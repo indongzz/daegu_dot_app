@@ -3,12 +3,10 @@ package com.kop.daegudot;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.ImageView;
 
-public class IntroPage extends AppCompatActivity {
+public class IntroPageActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,7 +16,7 @@ public class IntroPage extends AppCompatActivity {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
-                Intent intent = new Intent(IntroPage.this, MainActivity.class);
+                Intent intent = new Intent(IntroPageActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             }
