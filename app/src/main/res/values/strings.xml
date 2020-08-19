@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">DAEGU닷</string>
     <string name="server_client_id">353144782044-i5cq2eki3u21edqott1i8hebduhbe35j.apps.googleusercontent.com</string>
+    <string name="kakao_app_key">84e68d68b8c56f35f5cdcf85250988ec</string>
 </resources>
