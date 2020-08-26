@@ -1,4 +1,4 @@
-package com.kop.daegudot;
+package com.kop.daegudot.Login;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,8 +7,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ExpandableListView;
 import android.widget.ImageButton;
+
+import com.kop.daegudot.R;
 
 public class EmailLoginActivity extends AppCompatActivity implements View.OnClickListener {
 

@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 
+import com.kop.daegudot.Login.LoginActivity;
+
 public class IntroPageActivity extends AppCompatActivity {
 
     @Override

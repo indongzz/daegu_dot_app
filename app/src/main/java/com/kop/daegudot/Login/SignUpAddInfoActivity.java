@@ -1,4 +1,4 @@
-package com.kop.daegudot;
+package com.kop.daegudot.Login;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,11 +9,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.R;
+
 public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnClickListener{
 
     EditText editName, editEmail;
     ImageButton backBtn;
     Button btnOk, btnCheckDup;
+
+    Bundle bundle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +29,7 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
         editEmail = findViewById(R.id.edit_email);
 
         Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
+        bundle = intent.getExtras();
 
         editEmail.setText(bundle.getString("email"));
         editName.setText(bundle.getString("name"));
@@ -49,7 +54,15 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
                 break;
             case R.id.btn_ok:
                 // 회원가입 모두 완료
+                convertToMainActivity();
                 break;
         }
+    }
+
+    public void convertToMainActivity() {
+        Intent intent = new Intent(SignUpAddInfoActivity.this, MainActivity.class);
+        intent.putExtras(bundle);
+        startActivity(intent);
+        finish();
     }
 }

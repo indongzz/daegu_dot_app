@@ -1,10 +1,9 @@
-package com.kop.daegudot;
+package com.kop.daegudot.Login;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,7 +24,8 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.kakao.auth.AuthType;
 import com.kakao.auth.Session;
 import com.kakao.usermgmt.LoginButton;
-import com.kop.daegudot.KakaoLogin.SessionCallback;
+import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
+import com.kop.daegudot.R;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     // Google Login

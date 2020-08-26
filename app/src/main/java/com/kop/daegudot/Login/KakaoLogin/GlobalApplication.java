@@ -1,4 +1,4 @@
-package com.kop.daegudot.KakaoLogin;
+package com.kop.daegudot.Login.KakaoLogin;
 
 import android.app.Application;
 import android.content.Context;

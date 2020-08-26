@@ -1,13 +1,10 @@
-package com.kop.daegudot.KakaoLogin;
+package com.kop.daegudot.Login.KakaoLogin;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.kakao.auth.ISessionCallback;
-import com.kakao.auth.Session;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.UserManagement;
 import com.kakao.usermgmt.callback.MeV2ResponseCallback;
@@ -16,8 +13,7 @@ import com.kakao.usermgmt.response.model.Profile;
 import com.kakao.usermgmt.response.model.UserAccount;
 import com.kakao.util.OptionalBoolean;
 import com.kakao.util.exception.KakaoException;
-import com.kop.daegudot.LoginActivity;
-import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.Login.LoginActivity;
 
 public class SessionCallback implements ISessionCallback {
     private Context mContext = null;
