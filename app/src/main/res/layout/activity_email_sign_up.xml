@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EmailSignUpActivity"
+    android:orientation="vertical">
+
+    <ImageButton
+        android:id="@+id/backBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/backbtn"
+        android:layout_margin="5dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="100dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="10dp"
+        >
+
+        <EditText
+            android:id="@+id/edit_SUName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:hint="닉네임"
+            android:layout_marginHorizontal="20dp"
+            android:theme="@style/AppTheme"
+            android:layout_weight="12"
+            />
+
+        <Button
+            android:id="@+id/btn_checkDup"
+            android:layout_width="wrap_content"
+            android:layout_height="45dp"
+            android:text="중복 확인"
+            android:textSize="17sp"
+            android:background="@drawable/line_btn"
+            android:layout_weight="1"
+            android:layout_marginEnd="20dp"
+            />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/edit_SUemail"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:textSize="25sp"
+        android:hint="이메일"
+        android:inputType="textEmailAddress"
+        android:theme="@style/AppTheme"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp"
+        />
+
+    <EditText
+        android:id="@+id/edit_SUpw"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:textSize="25sp"
+        android:theme="@style/AppTheme"
+        android:hint="비밀번호"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp"
+        android:inputType="textPassword"/>
+
+    <EditText
+        android:id="@+id/edit_SUpwCheck"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:textSize="25sp"
+        android:theme="@style/AppTheme"
+        android:hint="비밀번호 확인"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp"
+        android:inputType="textPassword"/>
+
+    <Button
+        android:id="@+id/btn_SignUp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="회원가입 하기"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:textColor="#ffffff"
+        android:background="@drawable/round_btn"
+        android:backgroundTint="@color/colorPrimary"
+        android:layout_margin="20dp"
+        />
+
+</LinearLayout>
