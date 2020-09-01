@@ -1,6 +1,8 @@
 package com.kop.daegudot.Login.KakaoLogin;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -17,8 +19,6 @@ import com.kop.daegudot.Login.LoginActivity;
 
 public class SessionCallback implements ISessionCallback {
     private Context mContext = null;
-
-    Bundle bundle = null;
 
     public SessionCallback(Context context) {
         this.mContext = context;
@@ -47,15 +47,15 @@ public class SessionCallback implements ISessionCallback {
                         Log.i("KAKAO_API", "사용자 아이디: " + result.getId());
 
                         UserAccount kakaoAccount = result.getKakaoAccount();
-                        bundle = new Bundle();
 
                         if (kakaoAccount != null) {
 
                             String email = kakaoAccount.getEmail();
 
+                            // get email
                             if (email != null) {
                                 Log.i("KAKAO_API", "email: " + email);
-                                bundle.putString("email", email);
+                                LoginActivity.editor.putString("email", email);
                             } else if (kakaoAccount.emailNeedsAgreement() == OptionalBoolean.TRUE) {
                                 // get email after get agreement
                                 Log.e("KAKAO_API", "need agreeemnt");
@@ -64,15 +64,19 @@ public class SessionCallback implements ISessionCallback {
                                 Log.e("KAKAO_API", "cannot get email");
                             }
 
+                            // get profile nickname
                             Profile profile = kakaoAccount.getProfile();
                             if (profile != null) {
-                                bundle.putString("name", profile.getNickname());
+                                Log.d("KAKAO_API", "name: " + profile.getNickname());
+                                LoginActivity.editor.putString("name", profile.getNickname());
                             } else {
                                 Log.e("KAKAO_API", "cannot get profile");
                             }
 
-                            bundle.putString("passwd", "kakao");
+                            LoginActivity.editor.apply();
 
+                            System.out.println("Editor applied!!! *****************");
+                            
                             redirectLoginActivity();
                         }
                     }
@@ -80,6 +84,7 @@ public class SessionCallback implements ISessionCallback {
     }
 
     private void redirectLoginActivity() {
-        ((LoginActivity) mContext).updateUI(bundle);
+        ((LoginActivity) mContext).updateUI(true);
     }
+
 }

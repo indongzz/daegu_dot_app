@@ -3,6 +3,7 @@ package com.kop.daegudot.Login;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +21,9 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
 
     Bundle bundle;
 
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,11 +32,22 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
         editName = findViewById(R.id.edit_nickName);
         editEmail = findViewById(R.id.edit_email);
 
-        Intent intent = getIntent();
-        bundle = intent.getExtras();
+        pref = getSharedPreferences("data", MODE_PRIVATE);
+        String email = pref.getString("email", null);
+        String name = pref.getString("name", null);
 
-        editEmail.setText(bundle.getString("email"));
-        editName.setText(bundle.getString("name"));
+        /// Google & Kakao login 정보를 받고, 회원인지 아닌지 파악 (db에서 찾)
+
+        int num = 1; // 1은 회원 2는 회원 아님
+        if (num == 1) {
+            // 회원 이면 ? 그냥 Main으로 넘어가기
+            convertToMainActivity();
+        } else {
+            // 회원 아니면 이 activity가 뜨고 db에 데이터 추가
+            editEmail.setText(email);
+            editName.setText(name);
+        }
+
 
         backBtn = findViewById(R.id.backBtn);
         btnCheckDup = findViewById(R.id.btn_checkDup);
@@ -41,6 +56,7 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
         backBtn.setOnClickListener(this);
         btnCheckDup.setOnClickListener(this);
         btnOk.setOnClickListener(this);
+
     }
 
     @Override
@@ -61,7 +77,7 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
 
     public void convertToMainActivity() {
         Intent intent = new Intent(SignUpAddInfoActivity.this, MainActivity.class);
-        intent.putExtras(bundle);
+     //   intent.putExtras(bundle);
         startActivity(intent);
         finish();
     }

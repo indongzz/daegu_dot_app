@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.kakao.auth.AuthType;
 import com.kakao.auth.Session;
 import com.kakao.usermgmt.LoginButton;
 import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
+import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.R;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
@@ -38,12 +40,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private SessionCallback sessionCallback;
     Session mSession;
 
+    SharedPreferences pref ;
+    public static SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         //   getHashKey();
+
+        pref = getSharedPreferences("data", MODE_PRIVATE);
+        editor = pref.edit();
+
+        checkAlreadyLogin();
 
         /* Google Sign In */
         findViewById(R.id.signin_google).setOnClickListener(this);
@@ -72,37 +82,38 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
+    public void checkAlreadyLogin() {
+        pref = getSharedPreferences("data", MODE_PRIVATE);
+        Log.d("checkAlreadyLogin", "...Check login...");
+        if (pref.getString("email", "") != "") {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            Log.d("checkAlreadyLogin", "Already Logged in");
+        }
+    }
+
     // SignIn Clicked
     private void googleSignIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-//        FirebaseUser currentUser = mAuth.getCurrentUser();
-//        Bundle bundle = new Bundle();
-//        if(currentUser.getEmail() != null) {
-//            bundle.putString("email", currentUser.getEmail());
-//            bundle.putString("passwd", "google");
-//            bundle.putString("name", currentUser.getDisplayName());
-//        }
-//        updateUI(bundle);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        System.out.println("**********************************2");
+
         // Google Login Result
         if(requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }
 
+        // Kakao Login result
+        if(Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
 
@@ -112,9 +123,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
             firebaseAuthWithGoogle(account.getIdToken());
-        } catch (ApiException e) {
+        }
+        catch (ApiException e) {
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
-            updateUI(null);
+            updateUI(false);
         }
     }
 
@@ -130,28 +142,29 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Bundle bundle = new Bundle();
-                            bundle.putString("email", user.getEmail());
-                            bundle.putString("passwd", "google");
-                            bundle.putString("name", user.getDisplayName());
-                            updateUI(bundle);
+                            editor.putString("email", user.getEmail());
+                            editor.putString("passwd", "google");
+                            editor.putString("name", user.getDisplayName());
+                            editor.commit();
+
+                            updateUI(true);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            updateUI(null);
+                            updateUI(false);
                         }
                     }
                 });
     }
 
-    public void updateUI(Bundle account) {
-        if (account == null) {
-            Log.d(TAG, "updateUI:failure");
+    public void updateUI(boolean bool) {
+        if (!bool) {
+            Log.d(TAG, "updateUI: failed");
         } else {
             Log.d(TAG, "updateUI:success");
             Intent intent = new Intent(getApplicationContext(), SignUpAddInfoActivity.class);
-            intent.putExtras(account);
             startActivity(intent);
+            finish();
         }
     }
 
@@ -162,6 +175,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 googleSignIn();
                 break;
             case R.id.signin_kakao:
+                System.out.println("************Signin button clicked");
                 mSession.open(AuthType.KAKAO_LOGIN_ALL, LoginActivity.this);
                 break;
             case R.id.signin_email:

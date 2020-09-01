@@ -43,7 +43,6 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
 
         pwCheck();
 
-
         nickName = editNickName.getText().toString();
         email = editEmail.getText().toString();
         pw = editPw.getText().toString();
