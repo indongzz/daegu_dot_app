@@ -3,6 +3,7 @@ package com.kop.daegudot.Login;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -78,8 +79,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         switch(v.getId()) {
             case R.id.btn_SignUp:
                 if (checkInfo()) {
-                    // Todo:
-                    //  db에 회원가입 정보 저장하기 : email, pw, nickName
+                    addData();
                     convertToMainActivity();
                 }
                 break;
@@ -92,6 +92,19 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
                 checkNickName(nickName);
                 break;
         }
+    }
+
+    public void addData() {
+        // 자동 로그인을 위한 정보 저장
+        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("email", email);
+        editor.putString("name", nickName);
+        editor.putString("pw", pw);
+        editor.apply();
+
+        // Todo:
+        //  db에 회원가입 정보 저장하기 : email, pw, nickName
     }
 
     public boolean checkInfo() {
