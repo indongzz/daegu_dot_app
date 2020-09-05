@@ -38,15 +38,16 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
 
         /// Google & Kakao login 정보를 받고, 회원인지 아닌지 파악 (db에서 찾)
 
-        int num = 1; // 1은 회원 2는 회원 아님
-        if (num == 1) {
+        // TODO:
+        //  db에서 회원 인지 확인
+//        if ( 회원 인 경우)
             // 회원 이면 ? 그냥 Main으로 넘어가기
             convertToMainActivity();
-        } else {
-            // 회원 아니면 이 activity가 뜨고 db에 데이터 추가
+//        } else { 회원 아닌 경우
+            // 회원 아니면 이 activity 띄우기
             editEmail.setText(email);
             editName.setText(name);
-        }
+//        }
 
 
         backBtn = findViewById(R.id.backBtn);
@@ -70,6 +71,8 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
                 break;
             case R.id.btn_ok:
                 // 회원가입 모두 완료
+                // TODO:
+                //  db에 데이터 추가
                 convertToMainActivity();
                 break;
         }
@@ -77,7 +80,6 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
 
     public void convertToMainActivity() {
         Intent intent = new Intent(SignUpAddInfoActivity.this, MainActivity.class);
-     //   intent.putExtras(bundle);
         startActivity(intent);
         finish();
     }

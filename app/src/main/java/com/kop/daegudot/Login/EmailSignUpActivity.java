@@ -66,14 +66,10 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (NICK_CHECKED) {
-                    if (!nickName.equals(editNickName.getText().toString())) {
-                        NICK_CHECKED = false;
-                        updateUI(false);
-                    }
-                }
+                NICK_CHECKED = false;
             }
         });
+
     }
 
 
@@ -81,9 +77,9 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.btn_SignUp:
-                // db에 저장하고 main으로 넘어가기
-                // add to db
                 if (checkInfo()) {
+                    // Todo:
+                    //  db에 회원가입 정보 저장하기 : email, pw, nickName
                     convertToMainActivity();
                 }
                 break;
@@ -92,7 +88,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
                 break;
             case R.id.btn_checkDup:
                 nickName = editNickName.getText().toString();
-                // 있는지 확인 후 ui 업데이트
+
                 checkNickName(nickName);
                 break;
         }
@@ -141,27 +137,17 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         } else if (len < 2 || len > 6) {
             Toast.makeText(getApplicationContext(), "닉네임은 2글자 이상 6글자 이하로 설정해주세요", Toast.LENGTH_SHORT).show();
         } else {
-            updateUI(true);
-
+            // Todo: db 닉네임 중복 확인
+            //  중복 아닌 경우
             NICK_CHECKED = true;
-        }
-    }
 
-    public void updateUI(boolean bool) {
-        if (bool) { // 닉네임 중복 확인 완료 후 버튼 비활성화
-//            btnCheckDup.setBackground(getDrawable(R.drawable.round_btn));
-            btnCheckDup.setBackgroundTintList(ColorStateList.valueOf(
-                    getResources().getColor(R.color.lightGray, getTheme())));
-            btnCheckDup.setClickable(false);
-            Toast toast = Toast.makeText(getApplicationContext(), "사용 가능한 닉네임 입니다", Toast.LENGTH_LONG);
-            toast.show();
-        } else { // 닉네임 수정하면 버튼 활성화
-            btnCheckDup.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-            btnCheckDup.setBackground(getDrawable(R.drawable.round_btn));
-            btnCheckDup.setClickable(true);
+            //  중복 인 경우
+            Toast.makeText(getApplicationContext(), "중복된 닉네임 입니다", Toast.LENGTH_SHORT).show();
+            // NICK_CHECKED = false;
 
         }
     }
+
 
     public void convertToMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);

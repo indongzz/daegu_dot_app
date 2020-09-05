@@ -175,7 +175,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 googleSignIn();
                 break;
             case R.id.signin_kakao:
-                System.out.println("************Signin button clicked");
                 mSession.open(AuthType.KAKAO_LOGIN_ALL, LoginActivity.this);
                 break;
             case R.id.signin_email:

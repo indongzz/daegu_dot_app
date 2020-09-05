@@ -74,8 +74,6 @@ public class SessionCallback implements ISessionCallback {
                             }
 
                             LoginActivity.editor.apply();
-
-                            System.out.println("Editor applied!!! *****************");
                             
                             redirectLoginActivity();
                         }
