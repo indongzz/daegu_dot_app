@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,16 +20,32 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
     
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView nthDay;
-        TextView detail;
+        TextView detailAddress;
         
         ViewHolder(View itemView) {
             super(itemView);
     
             nthDay = itemView.findViewById(R.id.tv_nthDay);
-            detail = itemView.findViewById(R.id.tv_detail);
+            detailAddress = itemView.findViewById(R.id.tv_detail);
             
-            
+            TextView.OnClickListener onClickListener = new TextView.OnClickListener() {
+    
+                @Override
+                public void onClick(View v) {
+                    int pos = getAdapterPosition();
+    
+                    if (pos != RecyclerView.NO_POSITION) {
+                        // TODO: 클릭 시 지도 화면으로 넘어가기
+                        String whatDay = mDay.get(pos).getDate();
+                        Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            };
+    
+            nthDay.setOnClickListener(onClickListener);
+            detailAddress.setOnClickListener(onClickListener);
         }
+        
     }
     
     ItineraryAdapter(Context context, ArrayList<ItineraryInfo> list) {
@@ -51,10 +68,13 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ItineraryInfo info = mDay.get(position);
         holder.nthDay.setText(info.getDate());
+        holder.detailAddress.setText(info.getAddress());
     }
     
     @Override
     public int getItemCount() {
         return mDay.size();
     }
+    
+    
 }

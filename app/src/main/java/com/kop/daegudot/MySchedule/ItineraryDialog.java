@@ -17,8 +17,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 
-public class ItineraryDialog extends Dialog {
+public class ItineraryDialog extends Dialog {   // 세부 일정
     private Context mContext;
     private RecyclerView recyclerView;
     private ItineraryAdapter adapter;
@@ -51,15 +52,22 @@ public class ItineraryDialog extends Dialog {
         String title = firstDay.substring(3, 8) + " ~ " + lastDay.substring(3, 8);
         dialogTitle.setText(title);
         
-        setAscendingDate(firstDay, lastDay);
-    
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd");
+        /* 세부 일정 날짜 */
+        int num = setAscendingDate(firstDay, lastDay);
         
-        for (int i = 0; i < 3; i++) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd");
+        for (int i = 0; i < num; i++) {
+            // TODO: 그 날짜 세부 일정 불러오기
             ItineraryInfo data = new ItineraryInfo();
             String dateText = i + 1 + "일차 - " + dateFormat.format(date[i]);
             
             data.setDate(dateText);
+            
+            // 세부 일정 개수별로 String에 붙이기
+            String address = "";
+            address="대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n";
+            address += "대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n";
+            data.setAddress(address);
             
             mDay.add(data);
         }
@@ -71,15 +79,16 @@ public class ItineraryDialog extends Dialog {
         recyclerView.setAdapter(adapter);
     }
     
-    public void setAscendingDate(String first, String last) {
+    public int setAscendingDate(String first, String last) {
         SimpleDateFormat sdf = new SimpleDateFormat("yy.MM.dd");
-        
+        int count = 0;
         try {
             Date firstDate = sdf.parse(first);
             Date lastDate = sdf.parse(last);
             long diff = (lastDate.getTime() - firstDate.getTime()) / (24 * 60 * 60 * 1000);
-            date = new Date[(int) diff + 1];
-            for (int i = 0; i <= diff; i++) {
+            count = (int)diff + 1;
+            date = new Date[count];
+            for (int i = 0; i < count; i++) {
                 long cal = firstDate.getTime() + i * (24 * 60 * 60 * 1000);
                 date[i] = new Date();
                 date[i].setTime(cal);
@@ -89,5 +98,6 @@ public class ItineraryDialog extends Dialog {
             e.printStackTrace();
         }
         
+        return count;
     }
 }
