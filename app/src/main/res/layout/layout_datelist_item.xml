@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_datelist"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="18.26 ~ 81.29 / D-210"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#ffffff"
+        android:background="@drawable/btn_blue"
+        android:backgroundTint="@color/lightBlue"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="10dp"
+        />
+
+
+</LinearLayout>
