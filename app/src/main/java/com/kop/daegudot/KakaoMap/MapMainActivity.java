@@ -2,6 +2,7 @@ package com.kop.daegudot.KakaoMap;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -25,6 +26,14 @@ public class MapMainActivity extends AppCompatActivity implements MapView.POIIte
         mMapView.setPOIItemEventListener(this);
         mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(35.871344, 128.601705), true);
         mMapView.setZoomLevel(6, true);
+    
+        Intent intent = getIntent();
+        if (intent != null) {
+            String startDay = intent.getStringExtra("startDay");
+            String endDay = intent.getStringExtra("endDay");
+            
+            System.out.println(startDay + "--------" + endDay);
+        }
     }
     
     @Override
