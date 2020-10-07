@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.R;
 
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,10 +64,10 @@ public class ItineraryDialog extends Dialog {   // 세부 일정
             
             data.setDate(dateText);
             
-            // 세부 일정 개수별로 String에 붙이기
-            String address = "";
-            address="대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n";
-            address += "대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n";
+            ArrayList<String> address = new ArrayList<>();
+            
+            address.add("대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n");
+            address.add("대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n");
             data.setAddress(address);
             
             mDay.add(data);

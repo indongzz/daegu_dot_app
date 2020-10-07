@@ -1,6 +1,8 @@
 package com.kop.daegudot.MySchedule;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -38,6 +41,11 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
                         // TODO: 클릭 시 지도 화면으로 넘어가기
                         String whatDay = mDay.get(pos).getDate();
                         Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
+    
+    
+                        Intent intent = new Intent(mContext, MapMainActivity.class);
+                        intent.putExtra("whatDay", whatDay);
+                        mContext.startActivity(intent);
                     }
                 }
             };
@@ -68,7 +76,7 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ItineraryInfo info = mDay.get(position);
         holder.nthDay.setText(info.getDate());
-        holder.detailAddress.setText(info.getAddress());
+        holder.detailAddress.setText(info.getAddressString());
     }
     
     @Override
