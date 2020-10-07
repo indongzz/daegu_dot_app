@@ -10,10 +10,10 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.kop.daegudot.Fragments.AddScheduleFragment;
-import com.kop.daegudot.Fragments.MoreFragment;
-import com.kop.daegudot.Fragments.MyScheduleFragment;
-import com.kop.daegudot.Fragments.RecommendFragment;
+import com.kop.daegudot.AddSchedule.AddScheduleFragment;
+import com.kop.daegudot.MorePage.MoreFragment;
+import com.kop.daegudot.MySchedule.MyScheduleFragment;
+import com.kop.daegudot.Recommend.RecommendFragment;
 
 public class MainActivity extends AppCompatActivity {
     private ImageButton[] bottomBtns;
