@@ -81,14 +81,11 @@ public class MyScheduleFragment extends Fragment {
             }
         });
         
-        
-        
         recyclerView = view.findViewById(R.id.dateList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         
         adapter = new DateAdapter(getContext(), mList);
         recyclerView.setAdapter(adapter);
-        
         
     //    adapter.notifyDataSetChanged();
         
