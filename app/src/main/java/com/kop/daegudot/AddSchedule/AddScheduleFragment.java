@@ -76,8 +76,6 @@ public class AddScheduleFragment extends Fragment {
              }
         }));
 
-
-
          return view;
     }
 }
