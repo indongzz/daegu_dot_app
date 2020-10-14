@@ -5,17 +5,34 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/dialogTitle"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="날~짜"
-        android:textSize="25sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
+        android:orientation="horizontal"
         android:layout_margin="10dp"
-        android:layout_gravity="center"
-        />
+        >
+        <TextView
+            android:id="@+id/dialogTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="날~짜"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:textAlignment="center"
+            android:layout_centerHorizontal="true"
+            />
+
+        <ImageButton
+            android:id="@+id/deleteBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/trash"
+            android:backgroundTint="@color/colorPrimary"
+            android:layout_alignParentEnd="true"/>
+
+    </RelativeLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/itineraryList"

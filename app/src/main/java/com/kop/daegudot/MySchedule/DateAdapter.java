@@ -1,6 +1,7 @@
 package com.kop.daegudot.MySchedule;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,30 +27,66 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
     private static ArrayList<DateInfo> mDateList;
     private static Context mContext;
     
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         Button button;
         
         ViewHolder(View itemView) {
             super(itemView);
             
             button = itemView.findViewById(R.id.btn_datelist);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int pos = getAdapterPosition();
-                    DateInfo dateInfo = mDateList.get(pos);
-                    Toast.makeText(mContext, dateInfo.getTextString(), Toast.LENGTH_SHORT).show();
+            button.setOnClickListener(this);
+            button.setOnLongClickListener(this);
+        }
     
-                    Bundle data = new Bundle();
-                    data.putString("first", dateInfo.getFirstDate());
-                    data.putString("last", dateInfo.getLastDate());
-                    
-                    ItineraryDialog dialog = new ItineraryDialog(mContext, data);
-                    dialog.setCanceledOnTouchOutside(true);
-                    dialog.setCancelable(true);
-                    dialog.show();
+        @Override
+        public void onClick(View v) {
+            int pos = getAdapterPosition();
+            DateInfo dateInfo = mDateList.get(pos);
+            Toast.makeText(mContext, dateInfo.getTextString(), Toast.LENGTH_SHORT).show();
+    
+            Bundle data = new Bundle();
+            data.putString("first", dateInfo.getFirstDate());
+            data.putString("last", dateInfo.getLastDate());
+            data.putInt("position", pos);
+    
+            ItineraryDialog dialog = new ItineraryDialog(mContext, data, new ItineraryDialog.ItineraryDialogListener() {
+                @Override
+                public void dialogEventListener() {
+                    deleteListItem();
                 }
             });
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.setCancelable(true);
+            dialog.show();
+        }
+    
+        @Override
+        public boolean onLongClick(View v) {
+            deleteListItem();
+            
+            return true;
+        }
+        
+        public void deleteListItem() {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle("삭제");
+            builder.setMessage("해당 항목을 삭제하시겠습니까?");
+            builder.setPositiveButton("예",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            mDateList.remove(getAdapterPosition());
+                            notifyItemRemoved(getAdapterPosition());
+                            
+                            // TODO: DB에서 데이터 삭제하기
+                        }
+                    });
+            builder.setNegativeButton("아니오",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+            builder.show();
         }
     }
     
@@ -63,9 +101,8 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
         View view = inflater.inflate(R.layout.layout_datelist_item, parent, false);
-        DateAdapter.ViewHolder vh = new ViewHolder(view);
-        
-        return vh;
+    
+        return new ViewHolder(view);
     }
     
     @Override
@@ -78,5 +115,7 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
     public int getItemCount() {
         return mDateList.size();
     }
+    
+    
     
 }

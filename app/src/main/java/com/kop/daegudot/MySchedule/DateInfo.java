@@ -31,7 +31,7 @@ public class DateInfo {
     
     public String getTextString() {
         // 년도 제외하고 월 일만 추출
-        return firstDate.substring(3, 8) + " ~ " + lastDate.substring(3, 8) + " / " + "D-" + dDate;
+        return firstDate.substring(3) + " ~ " + lastDate.substring(3) + " / " + "D-" + dDate;
     }
     
 }

@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     fm = getSupportFragmentManager();
                     ft = fm.beginTransaction().replace(R.id.fragment, fragment);
+                    ft.addToBackStack(null);
                     ft.commit();
                     setBottomBtnsUI(mCurrentFragNum, mNextFragNum);
 
@@ -78,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void setBottomBtnsUI(int current, int next) {
         // 클릭한 버튼이 다르면
-        System.out.println("current : "+ current + "next : " + next);
         if (current != next) {
             textViews[current].setTextColor(getResources().getColor(R.color.lightGray, getTheme()));
             if (current == 0) { // 현재 버튼 태두리
@@ -102,6 +102,19 @@ public class MainActivity extends AppCompatActivity {
                 bottomBtns[next].setImageResource(R.drawable.more_colored);
             }
         }
+    }
+    
+    public void changeFragment(int from, int to) {
+        
+        Fragment fragment = fragments[to];
+        fm = getSupportFragmentManager();
+        ft = fm.beginTransaction().replace(R.id.fragment, fragment);
+        ft.addToBackStack(null);
+        ft.commit();
+        setBottomBtnsUI(from, to);
+        
+        currentFragment = fragment;
+        mCurrentFragNum = to;
     }
 
 }
