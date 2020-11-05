@@ -2,13 +2,10 @@ package com.kop.daegudot.MySchedule;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,12 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.R;
 
-import java.lang.reflect.Array;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Random;
 
 public class ItineraryDialog extends Dialog implements View.OnClickListener {   // 세부 일정
     private Context mContext;
@@ -31,16 +26,16 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
     String firstDay, lastDay;
     Date[] date;
     int mPosition;
-    ArrayList<DateInfo> mDateList;
+    ArrayList<DateInfo> mMainScheduleList;
     
-    private ArrayList<ItineraryInfo> mDay = new ArrayList<>();
+    private ArrayList<ItineraryInfo> mSubScheduleList = new ArrayList<>();
     private ItineraryDialogListener dialogListener;
     
     public ItineraryDialog(@NonNull Context context, int position, ArrayList<DateInfo> dateList, ItineraryDialogListener dialogListener) {
         super(context);
         this.mContext = context;
         mPosition = position;
-        mDateList = dateList;
+        mMainScheduleList = dateList;
         this.dialogListener = dialogListener;
     }
     
@@ -59,11 +54,11 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         
         setContentView(R.layout.itinerary_dialog);
         
-        firstDay = mDateList.get(mPosition).getmFirstDate();
-        lastDay = mDateList.get(mPosition).getmLastDate();
+        firstDay = mMainScheduleList.get(mPosition).getmFirstDate();
+        lastDay = mMainScheduleList.get(mPosition).getmLastDate();
         
         TextView dialogTitle = findViewById(R.id.dialogTitle);
-        String title = mDateList.get(mPosition).getTextString();
+        String title = mMainScheduleList.get(mPosition).getTextString();
         dialogTitle.setText(title);
     
         Button deleteBtn = findViewById(R.id.deleteBtn);
@@ -74,19 +69,20 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         recyclerView = findViewById(R.id.itineraryList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     
-        adapter = new ItineraryAdapter(getContext(), mDay);
+        adapter = new ItineraryAdapter(getContext(), mSubScheduleList, mMainScheduleList);
         recyclerView.setAdapter(adapter);
     }
     
     public void setItineraryText() {
         /* 세부 일정 날짜 */
-        int num = setAscendingDate(firstDay, lastDay);
-    
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd");
-        for (int i = 0; i < num; i++) {
+        
+        LocalDate[] dateArray = mMainScheduleList.get(mPosition).getDateArray();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd");
+        
+        for (int i = 0; i < mMainScheduleList.get(mPosition).getDateBetween(); i++) {
             // TODO: 그 날짜 세부 일정 불러오기
             ItineraryInfo data = new ItineraryInfo();
-            String dateText = i + 1 + "일차 - " + dateFormat.format(date[i]);
+            String dateText = i + 1 + "일차 - " + dateArray[i].format(formatter);
         
             data.setDate(dateText);
         
@@ -96,30 +92,8 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
             address.add("대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n");
             data.setAddress(address);
         
-            mDay.add(data);
+            mSubScheduleList.add(data);
         }
-    }
-    
-    public int setAscendingDate(String first, String last) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yy.MM.dd");
-        int count = 0;
-        try {
-            Date firstDate = sdf.parse(first);
-            Date lastDate = sdf.parse(last);
-            long diff = (lastDate.getTime() - firstDate.getTime()) / (24 * 60 * 60 * 1000);
-            count = (int)diff + 1;
-            date = new Date[count];
-            for (int i = 0; i < count; i++) {
-                long cal = firstDate.getTime() + i * (24 * 60 * 60 * 1000);
-                date[i] = new Date();
-                date[i].setTime(cal);
-            }
-            
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        
-        return count;
     }
     
     @Override

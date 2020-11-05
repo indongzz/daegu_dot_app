@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.kop.daegudot.MySchedule.DateInfo;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -57,7 +59,17 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         setCategoryBtn();
         setHashBtn();
+        
+        Intent intent = getIntent();
+        ArrayList<DateInfo> mDateList = intent.getParcelableArrayListExtra("DateList");
     
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        if (mDateList != null) {
+            for (Object a : mDateList) {
+                System.out.println(a);
+            }
+        }
+        
         String[] address = {
                 "대구광역시 중구 남산로 4길 112",
                 "대구광역시 중구 서성로 6-1",

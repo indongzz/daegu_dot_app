@@ -2,7 +2,6 @@ package com.kop.daegudot.MySchedule;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,8 @@ import com.kop.daegudot.R;
 import java.util.ArrayList;
 
 public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.ViewHolder> {
-    private static ArrayList<ItineraryInfo> mDay;
+    private static ArrayList<ItineraryInfo> mItineraryList;
+    private static ArrayList<DateInfo> mDateList;
     private static Context mContext;
     
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -39,12 +39,12 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
     
                     if (pos != RecyclerView.NO_POSITION) {
                         // TODO: 클릭 시 지도 화면으로 넘어가기
-                        String whatDay = mDay.get(pos).getDate();
+                        String whatDay = mItineraryList.get(pos).getDate();
                         Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
     
-    
                         Intent intent = new Intent(mContext, MapMainActivity.class);
-                        intent.putExtra("whatDay", whatDay);
+                        intent.putParcelableArrayListExtra("DateList", mDateList);
+                        intent.putParcelableArrayListExtra("ItineraryList", mItineraryList);
                         mContext.startActivity(intent);
                     }
                 }
@@ -56,9 +56,10 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
         
     }
     
-    ItineraryAdapter(Context context, ArrayList<ItineraryInfo> list) {
+    ItineraryAdapter(Context context, ArrayList<ItineraryInfo> itineraryList, ArrayList<DateInfo> dateList) {
         mContext = context;
-        mDay = list;
+        mItineraryList = itineraryList;
+        mDateList = dateList;
     }
     
     @NonNull
@@ -74,14 +75,14 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
     
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ItineraryInfo info = mDay.get(position);
+        ItineraryInfo info = mItineraryList.get(position);
         holder.nthDay.setText(info.getDate());
         holder.detailAddress.setText(info.getAddressString());
     }
     
     @Override
     public int getItemCount() {
-        return mDay.size();
+        return mItineraryList.size();
     }
     
     

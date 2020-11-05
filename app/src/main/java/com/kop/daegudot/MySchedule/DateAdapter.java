@@ -41,13 +41,15 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
             DateInfo dateInfo = mDateList.get(pos);
             Toast.makeText(mContext, dateInfo.getTextString(), Toast.LENGTH_SHORT).show();
         
+            
             ItineraryDialog dialog = new ItineraryDialog(mContext, pos, mDateList, new ItineraryDialog.ItineraryDialogListener() {
                 @Override
                 public void dialogEventListener() {
                     deleteListItem();
                 }
             });
-            Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            Objects.requireNonNull(dialog.getWindow())
+                    .setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.setCanceledOnTouchOutside(true);
             dialog.setCancelable(true);
             dialog.show();
