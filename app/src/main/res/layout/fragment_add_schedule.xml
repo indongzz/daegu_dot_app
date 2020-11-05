@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".AddSchedule.AddScheduleFragment">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include layout="@layout/layout_top_title"/>
+
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="대.구."
+            android:textSize="40sp"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:fontFamily="@font/nanum_square"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="@id/text2"
+            app:layout_constraintVertical_bias="0.1"
+            />
+
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="언.제.떠.나.세.요?"
+            android:textSize="40sp"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:fontFamily="@font/nanum_square"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintVertical_bias="0.18"
+            />
+
+        <com.applikeysolutions.cosmocalendar.view.CalendarView
+            android:id="@+id/calendar"
+            android:layout_height="450dp"
+            android:layout_width="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintVertical_bias="0.6"
+            app:selectedDayBackgroundColor="@color/transparentAccent"
+            app:selectedDayBackgroundEndColor="@color/colorAccent"
+            app:selectedDayBackgroundStartColor="@color/colorAccent"
+            app:weekendDayTextColor="#ff00"
+            />
+
+        <Button
+            android:id="@+id/calendarBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="날짜를 선택해주세요"
+            android:textSize="20sp"
+            android:textColor="#ffffff"
+            android:paddingHorizontal="20dp"
+            android:background="@drawable/round_btn"
+            android:backgroundTint="@color/colorPrimary"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintVertical_bias="0.95"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</FrameLayout>
