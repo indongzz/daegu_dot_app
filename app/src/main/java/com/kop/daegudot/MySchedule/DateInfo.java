@@ -1,37 +1,56 @@
 package com.kop.daegudot.MySchedule;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+
 public class DateInfo {
-    private String firstDate;
-    private String lastDate;
-    private String dDate;
+    private String mFirstDate;
+    private String mLastDate;
+    private int mDDate;
+    private LocalDate mFirstLocalDate;
+    private LocalDate mLastLocalDate;
+    DateTimeFormatter format = DateTimeFormatter.ofPattern("yy.MM.dd");
     
-    public String getFirstDate() {
-        return firstDate;
+    public String getmFirstDate() {
+        return mFirstDate;
     }
     
-    public void setFirstDate(String firstDate) {
-        this.firstDate = firstDate;
+    public void setmFirstDate(String mFirstDate) {
+        this.mFirstDate = mFirstDate;
     }
     
-    public String getLastDate() {
-        return lastDate;
+    public String getmLastDate() {
+        return mLastDate;
     }
     
-    public void setLastDate(String lastDate) {
-        this.lastDate = lastDate;
+    public void setmLastDate(String mLastDate) {
+        this.mLastDate = mLastDate;
     }
     
-    public String getdDate() {
-        return dDate;
+    public String getmDDate() {
+        return String.valueOf(mDDate);
     }
     
-    public void setdDate(String dDate) {
-        this.dDate = dDate;
+    public void setmDDate() {
+        LocalDate firstDate = LocalDate.parse(mFirstDate, format);
+        LocalDate today = LocalDate.now();
+        mDDate = (int) ChronoUnit.DAYS.between(today, firstDate);
     }
     
     public String getTextString() {
         // 년도 제외하고 월 일만 추출
-        return firstDate.substring(3) + " ~ " + lastDate.substring(3) + " / " + "D-" + dDate;
+        return mFirstDate.substring(3) + " ~ " + mLastDate.substring(3) + " / " + "D-" + mDDate;
     }
     
+    
+    public LocalDate[] getDateArray() {
+        LocalDate[] dateArray = new LocalDate[mDDate];
+        for (int i = 0; i < mDDate; i++) {
+            dateArray[i] = mFirstLocalDate.plusDays(i);
+            System.out.println(dateArray[i]);
+        }
+        
+        return dateArray;
+    }
 }

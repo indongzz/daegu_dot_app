@@ -8,20 +8,17 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.R;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
     private static ArrayList<DateInfo> mDateList;
@@ -45,8 +42,8 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
             Toast.makeText(mContext, dateInfo.getTextString(), Toast.LENGTH_SHORT).show();
     
             Bundle data = new Bundle();
-            data.putString("first", dateInfo.getFirstDate());
-            data.putString("last", dateInfo.getLastDate());
+            data.putString("first", dateInfo.getmFirstDate());
+            data.putString("last", dateInfo.getmLastDate());
             data.putInt("position", pos);
     
             ItineraryDialog dialog = new ItineraryDialog(mContext, data, new ItineraryDialog.ItineraryDialogListener() {
@@ -55,6 +52,7 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
                     deleteListItem();
                 }
             });
+            Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.setCanceledOnTouchOutside(true);
             dialog.setCancelable(true);
             dialog.show();
@@ -68,7 +66,7 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
         }
         
         public void deleteListItem() {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AlertDialogStyle);
             builder.setTitle("삭제");
             builder.setMessage("해당 항목을 삭제하시겠습니까?");
             builder.setPositiveButton("예",

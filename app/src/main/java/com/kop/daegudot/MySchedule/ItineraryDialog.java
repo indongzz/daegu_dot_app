@@ -54,6 +54,7 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         layoutParams.dimAmount = 0.8f;
         getWindow().setAttributes(layoutParams);
         
+        
         setContentView(R.layout.itinerary_dialog);
         
         firstDay = dateData.getString("first");
@@ -63,7 +64,7 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         String title = firstDay.substring(3, 8) + " ~ " + lastDay.substring(3, 8);
         dialogTitle.setText(title);
     
-        ImageButton deleteBtn = findViewById(R.id.deleteBtn);
+        Button deleteBtn = findViewById(R.id.deleteBtn);
         deleteBtn.setOnClickListener(this);
         
         setItineraryText();
