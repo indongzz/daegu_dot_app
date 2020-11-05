@@ -1,35 +1,39 @@
 package com.kop.daegudot.KakaoMap;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.kop.daegudot.R;
 
-import net.daum.mf.map.api.CalloutBalloonAdapter;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
-public class MapMainActivity extends AppCompatActivity implements MapView.POIItemEventListener, View.OnClickListener {
+public class MapMainActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener {
     private static final String LOG_TAG = "MapMainActivity";
     private MapView mMapView;
     Button[] mCategory;
     Button[] mHashTag;
     Button mToggleBtn;
+    ImageButton mBackBtn;
     int flag = 1;
+    
+    ArrayList<MarkerInfo> mMarkerItems;
+    private BottomSheetBehavior mBSBPlace;
+    PlaceBottomSheet placeBottomSheet;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,16 +46,18 @@ public class MapMainActivity extends AppCompatActivity implements MapView.POIIte
         mMapView = findViewById(R.id.map_view);
     
         mMapView.setPOIItemEventListener(this);
+        mMapView.setMapViewEventListener(this);
         mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(35.871344, 128.601705), true);
         mMapView.setZoomLevel(6, true);
     
+        mBackBtn = findViewById(R.id.backBtn);
+        mBackBtn.setOnClickListener(this);
         mToggleBtn = findViewById(R.id.toggle_btn);
         mToggleBtn.setOnClickListener(this);
         
         setCategoryBtn();
         setHashBtn();
     
-        Geocoder geocoder = new Geocoder(this);
         String[] address = {
                 "대구광역시 중구 남산로 4길 112",
                 "대구광역시 중구 서성로 6-1",
@@ -66,35 +72,50 @@ public class MapMainActivity extends AppCompatActivity implements MapView.POIIte
                 "053-254-9405"
         };
         
-        List<Address> list = null;
-        ArrayList<MapPoint.GeoCoordinate> addressList = new ArrayList<>();
+        // 나중에 data read후에 markerinfo에 담기
+         mMarkerItems = new ArrayList<>();
         
         for (int i = 0; i < 5; i++) {
-            try {
-                list = geocoder.getFromLocationName(address[i], 20);
-                System.out.println(list);
-                for (Address addr : list) {
-                    addressList.add(new MapPoint.GeoCoordinate(addr.getLatitude(), addr.getLongitude()));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e("GetLocationName", "location error");
-            }
+            MarkerInfo markerItem = new MarkerInfo(this);
+            markerItem.setAddress(address[i]);
+            markerItem.setName(attractname[i]);
+            markerItem.setTel(tel[i]);
+            markerItem.setRate((float) (i+0.5));
+            markerItem.setLike(false);
+            mMarkerItems.add(markerItem);
         }
         
         for (int i = 0; i< 5; i++) {
-            System.out.println("latitude : " + addressList.get(i).latitude + ", longitude : " + addressList.get(i).longitude);
             MapPOIItem marker = new MapPOIItem();
-            marker.setItemName(attractname[i]);
+            marker.setItemName(mMarkerItems.get(i).getName());
             marker.setTag(i);
-            marker.setMapPoint(MapPoint.mapPointWithGeoCoord(addressList.get(i).latitude, addressList.get(i).longitude));
+            marker.setMapPoint(mMarkerItems.get(i).getAddressPoint());
             marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
             marker.setCustomImageResourceId(R.drawable.blue_pin);
             marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-            marker.setCustomSelectedImageResourceId(R.drawable.yellow_pin);
-    
+            marker.setCustomImageAnchor(0.5f, 1.0f);
+            marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
+            marker.setShowCalloutBalloonOnTouch(false);
             mMapView.addPOIItem(marker);
         }
+        
+        placeBottomSheet = new PlaceBottomSheet(this, mMarkerItems);
+        
+        CoordinatorLayout lBottomSheet = (CoordinatorLayout) findViewById(R.id.bottomSheet);
+        mBSBPlace = BottomSheetBehavior.from(lBottomSheet);
+        mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
+        
+        mBSBPlace.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+        
+            }
+    
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+        
+            }
+        });
     }
     
     public void setCategoryBtn() {
@@ -149,7 +170,8 @@ public class MapMainActivity extends AppCompatActivity implements MapView.POIIte
     
     @Override
     public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
-    
+        placeBottomSheet.changePlaceBottomSheet(mapPOIItem.getTag());
+        mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
     
     @Override
@@ -166,6 +188,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.POIIte
     public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) {
     
     }
+    
     
     @Override
     public void onClick(View v) {
@@ -191,24 +214,54 @@ public class MapMainActivity extends AppCompatActivity implements MapView.POIIte
                     flag = 1;
                 }
                 break;
+            case R.id.backBtn:
+                finish();
+                break;
         }
     }
-}
-
-class CustomCalloutBalloonAdapter implements CalloutBalloonAdapter {
-    private final View mCalloutBalloon;
     
-    CustomCalloutBalloonAdapter(View mCalloutBalloon) {
-        this.mCalloutBalloon = mCalloutBalloon;
+    @Override
+    public void onMapViewInitialized(MapView mapView) {
+    
     }
     
     @Override
-    public View getCalloutBalloon(MapPOIItem mapPOIItem) {
-        return null;
+    public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
+    
     }
     
     @Override
-    public View getPressedCalloutBalloon(MapPOIItem mapPOIItem) {
-        return null;
+    public void onMapViewZoomLevelChanged(MapView mapView, int i) {
+    
+    }
+    
+    @Override
+    public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
+        mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+    
+    @Override
+    public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint) {
+    
+    }
+    
+    @Override
+    public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint) {
+    
+    }
+    
+    @Override
+    public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
+    
+    }
+    
+    @Override
+    public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
+    
+    }
+    
+    @Override
+    public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
+    
     }
 }

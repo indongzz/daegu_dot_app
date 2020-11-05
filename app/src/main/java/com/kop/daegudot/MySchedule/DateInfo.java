@@ -4,12 +4,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
-public class DateInfo {
+public class DateInfo implements Comparable<DateInfo> {
     private String mFirstDate;
     private String mLastDate;
     private int mDDate;
     private LocalDate mFirstLocalDate;
-    private LocalDate mLastLocalDate;
     DateTimeFormatter format = DateTimeFormatter.ofPattern("yy.MM.dd");
     
     public String getmFirstDate() {
@@ -28,14 +27,14 @@ public class DateInfo {
         this.mLastDate = mLastDate;
     }
     
-    public String getmDDate() {
-        return String.valueOf(mDDate);
+    public int getmDDate() {
+        return mDDate;
     }
     
     public void setmDDate() {
-        LocalDate firstDate = LocalDate.parse(mFirstDate, format);
+        mFirstLocalDate = LocalDate.parse(mFirstDate, format);
         LocalDate today = LocalDate.now();
-        mDDate = (int) ChronoUnit.DAYS.between(today, firstDate);
+        mDDate = (int) ChronoUnit.DAYS.between(today, mFirstLocalDate);
     }
     
     public String getTextString() {
@@ -52,5 +51,10 @@ public class DateInfo {
         }
         
         return dateArray;
+    }
+    
+    @Override
+    public int compareTo(DateInfo o) {
+        return Integer.compare(this.getmDDate(), o.getmDDate());
     }
 }

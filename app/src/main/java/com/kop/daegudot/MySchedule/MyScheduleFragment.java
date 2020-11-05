@@ -72,8 +72,8 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         data.setmDDate();
         
         DateInfo data2 = new DateInfo();
-        String firstdate2 = "20.10.14";
-        String lastDate2 = "20.10.16";
+        String firstdate2 = "20.12.09";
+        String lastDate2 = "20.12.16";
         data2.setmFirstDate(firstdate2);
         data2.setmLastDate(lastDate2);
         data2.setmDDate();
@@ -81,12 +81,7 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         mList.add(data);
         mList.add(data2);
     
-        Collections.sort(mList, new Comparator<DateInfo>() {
-            @Override
-            public int compare(DateInfo o1, DateInfo o2) {
-                return o1.getmDDate().compareTo(o2.getmDDate());
-            }
-        });
+        Collections.sort(mList);
     }
     
     

@@ -28,17 +28,19 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
     private Context mContext;
     private RecyclerView recyclerView;
     private ItineraryAdapter adapter;
-    Bundle dateData;
     String firstDay, lastDay;
     Date[] date;
+    int mPosition;
+    ArrayList<DateInfo> mDateList;
     
     private ArrayList<ItineraryInfo> mDay = new ArrayList<>();
     private ItineraryDialogListener dialogListener;
     
-    public ItineraryDialog(@NonNull Context context, Bundle data, ItineraryDialogListener dialogListener) {
+    public ItineraryDialog(@NonNull Context context, int position, ArrayList<DateInfo> dateList, ItineraryDialogListener dialogListener) {
         super(context);
         this.mContext = context;
-        dateData = data;
+        mPosition = position;
+        mDateList = dateList;
         this.dialogListener = dialogListener;
     }
     
@@ -57,11 +59,11 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         
         setContentView(R.layout.itinerary_dialog);
         
-        firstDay = dateData.getString("first");
-        lastDay = dateData.getString("last");
+        firstDay = mDateList.get(mPosition).getmFirstDate();
+        lastDay = mDateList.get(mPosition).getmLastDate();
         
         TextView dialogTitle = findViewById(R.id.dialogTitle);
-        String title = firstDay.substring(3, 8) + " ~ " + lastDay.substring(3, 8);
+        String title = mDateList.get(mPosition).getTextString();
         dialogTitle.setText(title);
     
         Button deleteBtn = findViewById(R.id.deleteBtn);

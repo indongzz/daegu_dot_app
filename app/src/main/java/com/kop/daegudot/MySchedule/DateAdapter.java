@@ -40,13 +40,8 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
             int pos = getAdapterPosition();
             DateInfo dateInfo = mDateList.get(pos);
             Toast.makeText(mContext, dateInfo.getTextString(), Toast.LENGTH_SHORT).show();
-    
-            Bundle data = new Bundle();
-            data.putString("first", dateInfo.getmFirstDate());
-            data.putString("last", dateInfo.getmLastDate());
-            data.putInt("position", pos);
-    
-            ItineraryDialog dialog = new ItineraryDialog(mContext, data, new ItineraryDialog.ItineraryDialogListener() {
+        
+            ItineraryDialog dialog = new ItineraryDialog(mContext, pos, mDateList, new ItineraryDialog.ItineraryDialogListener() {
                 @Override
                 public void dialogEventListener() {
                     deleteListItem();
