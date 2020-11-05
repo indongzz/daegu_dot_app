@@ -32,4 +32,20 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
     implementation group: 'com.kakao.sdk', name: 'usermgmt', version: '1.30.0'
     implementation 'com.github.applikeysolutions:cosmocalendar:1.0.4'
+
+    // rxjava, rxandroid
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.7'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
+    // lombok
+    implementation 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    // okhttp
+    implementation 'com.squareup.okhttp3:okhttp:3.6.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
+    // retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.2.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.2.0'
 }
