@@ -8,8 +8,8 @@ import retrofit2.http.Path;
 
 public interface RestApiService {
 
-    @GET("repos/{owner}/{repo}/contributors")
-    Observable<List<Contributor>> getObContributors(@Path("owner") String owner, @Path("repo") String repo);
+/*    @GET("repos/{owner}/{repo}/contributors")
+    Observable<List<Contributor>> getObContributors(@Path("owner") String owner, @Path("repo") String repo);*/
 
 
 }

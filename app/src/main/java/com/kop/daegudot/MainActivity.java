@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -14,6 +15,17 @@ import com.kop.daegudot.AddSchedule.AddScheduleFragment;
 import com.kop.daegudot.MorePage.MoreFragment;
 import com.kop.daegudot.MySchedule.MyScheduleFragment;
 import com.kop.daegudot.Recommend.RecommendFragment;
+import com.kop.daegudot.network.Contributor;
+import com.kop.daegudot.network.RestApiService;
+import com.kop.daegudot.network.RestfulAdapter;
+
+import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
     private ImageButton[] bottomBtns;
@@ -25,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     Fragment currentFragment;
     int mCurrentFragNum;
+    //private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        //startRx();
 
         // MyScheduleFragment 첫 화면
         currentFragment = fragments[0];
@@ -117,4 +132,44 @@ public class MainActivity extends AppCompatActivity {
         mCurrentFragNum = to;
     }
 
+    /**
+     * retrofit + okHttp + rxJava
+     */
+    /*private void startRx() {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi();
+        Observable<List<Contributor>> observable = service.getObContributors(sName, sRepo);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<List<Contributor>>() {
+                    @Override
+                    public void onNext(List<Contributor> contributors) {
+                        for (Contributor c : contributors) {
+                            Log.d("RX", c.toString());
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
+                    }
+                })
+
+
+        );
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (!mCompositeDisposable.isDisposed()) {
+            mCompositeDisposable.dispose();
+        }
+    }*/
 }
