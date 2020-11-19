@@ -11,11 +11,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.kop.daegudot.MySchedule.DateInfo;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -36,6 +34,9 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     ArrayList<MarkerInfo> mMarkerItems;
     private BottomSheetBehavior mBSBPlace;
     PlaceBottomSheet placeBottomSheet;
+    private BottomSheetBehavior mBSBSchedule;
+    ScheduleBottomSheet scheduleBottomSheet;
+    
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,14 +62,14 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         setHashBtn();
         
         Intent intent = getIntent();
-        ArrayList<DateInfo> mDateList = intent.getParcelableArrayListExtra("DateList");
-    
-        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-        if (mDateList != null) {
-            for (Object a : mDateList) {
-                System.out.println(a);
-            }
-        }
+       // ArrayList<DateInfo> mDateList = intent.getParcelableArrayListExtra("DateList");
+//
+//        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+//        if (mDateList != null) {
+//            for (Object a : mDateList) {
+//                System.out.println(a);
+//            }
+//        }
         
         String[] address = {
                 "대구광역시 중구 남산로 4길 112",
@@ -113,21 +114,26 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         placeBottomSheet = new PlaceBottomSheet(this, mMarkerItems);
         
-        CoordinatorLayout lBottomSheet = (CoordinatorLayout) findViewById(R.id.bottomSheet);
-        mBSBPlace = BottomSheetBehavior.from(lBottomSheet);
+        CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
+        mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
         
-        mBSBPlace.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+//        mBSBPlace.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+//            @Override
+//            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+//
+//            }
+//
+//            @Override
+//            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+//
+//            }
+//        });
         
-            }
-    
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+        scheduleBottomSheet = new ScheduleBottomSheet(this);
+        CoordinatorLayout scheduleLayout = (CoordinatorLayout) findViewById(R.id.schedule_bottomSheet_layout);
+        mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
         
-            }
-        });
     }
     
     public void setCategoryBtn() {
@@ -184,6 +190,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
         placeBottomSheet.changePlaceBottomSheet(mapPOIItem.getTag());
         mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
+        mBSBSchedule.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
     
     @Override
@@ -250,6 +257,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     @Override
     public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
+        mBSBSchedule.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
     
     @Override

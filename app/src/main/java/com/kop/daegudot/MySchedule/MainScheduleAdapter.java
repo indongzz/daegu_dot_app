@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +19,8 @@ import com.kop.daegudot.R;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
-    private static ArrayList<DateInfo> mDateList;
+public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapter.ViewHolder> {
+    private static ArrayList<MainScheduleInfo> mDateList;
     private static Context mContext;
     
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
@@ -38,11 +37,11 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             int pos = getAdapterPosition();
-            DateInfo dateInfo = mDateList.get(pos);
-            Toast.makeText(mContext, dateInfo.getTextString(), Toast.LENGTH_SHORT).show();
+            MainScheduleInfo mainScheduleInfo = mDateList.get(pos);
+            Toast.makeText(mContext, mainScheduleInfo.getTextString(), Toast.LENGTH_SHORT).show();
         
             
-            ItineraryDialog dialog = new ItineraryDialog(mContext, pos, mDateList, new ItineraryDialog.ItineraryDialogListener() {
+            SubScheduleDialog dialog = new SubScheduleDialog(mContext, pos, mDateList, new SubScheduleDialog.SubScheduleDialogListener() {
                 @Override
                 public void dialogEventListener() {
                     deleteListItem();
@@ -85,14 +84,14 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
         }
     }
     
-    DateAdapter(Context context, ArrayList<DateInfo> list) {
+    MainScheduleAdapter(Context context, ArrayList<MainScheduleInfo> list) {
         mContext = context;
         mDateList = list;
     }
     
     @NonNull
     @Override
-    public DateAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MainScheduleAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
         View view = inflater.inflate(R.layout.layout_datelist_item, parent, false);

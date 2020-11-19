@@ -19,19 +19,19 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class ItineraryDialog extends Dialog implements View.OnClickListener {   // 세부 일정
+public class SubScheduleDialog extends Dialog implements View.OnClickListener {   // 세부 일정
     private Context mContext;
     private RecyclerView recyclerView;
-    private ItineraryAdapter adapter;
+    private SubScheduleAdapter adapter;
     String firstDay, lastDay;
     Date[] date;
     int mPosition;
-    ArrayList<DateInfo> mMainScheduleList;
+    ArrayList<MainScheduleInfo> mMainScheduleList;
     
-    private ArrayList<ItineraryInfo> mSubScheduleList = new ArrayList<>();
-    private ItineraryDialogListener dialogListener;
+    private ArrayList<SubScheduleInfo> mSubScheduleList = new ArrayList<>();
+    private SubScheduleDialogListener dialogListener;
     
-    public ItineraryDialog(@NonNull Context context, int position, ArrayList<DateInfo> dateList, ItineraryDialogListener dialogListener) {
+    public SubScheduleDialog(@NonNull Context context, int position, ArrayList<MainScheduleInfo> dateList, SubScheduleDialogListener dialogListener) {
         super(context);
         this.mContext = context;
         mPosition = position;
@@ -39,7 +39,7 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         this.dialogListener = dialogListener;
     }
     
-    public interface ItineraryDialogListener {
+    public interface SubScheduleDialogListener {
         void dialogEventListener();
     }
     
@@ -69,7 +69,7 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         recyclerView = findViewById(R.id.itineraryList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     
-        adapter = new ItineraryAdapter(getContext(), mSubScheduleList, mMainScheduleList);
+        adapter = new SubScheduleAdapter(getContext(), mSubScheduleList, mMainScheduleList);
         recyclerView.setAdapter(adapter);
     }
     
@@ -81,7 +81,7 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         
         for (int i = 0; i < mMainScheduleList.get(mPosition).getDateBetween(); i++) {
             // TODO: 그 날짜 세부 일정 불러오기
-            ItineraryInfo data = new ItineraryInfo();
+            SubScheduleInfo data = new SubScheduleInfo();
             String dateText = i + 1 + "일차 - " + dateArray[i].format(formatter);
         
             data.setDate(dateText);

@@ -16,9 +16,9 @@ import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 
-public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.ViewHolder> {
-    private static ArrayList<ItineraryInfo> mItineraryList;
-    private static ArrayList<DateInfo> mDateList;
+public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.ViewHolder> {
+    private static ArrayList<SubScheduleInfo> mItineraryList;
+    private static ArrayList<MainScheduleInfo> mDateList;
     private static Context mContext;
     
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -43,8 +43,8 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
                         Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
     
                         Intent intent = new Intent(mContext, MapMainActivity.class);
-                        intent.putParcelableArrayListExtra("DateList", mDateList);
-                        intent.putParcelableArrayListExtra("ItineraryList", mItineraryList);
+//                        intent.putParcelableArrayListExtra("DateList", mDateList);
+//                        intent.putParcelableArrayListExtra("ItineraryList", mItineraryList);
                         mContext.startActivity(intent);
                     }
                 }
@@ -56,7 +56,7 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
         
     }
     
-    ItineraryAdapter(Context context, ArrayList<ItineraryInfo> itineraryList, ArrayList<DateInfo> dateList) {
+    SubScheduleAdapter(Context context, ArrayList<SubScheduleInfo> itineraryList, ArrayList<MainScheduleInfo> dateList) {
         mContext = context;
         mItineraryList = itineraryList;
         mDateList = dateList;
@@ -64,18 +64,18 @@ public class ItineraryAdapter extends RecyclerView.Adapter<ItineraryAdapter.View
     
     @NonNull
     @Override
-    public ItineraryAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public SubScheduleAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
         View view = inflater.inflate(R.layout.layout_itinerarylist_item, parent, false);
-        ItineraryAdapter.ViewHolder vh = new ItineraryAdapter.ViewHolder(view);
+        SubScheduleAdapter.ViewHolder vh = new SubScheduleAdapter.ViewHolder(view);
         
         return vh;
     }
     
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ItineraryInfo info = mItineraryList.get(position);
+        SubScheduleInfo info = mItineraryList.get(position);
         holder.nthDay.setText(info.getDate());
         holder.detailAddress.setText(info.getAddressString());
     }
