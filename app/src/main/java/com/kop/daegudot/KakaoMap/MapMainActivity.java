@@ -14,6 +14,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.kop.daegudot.MySchedule.MainScheduleAdapter;
+import com.kop.daegudot.MySchedule.MainScheduleInfo;
+import com.kop.daegudot.MySchedule.SubScheduleInfo;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -62,14 +65,23 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         setHashBtn();
         
         Intent intent = getIntent();
-       // ArrayList<DateInfo> mDateList = intent.getParcelableArrayListExtra("DateList");
-//
-//        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-//        if (mDateList != null) {
-//            for (Object a : mDateList) {
-//                System.out.println(a);
-//            }
-//        }
+        ArrayList<MainScheduleInfo> mMainScheduleList = intent.getParcelableArrayListExtra("MainScheduleList");
+        ArrayList<SubScheduleInfo> mSubScheduleList = intent.getParcelableArrayListExtra("SubScheduleList");
+        
+        
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        if (mMainScheduleList != null) {
+            for (Object a : mMainScheduleList) {
+                System.out.println(((MainScheduleInfo)a).getmFirstDate());
+            }
+        }
+        
+        if (mSubScheduleList != null) {
+            SubScheduleInfo ssi = mSubScheduleList.get(0);
+            ArrayList<String> list = ssi.getAddress();
+            System.out.println(list.get(0));
+        }
+        
         
         String[] address = {
                 "대구광역시 중구 남산로 4길 112",

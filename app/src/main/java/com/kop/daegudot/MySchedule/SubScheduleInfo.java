@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 
-public class SubScheduleInfo { // implements Parcelable {
+public class SubScheduleInfo  implements Parcelable {
     private String date;
     private ArrayList<String> address;
     
@@ -15,20 +15,20 @@ public class SubScheduleInfo { // implements Parcelable {
     
     protected SubScheduleInfo(Parcel in) {
         date = in.readString();
-        address = in.createStringArrayList();
+        address = in.readArrayList(String.class.getClassLoader());
     }
     
-//    public static final Creator<ItineraryInfo> CREATOR = new Creator<ItineraryInfo>() {
-//        @Override
-//        public ItineraryInfo createFromParcel(Parcel in) {
-//            return new ItineraryInfo(in);
-//        }
-//
-//        @Override
-//        public ItineraryInfo[] newArray(int size) {
-//            return new ItineraryInfo[size];
-//        }
-//    };
+    public static final Creator<SubScheduleInfo> CREATOR = new Creator<SubScheduleInfo>() {
+        @Override
+        public SubScheduleInfo createFromParcel(Parcel in) {
+            return new SubScheduleInfo(in);
+        }
+
+        @Override
+        public SubScheduleInfo[] newArray(int size) {
+            return new SubScheduleInfo[size];
+        }
+    };
     
     public String getDate() {
         return date;
@@ -56,14 +56,14 @@ public class SubScheduleInfo { // implements Parcelable {
         return text;
     }
     
-//    @Override
-//    public int describeContents() {
-//        return 0;
-//    }
-//
-//    @Override
-//    public void writeToParcel(Parcel dest, int flags) {
-//        dest.writeString(date);
-//        dest.writeValue(address);
-//    }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(date);
+        dest.writeList(address);
+    }
 }

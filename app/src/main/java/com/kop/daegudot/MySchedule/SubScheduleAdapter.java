@@ -17,8 +17,8 @@ import com.kop.daegudot.R;
 import java.util.ArrayList;
 
 public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.ViewHolder> {
-    private static ArrayList<SubScheduleInfo> mItineraryList;
-    private static ArrayList<MainScheduleInfo> mDateList;
+    private static ArrayList<SubScheduleInfo> mSubScheduleList;
+    private static ArrayList<MainScheduleInfo> mMainScheduleList;
     private static Context mContext;
     
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -39,12 +39,12 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
     
                     if (pos != RecyclerView.NO_POSITION) {
                         // TODO: 클릭 시 지도 화면으로 넘어가기
-                        String whatDay = mItineraryList.get(pos).getDate();
+                        String whatDay = mSubScheduleList.get(pos).getDate();
                         Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
     
                         Intent intent = new Intent(mContext, MapMainActivity.class);
-//                        intent.putParcelableArrayListExtra("DateList", mDateList);
-//                        intent.putParcelableArrayListExtra("ItineraryList", mItineraryList);
+                        intent.putParcelableArrayListExtra("MainScheduleList", mMainScheduleList);
+                        intent.putParcelableArrayListExtra("SubScheduleList", mSubScheduleList);
                         mContext.startActivity(intent);
                     }
                 }
@@ -58,8 +58,8 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
     
     SubScheduleAdapter(Context context, ArrayList<SubScheduleInfo> itineraryList, ArrayList<MainScheduleInfo> dateList) {
         mContext = context;
-        mItineraryList = itineraryList;
-        mDateList = dateList;
+        mSubScheduleList = itineraryList;
+        mMainScheduleList = dateList;
     }
     
     @NonNull
@@ -75,14 +75,14 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
     
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        SubScheduleInfo info = mItineraryList.get(position);
+        SubScheduleInfo info = mSubScheduleList.get(position);
         holder.nthDay.setText(info.getDate());
         holder.detailAddress.setText(info.getAddressString());
     }
     
     @Override
     public int getItemCount() {
-        return mItineraryList.size();
+        return mSubScheduleList.size();
     }
     
     

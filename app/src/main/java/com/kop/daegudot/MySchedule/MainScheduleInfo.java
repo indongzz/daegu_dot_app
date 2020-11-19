@@ -1,12 +1,13 @@
 package com.kop.daegudot.MySchedule;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
-public class MainScheduleInfo implements Comparable<MainScheduleInfo> { //, Parcelable{
+public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelable{
     private String mFirstDate;
     private String mLastDate;
     private LocalDate mFirstLocalDate;
@@ -20,22 +21,22 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> { //, Parc
     protected MainScheduleInfo(Parcel in) {
         mFirstDate = in.readString();
         mLastDate = in.readString();
-        mFirstLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
-        mLastLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
+//        mFirstLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
+//        mLastLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
         mDDate = in.readInt();
     }
 
-//    public static final Creator<DateInfo> CREATOR = new Creator<DateInfo>() {
-//        @Override
-//        public DateInfo createFromParcel(Parcel in) {
-//            return new DateInfo(in);
-//        }
-//
-//        @Override
-//        public DateInfo[] newArray(int size) {
-//            return new DateInfo[size];
-//        }
-//    };
+    public static final Creator<MainScheduleInfo> CREATOR = new Creator<MainScheduleInfo>() {
+        @Override
+        public MainScheduleInfo createFromParcel(Parcel in) {
+            return new MainScheduleInfo(in);
+        }
+
+        @Override
+        public MainScheduleInfo[] newArray(int size) {
+            return new MainScheduleInfo[size];
+        }
+    };
     
     public String getmFirstDate() {
         return mFirstDate;
@@ -90,17 +91,17 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> { //, Parc
         return Integer.compare(this.getmDDate(), o.getmDDate());
     }
 
-//    @Override
-//    public int describeContents() {
-//        return 0;
-//    }
-//
-//    @Override
-//    public void writeToParcel(Parcel dest, int flags) {
-//        dest.writeString(mFirstDate);
-//        dest.writeString(mLastDate);
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mFirstDate);
+        dest.writeString(mLastDate);
 //        dest.writeValue(mFirstLocalDate);
 //        dest.writeValue(mLastLocalDate);
-//        dest.writeInt(mDDate);
-//    }
+        dest.writeInt(mDDate);
+    }
 }

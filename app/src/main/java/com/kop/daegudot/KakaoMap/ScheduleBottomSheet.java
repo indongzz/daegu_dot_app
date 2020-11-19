@@ -2,15 +2,12 @@ package com.kop.daegudot.KakaoMap;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,7 +23,10 @@ public class ScheduleBottomSheet {
     MainScheduleInfo data;
     SubScheduleInfo itidata;
     Button[] mButtons;
+    RecyclerView mRecyclerView;
+    ArrayList<String> nameList;
     
+    ItemTouchHelper mItemTouchHelper;
     float oldX;
     
     ScheduleBottomSheet(Context context) {
@@ -40,12 +40,12 @@ public class ScheduleBottomSheet {
         data.setmDDate();
         int days = data.getDateBetween();
     
-        RecyclerView recyclerView = ((MapMainActivity) mContext).findViewById(R.id.BSScheduleList);
+        mRecyclerView = ((MapMainActivity) mContext).findViewById(R.id.BSScheduleList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         
         // TODO: get list of subschedule address name
-        ArrayList<String> nameList = new ArrayList<>();
+        nameList = new ArrayList<>();
         nameList.add("요깅1");
         nameList.add("요깅2");
         nameList.add("요깅3");
@@ -53,14 +53,19 @@ public class ScheduleBottomSheet {
         nameList.add("요깅5");
         nameList.add("요깅6");
         
-        recyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(layoutManager);
+        
         ScheduleBSAdapter adapter = new ScheduleBSAdapter(nameList, mContext);
         
-        recyclerView.setAdapter(adapter);
+        ScheduleItemTouchHelperCallback mCallback = new ScheduleItemTouchHelperCallback(adapter);
+        mItemTouchHelper = new ItemTouchHelper(mCallback);
+        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
+        
+        mRecyclerView.setAdapter(adapter);
      //   setmButtons(data.getDateBetween());
         
         float width = (float) 320 / nameList.size();
-        recyclerView.addItemDecoration(new RecyclerViewDecoration(dpToPx(mContext, width)));
+        mRecyclerView.addItemDecoration(new RecyclerViewDecoration(dpToPx(mContext, width)));
     }
     
     public void ViewScheduleBottomSheet() {
@@ -104,6 +109,12 @@ public class ScheduleBottomSheet {
 //        return false;
 //    }
     
+    public void updateUI() {
+        float width = (float) 320 / nameList.size();
+        mRecyclerView.addItemDecoration(new RecyclerViewDecoration(dpToPx(mContext, width)));
+    }
+    
+    // change dp to pixel
     public int dpToPx(Context context, float dp) {
         return (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
