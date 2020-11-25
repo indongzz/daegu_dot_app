@@ -20,97 +20,41 @@ import java.util.ArrayList;
 
 public class ScheduleBottomSheet {
     private Context mContext;
-    MainScheduleInfo data;
-    SubScheduleInfo itidata;
-    Button[] mButtons;
     RecyclerView mRecyclerView;
-    ArrayList<String> nameList;
+    ArrayList<SubScheduleInfo> mSubScheduleList;
+    MainScheduleInfo mMainSchedule;
     
     ItemTouchHelper mItemTouchHelper;
     float oldX;
     
-    ScheduleBottomSheet(Context context) {
+    ScheduleBottomSheet(Context context,
+                        MainScheduleInfo mainSchedule, ArrayList<SubScheduleInfo> subscheduleList) {
         mContext = context;
-    
-        data = new MainScheduleInfo();
-        String firstdate = "20.11.14";
-        String lastDate = "20.11.16";
-        data.setmFirstDate(firstdate);
-        data.setmLastDate(lastDate);
-        data.setmDDate();
-        int days = data.getDateBetween();
-    
-        mRecyclerView = ((MapMainActivity) mContext).findViewById(R.id.BSScheduleList);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
-        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        mMainSchedule = mainSchedule;
+        mSubScheduleList = subscheduleList;
         
-        // TODO: get list of subschedule address name
-        nameList = new ArrayList<>();
-        nameList.add("요깅1");
-        nameList.add("요깅2");
-        nameList.add("요깅3");
-        nameList.add("요깅4");
-        nameList.add("요깅5");
-        nameList.add("요깅6");
-        
-        mRecyclerView.setLayoutManager(layoutManager);
-        
-        ScheduleBSAdapter adapter = new ScheduleBSAdapter(nameList, mContext);
-        
-        ScheduleItemTouchHelperCallback mCallback = new ScheduleItemTouchHelperCallback(adapter);
-        mItemTouchHelper = new ItemTouchHelper(mCallback);
-        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
-        
-        mRecyclerView.setAdapter(adapter);
-     //   setmButtons(data.getDateBetween());
-        
-        float width = (float) 320 / nameList.size();
-        mRecyclerView.addItemDecoration(new RecyclerViewDecoration(dpToPx(mContext, width)));
+        ViewScheduleBottomSheet();
     }
     
     public void ViewScheduleBottomSheet() {
+        mRecyclerView = ((MapMainActivity) mContext).findViewById(R.id.BSScheduleList);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
+        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
     
-    }
+        // TODO: get list of subschedule address name
     
-    public void setmButtons(int days) {
-        mButtons = new Button[days];
+        mRecyclerView.setLayoutManager(layoutManager);
     
-        CoordinatorLayout layout = (CoordinatorLayout) ((MapMainActivity) mContext).findViewById(R.id.schedule_bottomSheet_layout);
-        
-//        for (int i = 0; i < days; i++) {
-//            mButtons[i] = new Button(mContext);
-//            mButtons[i].setBackgroundResource(R.drawable.buttonsheet_btn);
-//            ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(30, 30);
-//            lp.startToEnd = R.id.left_btn;
-//            lp.bottomToBottom = R.id.schedule_bottomSheet_layout;
-//            lp.topToTop = R.id.schedule_bottomSheet_layout;
-//            lp.setMarginStart(dpToPx(mContext, 300) / (data.getDateBetween() - 1) * i);
-//            mButtons[i].setLayoutParams(lp);  // 버튼 위치와 크기
-//            mButtons[i].setStateListAnimator(null);  // 그림자 지우기
-//
-//            mButtons[i].setOnTouchListener(this);
-//            layout.addView(mButtons[i]);
-//        }
-    }
+        ScheduleBSAdapter adapter = new ScheduleBSAdapter(mSubScheduleList.get(0).getPlaceName(), mContext);
     
-//    @Override
-//    public boolean onTouch(View v, MotionEvent event) {
-//        int width = ((ViewGroup)v.getParent()).getWidth() - v.getWidth();
-//
-//        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//            oldX = event.getX();
-//
-//            Log.i("Schedule Bottom sheet", "Action Down x" + event.getRawX());
-//        } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-//            v.setX(event.getRawX() - oldX);
-//        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-//
-//        }
-//        return false;
-//    }
+       
+//        ScheduleItemTouchHelperCallback mCallback = new ScheduleItemTouchHelperCallback(adapter);
+//        mItemTouchHelper = new ItemTouchHelper(mCallback);
+//        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
     
-    public void updateUI() {
-        float width = (float) 320 / nameList.size();
+        mRecyclerView.setAdapter(adapter);
+    
+        float width = (float) 320 / mSubScheduleList.get(0).getPlaceName().size() - 1;
         mRecyclerView.addItemDecoration(new RecyclerViewDecoration(dpToPx(mContext, width)));
     }
     

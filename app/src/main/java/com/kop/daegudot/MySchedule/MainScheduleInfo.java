@@ -21,8 +21,8 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
     protected MainScheduleInfo(Parcel in) {
         mFirstDate = in.readString();
         mLastDate = in.readString();
-//        mFirstLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
-//        mLastLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
+        mFirstLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
+        mLastLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
         mDDate = in.readInt();
     }
 
@@ -66,9 +66,16 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
         mDDate = (int) ChronoUnit.DAYS.between(today, mFirstLocalDate);
     }
     
-    public String getTextString() {
-        // 년도 제외하고 월 일만 추출
+    public String getButtonString() {
+        // 년도 제외하고 월 일만 추출 + D-day
+        // 리스트뷰에 들어가는 버튼 이름에 사용함.
         return mFirstDate.substring(3) + " ~ " + mLastDate.substring(3) + " / " + "D-" + mDDate;
+    }
+    
+    public String getDateString() {
+        // 월 일만 추출
+        // title로 사용
+        return mFirstDate.substring(3) + " ~ " + mLastDate.substring(3);
     }
     
     
@@ -100,8 +107,8 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mFirstDate);
         dest.writeString(mLastDate);
-//        dest.writeValue(mFirstLocalDate);
-//        dest.writeValue(mLastLocalDate);
+        dest.writeValue(mFirstLocalDate);
+        dest.writeValue(mLastLocalDate);
         dest.writeInt(mDDate);
     }
 }

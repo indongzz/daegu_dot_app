@@ -8,6 +8,9 @@ import java.util.ArrayList;
 public class SubScheduleInfo  implements Parcelable {
     private String date;
     private ArrayList<String> address;
+    private int mainTag;
+    private int placeNum;
+    private ArrayList<String> placeName;
     
     public SubScheduleInfo() {
     
@@ -16,6 +19,7 @@ public class SubScheduleInfo  implements Parcelable {
     protected SubScheduleInfo(Parcel in) {
         date = in.readString();
         address = in.readArrayList(String.class.getClassLoader());
+        placeName = in.readArrayList(String.class.getClassLoader());
     }
     
     public static final Creator<SubScheduleInfo> CREATOR = new Creator<SubScheduleInfo>() {
@@ -46,6 +50,24 @@ public class SubScheduleInfo  implements Parcelable {
         this.address = address;
     }
     
+    public int getPlaceNum() {
+        return placeNum;
+    }
+    
+    public void setPlaceNum(int placeNum) {
+        this.placeNum = placeNum;
+    }
+    
+    public ArrayList<String> getPlaceName() {
+        return placeName;
+    }
+    
+    public void setPlaceName(ArrayList<String> placeName) {
+        this.placeName = placeName;
+    }
+    
+    
+    
     public String getAddressString() {
         String text = "";
         
@@ -65,5 +87,6 @@ public class SubScheduleInfo  implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(date);
         dest.writeList(address);
+        dest.writeList(placeName);
     }
 }

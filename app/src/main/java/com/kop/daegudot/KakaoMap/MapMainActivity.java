@@ -32,6 +32,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     Button[] mHashTag;
     Button mToggleBtn;
     ImageButton mBackBtn;
+    String mTitleText;
     int flag = 1;
     
     ArrayList<MarkerInfo> mMarkerItems;
@@ -47,7 +48,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         setContentView(R.layout.activity_map_main);
         
         TextView title = findViewById(R.id.title);
-        title.setText("장소 검색");
+        //title.setText("장소 검색");
         
         mMapView = findViewById(R.id.map_view);
     
@@ -65,23 +66,37 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         setHashBtn();
         
         Intent intent = getIntent();
-        ArrayList<MainScheduleInfo> mMainScheduleList = intent.getParcelableArrayListExtra("MainScheduleList");
+        MainScheduleInfo mMainSchedule = intent.getParcelableExtra("MainSchedule");
         ArrayList<SubScheduleInfo> mSubScheduleList = intent.getParcelableArrayListExtra("SubScheduleList");
+        String firstDay = intent.getStringExtra("firstDay");
+        String lastDay = intent.getStringExtra("lastDay");
+        
         
         
         System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-        if (mMainScheduleList != null) {
-            for (Object a : mMainScheduleList) {
-                System.out.println(((MainScheduleInfo)a).getmFirstDate());
-            }
+        
+        if (mMainSchedule != null) {
+            System.out.println(mMainSchedule.getmFirstDate());
+            
+            mTitleText = mMainSchedule.getDateString();
         }
         
         if (mSubScheduleList != null) {
             SubScheduleInfo ssi = mSubScheduleList.get(0);
             ArrayList<String> list = ssi.getAddress();
-            System.out.println(list.get(0));
+            System.out.println("list" + list.get(0) + mSubScheduleList.size() + mSubScheduleList.get(0).getPlaceName());
         }
         
+        if (firstDay != null) {
+            System.out.println("first day" + firstDay);
+        }
+        
+        if (lastDay != null) {
+            System.out.println("last" + lastDay);
+            mTitleText = firstDay + " ~ " + lastDay;
+        }
+    
+        title.setText(mTitleText);
         
         String[] address = {
                 "대구광역시 중구 남산로 4길 112",
@@ -142,7 +157,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
 //            }
 //        });
         
-        scheduleBottomSheet = new ScheduleBottomSheet(this);
+        scheduleBottomSheet = new ScheduleBottomSheet(this, mMainSchedule, mSubScheduleList);
         CoordinatorLayout scheduleLayout = (CoordinatorLayout) findViewById(R.id.schedule_bottomSheet_layout);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
         

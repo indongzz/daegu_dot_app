@@ -20,10 +20,11 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapter.ViewHolder> {
-    private static ArrayList<MainScheduleInfo> mDateList;
+    private static ArrayList<MainScheduleInfo> mMainScheduleList;
     private static Context mContext;
     
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener, View.OnLongClickListener{
         Button button;
         
         ViewHolder(View itemView) {
@@ -37,11 +38,12 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
         @Override
         public void onClick(View v) {
             int pos = getAdapterPosition();
-            MainScheduleInfo mainScheduleInfo = mDateList.get(pos);
-            Toast.makeText(mContext, mainScheduleInfo.getTextString(), Toast.LENGTH_SHORT).show();
+            MainScheduleInfo mainScheduleInfo = mMainScheduleList.get(pos);
+            Toast.makeText(mContext, mainScheduleInfo.getDateString(), Toast.LENGTH_SHORT).show();
         
             
-            SubScheduleDialog dialog = new SubScheduleDialog(mContext, pos, mDateList, new SubScheduleDialog.SubScheduleDialogListener() {
+            SubScheduleDialog dialog = new SubScheduleDialog(mContext, mainScheduleInfo,
+                    new SubScheduleDialog.SubScheduleDialogListener() {
                 @Override
                 public void dialogEventListener() {
                     deleteListItem();
@@ -68,7 +70,7 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
             builder.setPositiveButton("예",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            mDateList.remove(getAdapterPosition());
+                            mMainScheduleList.remove(getAdapterPosition());
                             notifyItemRemoved(getAdapterPosition());
                             
                             // TODO: DB에서 데이터 삭제하기
@@ -86,7 +88,7 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
     
     MainScheduleAdapter(Context context, ArrayList<MainScheduleInfo> list) {
         mContext = context;
-        mDateList = list;
+        mMainScheduleList = list;
     }
     
     @NonNull
@@ -101,13 +103,13 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
     
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String textDate = mDateList.get(position).getTextString();
+        String textDate = mMainScheduleList.get(position).getButtonString();
         holder.button.setText(textDate);
     }
     
     @Override
     public int getItemCount() {
-        return mDateList.size();
+        return mMainScheduleList.size();
     }
     
     

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.ViewHolder> {
     private static ArrayList<SubScheduleInfo> mSubScheduleList;
-    private static ArrayList<MainScheduleInfo> mMainScheduleList;
+    private static MainScheduleInfo mMainSchedule;
     private static Context mContext;
     
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -38,12 +38,12 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
                     int pos = getAdapterPosition();
     
                     if (pos != RecyclerView.NO_POSITION) {
-                        // TODO: 클릭 시 지도 화면으로 넘어가기
+                        // 세부 일정 클릭하여 MapMainActivity로 넘어가기
                         String whatDay = mSubScheduleList.get(pos).getDate();
                         Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
     
                         Intent intent = new Intent(mContext, MapMainActivity.class);
-                        intent.putParcelableArrayListExtra("MainScheduleList", mMainScheduleList);
+                        intent.putExtra("MainSchedule", mMainSchedule);
                         intent.putParcelableArrayListExtra("SubScheduleList", mSubScheduleList);
                         mContext.startActivity(intent);
                     }
@@ -56,10 +56,10 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
         
     }
     
-    SubScheduleAdapter(Context context, ArrayList<SubScheduleInfo> itineraryList, ArrayList<MainScheduleInfo> dateList) {
+    SubScheduleAdapter(Context context, ArrayList<SubScheduleInfo> subScheduleList, MainScheduleInfo mainScheduleInfo) {
         mContext = context;
-        mSubScheduleList = itineraryList;
-        mMainScheduleList = dateList;
+        mSubScheduleList = subScheduleList;
+        mMainSchedule = mainScheduleInfo;
     }
     
     @NonNull

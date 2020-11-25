@@ -2,7 +2,6 @@ package com.kop.daegudot.KakaoMap;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +15,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
-public class ScheduleBSAdapter extends RecyclerView.Adapter<ScheduleBSAdapter.ViewHolder> implements ScheduleItemTouchHelperCallback.OnItemMoveListener {
+public class ScheduleBSAdapter extends RecyclerView.Adapter<ScheduleBSAdapter.ViewHolder> {
+        // implements ScheduleItemTouchHelperCallback.OnItemMoveListener {  // drag and swipe
     private Context mContext;
-    private ArrayList<String> mNameList;
+    private ArrayList<String> mNthSchedule;
     
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
         Button button;
@@ -48,11 +47,12 @@ public class ScheduleBSAdapter extends RecyclerView.Adapter<ScheduleBSAdapter.Vi
             builder.setPositiveButton("예",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            mNameList.remove(getAdapterPosition());
+                            mNthSchedule.remove(getAdapterPosition());
                             notifyItemRemoved(getAdapterPosition());
                     
                             // TODO: DB에서 데이터 삭제하기
                             
+                            itemView.invalidate();
                         }
                     });
             builder.setNegativeButton("아니오",
@@ -66,9 +66,9 @@ public class ScheduleBSAdapter extends RecyclerView.Adapter<ScheduleBSAdapter.Vi
         
     }
     
-    ScheduleBSAdapter(ArrayList<String> nameList, Context context) {
+    ScheduleBSAdapter(ArrayList<String> nthSchedule, Context context) {
         mContext = context;
-        mNameList = nameList;
+        mNthSchedule = nthSchedule;
     }
     
     @NonNull
@@ -83,35 +83,36 @@ public class ScheduleBSAdapter extends RecyclerView.Adapter<ScheduleBSAdapter.Vi
     
     @Override
     public void onBindViewHolder(@NonNull ScheduleBSAdapter.ViewHolder holder, int position) {
-        holder.text.setText(mNameList.get(position));
+        holder.text.setText(mNthSchedule.get(position));
     }
     
     @Override
     public int getItemCount() {
-        return mNameList.size();
+        return mNthSchedule.size();
     }
     
-    @Override
-    public boolean onItemMove(int fromPosition, int toPosition) {
-        if (fromPosition < toPosition) {
-            for (int i = fromPosition; i < toPosition; i++) {
-                Collections.swap(mNameList, i, i + 1);
-            }
-        } else {
-            for (int i = fromPosition; i > toPosition; i--) {
-                Collections.swap(mNameList, i, i - 1);
-            }
-        }
-    
-        notifyItemMoved(fromPosition, toPosition);
-        
-        return true;
-    }
-    
-    @Override
-    public void onItemSwipe(int position) {
-            mNameList.remove(position);
-            notifyItemRemoved(position);
-    }
+    // drag to move, swipe to delete
+//    @Override
+//    public boolean onItemMove(int fromPosition, int toPosition) {
+//        if (fromPosition < toPosition) {
+//            for (int i = fromPosition; i < toPosition; i++) {
+//                Collections.swap(mSubScheduleList, i, i + 1);
+//            }
+//        } else {
+//            for (int i = fromPosition; i > toPosition; i--) {
+//                Collections.swap(mSubScheduleList, i, i - 1);
+//            }
+//        }
+//
+//        notifyItemMoved(fromPosition, toPosition);
+//
+//        return true;
+//    }
+//
+//    @Override
+//    public void onItemSwipe(int position) {
+//            mSubScheduleList.remove(position);
+//            notifyItemRemoved(position);
+//    }
     
 }

@@ -1,5 +1,6 @@
 package com.kop.daegudot.AddSchedule;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,16 +15,19 @@ import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener;
 import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
 //import com.applikeysolutions.cosmocalendar.utils.SelectionType;
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
+import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.MySchedule.MyScheduleFragment;
 import com.kop.daegudot.R;
 
 import java.util.Calendar;
 import java.util.List;
 
-public class AddScheduleFragment extends Fragment {
+public class AddScheduleFragment extends Fragment implements View.OnClickListener {
     View view;
     CalendarView mCalendar;
     Button mCalendarBtn;
-
+    String mFirstDay;
+    String mLastDay;
 
     public AddScheduleFragment() {
         // Required empty public constructor
@@ -46,6 +50,7 @@ public class AddScheduleFragment extends Fragment {
 
         mCalendar = view.findViewById(R.id.calendar);
         mCalendarBtn = view.findViewById(R.id.calendarBtn);
+        mCalendarBtn.setOnClickListener(this);
 
         mCalendar.setSelectionType(SelectionType.RANGE);
 
@@ -59,12 +64,14 @@ public class AddScheduleFragment extends Fragment {
                 int startMonth = startCal.get(Calendar.MONTH);
                 int startYear = startCal.get(Calendar.YEAR);
                 String startDate = (startMonth + 1) + "월" + startDay + "일";
+                mFirstDay = startYear + "." + (startMonth + 1) + "." + startDay;
 
                 Calendar endCal = days.get(days.size() - 1);
                 int endDay = endCal.get(Calendar.DAY_OF_MONTH);
                 int endMonth = endCal.get(Calendar.MONTH);
                 int endYear = endCal.get(Calendar.YEAR);
                 String endDate = (endMonth + 1) + "월" + endDay + "일";
+                mLastDay = endYear + "." + (endMonth + 1) + "." + endDay;
 
                 String text = null;
                 if (startDate.equals(endDate)) {
@@ -79,5 +86,18 @@ public class AddScheduleFragment extends Fragment {
 
 
          return view;
+    }
+    
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.calendarBtn:
+                // TODO: DB에 MainSchedule 추가
+                // 세부 일정 추가를 위해 MapMainActivity로 이동
+                Intent intent = new Intent(getContext(), MapMainActivity.class);
+                intent.putExtra("firstDay", mFirstDay);
+                intent.putExtra("lastDay", mLastDay);
+                startActivity(intent);
+        }
     }
 }

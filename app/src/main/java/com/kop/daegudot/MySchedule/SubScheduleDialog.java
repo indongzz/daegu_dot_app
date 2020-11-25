@@ -25,17 +25,16 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
     private SubScheduleAdapter adapter;
     String firstDay, lastDay;
     Date[] date;
-    int mPosition;
-    ArrayList<MainScheduleInfo> mMainScheduleList;
+    MainScheduleInfo mMainScheduleInfo;
     
     private ArrayList<SubScheduleInfo> mSubScheduleList = new ArrayList<>();
     private SubScheduleDialogListener dialogListener;
     
-    public SubScheduleDialog(@NonNull Context context, int position, ArrayList<MainScheduleInfo> dateList, SubScheduleDialogListener dialogListener) {
+    public SubScheduleDialog(@NonNull Context context, MainScheduleInfo mainScheduleInfo,
+                             SubScheduleDialogListener dialogListener) {
         super(context);
         this.mContext = context;
-        mPosition = position;
-        mMainScheduleList = dateList;
+        mMainScheduleInfo = mainScheduleInfo;
         this.dialogListener = dialogListener;
     }
     
@@ -54,11 +53,11 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
         
         setContentView(R.layout.itinerary_dialog);
         
-        firstDay = mMainScheduleList.get(mPosition).getmFirstDate();
-        lastDay = mMainScheduleList.get(mPosition).getmLastDate();
+        firstDay = mMainScheduleInfo.getmFirstDate();
+        lastDay = mMainScheduleInfo.getmLastDate();
         
         TextView dialogTitle = findViewById(R.id.dialogTitle);
-        String title = mMainScheduleList.get(mPosition).getTextString();
+        String title = mMainScheduleInfo.getButtonString();
         dialogTitle.setText(title);
     
         Button deleteBtn = findViewById(R.id.deleteBtn);
@@ -69,31 +68,39 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
         recyclerView = findViewById(R.id.itineraryList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     
-        adapter = new SubScheduleAdapter(getContext(), mSubScheduleList, mMainScheduleList);
+        adapter = new SubScheduleAdapter(getContext(), mSubScheduleList, mMainScheduleInfo);
         recyclerView.setAdapter(adapter);
     }
     
     public void setItineraryText() {
         /* 세부 일정 날짜 */
         
-        LocalDate[] dateArray = mMainScheduleList.get(mPosition).getDateArray();
+        LocalDate[] dateArray = mMainScheduleInfo.getDateArray();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd");
         
-        for (int i = 0; i < mMainScheduleList.get(mPosition).getDateBetween(); i++) {
+        for (int i = 0; i < mMainScheduleInfo.getDateBetween(); i++) {
             // TODO: 그 날짜 세부 일정 불러오기
             SubScheduleInfo data = new SubScheduleInfo();
             String dateText = i + 1 + "일차 - " + dateArray[i].format(formatter);
-        
+            
             data.setDate(dateText);
         
             ArrayList<String> address = new ArrayList<>();
         
             address.add("대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n");
             address.add("대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n");
+            
+            ArrayList<String> attract = new ArrayList<>();
+            attract.add("더락");
+            attract.add("중앙떡볶이");
+            
             data.setAddress(address);
+            data.setPlaceName(attract);
+            
         
             mSubScheduleList.add(data);
         }
+        
     }
     
     @Override
