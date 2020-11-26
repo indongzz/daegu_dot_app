@@ -16,6 +16,7 @@ import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
 //import com.applikeysolutions.cosmocalendar.utils.SelectionType;
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
 import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.MySchedule.MyScheduleFragment;
 import com.kop.daegudot.R;
 
@@ -93,11 +94,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         switch(v.getId()) {
             case R.id.calendarBtn:
                 // TODO: DB에 MainSchedule 추가
-                // 세부 일정 추가를 위해 MapMainActivity로 이동
-                Intent intent = new Intent(getContext(), MapMainActivity.class);
-                intent.putExtra("firstDay", mFirstDay);
-                intent.putExtra("lastDay", mLastDay);
-                startActivity(intent);
+                ((MainActivity)getActivity()).changeFragment(1, 0);
         }
     }
 }

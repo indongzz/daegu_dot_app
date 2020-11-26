@@ -1,5 +1,6 @@
 package com.kop.daegudot.MySchedule;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.R;
 
@@ -94,4 +96,12 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
                 break;
         }
     }
+    
+//    public void ConvertToMapMainActivity() {
+//        Intent intent = new Intent(getContext(), MapMainActivity.class);
+//        intent.putExtra("firstDay", mFirstDay);
+//        intent.putExtra("lastDay", mLastDay);
+//
+//        startActivity(intent);
+//    }
 }

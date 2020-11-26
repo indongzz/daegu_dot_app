@@ -16,7 +16,7 @@ import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 
-public class ScheduleBSAdapter extends RecyclerView.Adapter<ScheduleBSAdapter.ViewHolder> {
+public class ScheduleRecyclerViewAdapter extends RecyclerView.Adapter<ScheduleRecyclerViewAdapter.ViewHolder> {
         // implements ScheduleItemTouchHelperCallback.OnItemMoveListener {  // drag and swipe
     private Context mContext;
     private ArrayList<String> mNthSchedule;
@@ -66,14 +66,14 @@ public class ScheduleBSAdapter extends RecyclerView.Adapter<ScheduleBSAdapter.Vi
         
     }
     
-    ScheduleBSAdapter(ArrayList<String> nthSchedule, Context context) {
+    ScheduleRecyclerViewAdapter(ArrayList<String> nthSchedule, Context context) {
         mContext = context;
         mNthSchedule = nthSchedule;
     }
     
     @NonNull
     @Override
-    public ScheduleBSAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ScheduleRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     
         View view = inflater.inflate(R.layout.bs_item_view, parent, false);
@@ -82,7 +82,7 @@ public class ScheduleBSAdapter extends RecyclerView.Adapter<ScheduleBSAdapter.Vi
     }
     
     @Override
-    public void onBindViewHolder(@NonNull ScheduleBSAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ScheduleRecyclerViewAdapter.ViewHolder holder, int position) {
         holder.text.setText(mNthSchedule.get(position));
     }
     

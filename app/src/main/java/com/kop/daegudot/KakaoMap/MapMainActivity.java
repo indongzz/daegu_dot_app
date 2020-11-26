@@ -1,11 +1,16 @@
 package com.kop.daegudot.KakaoMap;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.widget.NestedScrollView;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
@@ -14,7 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.kop.daegudot.MySchedule.MainScheduleAdapter;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.SubScheduleInfo;
 import com.kop.daegudot.R;
@@ -25,7 +29,8 @@ import net.daum.mf.map.api.MapView;
 
 import java.util.ArrayList;
 
-public class MapMainActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener {
+public class MapMainActivity extends AppCompatActivity implements MapView.MapViewEventListener,
+        MapView.POIItemEventListener, View.OnClickListener {
     private static final String LOG_TAG = "MapMainActivity";
     private MapView mMapView;
     Button[] mCategory;
@@ -39,7 +44,9 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     private BottomSheetBehavior mBSBPlace;
     PlaceBottomSheet placeBottomSheet;
     private BottomSheetBehavior mBSBSchedule;
-    ScheduleBottomSheet scheduleBottomSheet;
+//    ScheduleBottomSheet scheduleBottomSheet;
+    ViewPager2 mViewPager;
+    ViewPagerAdapter adapter;
     
     
     @Override
@@ -64,14 +71,14 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         setCategoryBtn();
         setHashBtn();
+        setMarkerItems();
         
         Intent intent = getIntent();
         MainScheduleInfo mMainSchedule = intent.getParcelableExtra("MainSchedule");
         ArrayList<SubScheduleInfo> mSubScheduleList = intent.getParcelableArrayListExtra("SubScheduleList");
         String firstDay = intent.getStringExtra("firstDay");
         String lastDay = intent.getStringExtra("lastDay");
-        
-        
+        int position = intent.getIntExtra("position", 0);
         
         System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
         
@@ -98,47 +105,6 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
         title.setText(mTitleText);
         
-        String[] address = {
-                "대구광역시 중구 남산로 4길 112",
-                "대구광역시 중구 서성로 6-1",
-                "대구광역시 동구동화사 1길 1",
-                "대구광역시 중구 국채보상로 670",
-                "대구광역시 중구 동성로 2길 80"
-        };
-        String[] attractname = { "성모당", "서상돈 고택", "동화사 보사계 유공비", "국채보상운동기념공원", "2.28기념중앙공원" };
-        String[] tel = {
-                "053-250-3000", "053-256-3762",
-                "53-982-0101-2", "053-254-9401",
-                "053-254-9405"
-        };
-        
-        // 나중에 data read후에 markerinfo에 담기
-         mMarkerItems = new ArrayList<>();
-        
-        for (int i = 0; i < 5; i++) {
-            MarkerInfo markerItem = new MarkerInfo(this);
-            markerItem.setAddress(address[i]);
-            markerItem.setName(attractname[i]);
-            markerItem.setTel(tel[i]);
-            markerItem.setRate((float) (i+0.5));
-            markerItem.setLike(false);
-            mMarkerItems.add(markerItem);
-        }
-        
-        for (int i = 0; i< 5; i++) {
-            MapPOIItem marker = new MapPOIItem();
-            marker.setItemName(mMarkerItems.get(i).getName());
-            marker.setTag(i);
-            marker.setMapPoint(mMarkerItems.get(i).getAddressPoint());
-            marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-            marker.setCustomImageResourceId(R.drawable.blue_pin);
-            marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-            marker.setCustomImageAnchor(0.5f, 1.0f);
-            marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
-            marker.setShowCalloutBalloonOnTouch(false);
-            mMapView.addPOIItem(marker);
-        }
-        
         placeBottomSheet = new PlaceBottomSheet(this, mMarkerItems);
         
         CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
@@ -157,10 +123,63 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
 //            }
 //        });
         
-        scheduleBottomSheet = new ScheduleBottomSheet(this, mMainSchedule, mSubScheduleList);
-        CoordinatorLayout scheduleLayout = (CoordinatorLayout) findViewById(R.id.schedule_bottomSheet_layout);
+        mViewPager = findViewById(R.id.viewPager);
+        adapter = new ViewPagerAdapter(this, mSubScheduleList);
+        mViewPager.setAdapter(adapter);
+        
+//        scheduleBottomSheet = new ScheduleBottomSheet(this, mMainSchedule, mSubScheduleList);
+        NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
         
+        // move to n일차
+        mViewPager.setCurrentItem(position);
+
+    }
+    
+    public void setMarkerItems() {
+        // TODO: get marker info
+        // 나중에 data read후에 markerinfo에 담기
+        
+        /* example Marker Data */
+        String[] address = {
+                "대구광역시 중구 남산로 4길 112",
+                "대구광역시 중구 서성로 6-1",
+                "대구광역시 동구동화사 1길 1",
+                "대구광역시 중구 국채보상로 670",
+                "대구광역시 중구 동성로 2길 80"
+        };
+        String[] attractname = { "성모당", "서상돈 고택", "동화사 보사계 유공비", "국채보상운동기념공원", "2.28기념중앙공원" };
+        String[] tel = {
+                "053-250-3000", "053-256-3762",
+                "53-982-0101-2", "053-254-9401",
+                "053-254-9405"
+        };
+        
+        mMarkerItems = new ArrayList<>();
+    
+        for (int i = 0; i < 5; i++) {
+            MarkerInfo markerItem = new MarkerInfo(this);
+            markerItem.setAddress(address[i]);
+            markerItem.setName(attractname[i]);
+            markerItem.setTel(tel[i]);
+            markerItem.setRate((float) (i+0.5));
+            markerItem.setLike(false);
+            mMarkerItems.add(markerItem);
+        }
+    
+        for (int i = 0; i< 5; i++) {
+            MapPOIItem marker = new MapPOIItem();
+            marker.setItemName(mMarkerItems.get(i).getName());
+            marker.setTag(i);
+            marker.setMapPoint(mMarkerItems.get(i).getAddressPoint());
+            marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+            marker.setCustomImageResourceId(R.drawable.blue_pin);
+            marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+            marker.setCustomImageAnchor(0.5f, 1.0f);
+            marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
+            marker.setShowCalloutBalloonOnTouch(false);
+            mMapView.addPOIItem(marker);
+        }
     }
     
     public void setCategoryBtn() {
