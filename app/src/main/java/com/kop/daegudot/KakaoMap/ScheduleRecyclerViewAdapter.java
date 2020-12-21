@@ -16,7 +16,8 @@ import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 
-public class ScheduleRecyclerViewAdapter extends RecyclerView.Adapter<ScheduleRecyclerViewAdapter.ViewHolder> {
+public class ScheduleRecyclerViewAdapter
+        extends RecyclerView.Adapter<ScheduleRecyclerViewAdapter.ViewHolder> {
         // implements ScheduleItemTouchHelperCallback.OnItemMoveListener {  // drag and swipe
     private Context mContext;
     private ArrayList<String> mNthSchedule;
@@ -41,7 +42,8 @@ public class ScheduleRecyclerViewAdapter extends RecyclerView.Adapter<ScheduleRe
         }
         
         public void deleteSubschedule() {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AlertDialogStyle);
+            final AlertDialog.Builder builder =
+                    new AlertDialog.Builder(mContext, R.style.AlertDialogStyle);
             builder.setTitle("삭제");
             builder.setMessage("해당 항목을 삭제하시겠습니까?");
             builder.setPositiveButton("예",
@@ -74,7 +76,8 @@ public class ScheduleRecyclerViewAdapter extends RecyclerView.Adapter<ScheduleRe
     @NonNull
     @Override
     public ScheduleRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater =
+                (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     
         View view = inflater.inflate(R.layout.bs_item_view, parent, false);
     

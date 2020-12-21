@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item type="dimen" name="dialog_min_width">95%</item>
-    <item type="dimen" name="recyclerView_margin">150px</item>
+    <item type="dimen" name="recyclerView_margin">50px</item>
 </resources>

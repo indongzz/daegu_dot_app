@@ -57,7 +57,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/BSScheduleList"
-            android:layout_width="320dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:translationY="-7.5dp"
             app:layout_constraintTop_toTopOf="@+id/line"

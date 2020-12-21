@@ -70,19 +70,21 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     @NonNull
     @Override
     public ViewPagerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater =
+                (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     
         View view = inflater.inflate(R.layout.bottom_sheet_schedule, parent, false);
         ViewPagerAdapter.ViewHolder vh = new ViewPagerAdapter.ViewHolder(view);
     
         mRecyclerView = view.findViewById(R.id.BSScheduleList);
         
-        LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
-        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
     
     
-        ScheduleRecyclerViewAdapter adapter = new ScheduleRecyclerViewAdapter(mSubScheduleList.get(0).getPlaceName(), mContext);
+        ScheduleRecyclerViewAdapter adapter =
+                new ScheduleRecyclerViewAdapter(mSubScheduleList.get(0).getPlaceName(), mContext);
     
         mRecyclerView.setAdapter(adapter);
     
@@ -96,11 +98,13 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
         
         a.recycle();
     
-        DividerItemDecoration itemDecoration = new DividerItemDecoration(mContext, DividerItemDecoration.HORIZONTAL);
+        DividerItemDecoration itemDecoration =
+                new DividerItemDecoration(mContext, DividerItemDecoration.HORIZONTAL);
         itemDecoration.setDrawable(insetDivider);
         
         mRecyclerView.addItemDecoration(itemDecoration);
     
+        
 //        float width = (float) 320 / mSubScheduleList.get(0).getPlaceName().size() - 2;
 //        mRecyclerView.addItemDecoration(new RecyclerViewDecoration(dpToPx(mContext, width)));
         

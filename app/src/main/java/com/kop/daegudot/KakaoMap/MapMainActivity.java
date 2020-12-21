@@ -75,15 +75,16 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         Intent intent = getIntent();
         MainScheduleInfo mMainSchedule = intent.getParcelableExtra("MainSchedule");
-        ArrayList<SubScheduleInfo> mSubScheduleList = intent.getParcelableArrayListExtra("SubScheduleList");
+        ArrayList<SubScheduleInfo> mSubScheduleList =
+                intent.getParcelableArrayListExtra("SubScheduleList");
         String firstDay = intent.getStringExtra("firstDay");
         String lastDay = intent.getStringExtra("lastDay");
         int position = intent.getIntExtra("position", 0);
         
-        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+      //  System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
         
         if (mMainSchedule != null) {
-            System.out.println(mMainSchedule.getmFirstDate());
+         //   System.out.println(mMainSchedule.getmFirstDate());
             
             mTitleText = mMainSchedule.getDateString();
         }
@@ -91,15 +92,15 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         if (mSubScheduleList != null) {
             SubScheduleInfo ssi = mSubScheduleList.get(0);
             ArrayList<String> list = ssi.getAddress();
-            System.out.println("list" + list.get(0) + mSubScheduleList.size() + mSubScheduleList.get(0).getPlaceName());
+         //   System.out.println("list" + list.get(0) + mSubScheduleList.size() + mSubScheduleList.get(0).getPlaceName());
         }
         
         if (firstDay != null) {
-            System.out.println("first day" + firstDay);
+         //   System.out.println("first day" + firstDay);
         }
         
         if (lastDay != null) {
-            System.out.println("last" + lastDay);
+         //   System.out.println("last" + lastDay);
             mTitleText = firstDay + " ~ " + lastDay;
         }
     
