@@ -6,6 +6,9 @@
 //import androidx.recyclerview.widget.ItemTouchHelper;
 //import androidx.recyclerview.widget.RecyclerView;
 //
+/** Recyclerview drag to move & swipe to delete
+ * use when it need
+ */
 //public class ScheduleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 //  //  Context mContext;
 //    ScheduleBSAdapter mAdapter;

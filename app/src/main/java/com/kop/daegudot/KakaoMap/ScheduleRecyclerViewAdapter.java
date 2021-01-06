@@ -51,7 +51,7 @@ public class ScheduleRecyclerViewAdapter
                         public void onClick(DialogInterface dialog, int which) {
                             mNthSchedule.remove(getAdapterPosition());
                             notifyItemRemoved(getAdapterPosition());
-                    
+                            
                             // TODO: DB에서 데이터 삭제하기
                             
                             itemView.invalidate();

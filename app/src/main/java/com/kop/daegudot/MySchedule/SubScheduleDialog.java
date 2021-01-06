@@ -2,6 +2,7 @@ package com.kop.daegudot.MySchedule;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -9,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,7 +25,6 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
     private Context mContext;
     private RecyclerView recyclerView;
     private SubScheduleAdapter adapter;
-    String firstDay, lastDay;
     Date[] date;
     MainScheduleInfo mMainScheduleInfo;
     
@@ -37,6 +38,7 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
         mMainScheduleInfo = mainScheduleInfo;
         this.dialogListener = dialogListener;
     }
+
     
     public interface SubScheduleDialogListener {
         void dialogEventListener();
@@ -52,9 +54,6 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
         
         
         setContentView(R.layout.itinerary_dialog);
-        
-        firstDay = mMainScheduleInfo.getmFirstDate();
-        lastDay = mMainScheduleInfo.getmLastDate();
         
         TextView dialogTitle = findViewById(R.id.dialogTitle);
         String title = mMainScheduleInfo.getButtonString();
@@ -84,20 +83,39 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
             String dateText = i + 1 + "일차 - " + dateArray[i].format(formatter);
             
             data.setDate(dateText);
-        
+            
             ArrayList<String> address = new ArrayList<>();
-        
-            address.add("대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n");
-            address.add("대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n");
-            
             ArrayList<String> attract = new ArrayList<>();
-            attract.add("더락");
-            attract.add("중앙떡볶이");
             
+            if (i == 0) {
+                address.add("대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n");
+                address.add("대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n");
+    
+                attract.add("더락");
+                attract.add("중앙떡볶이");
+            } else if (i == 1) {
+                address.add("대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n");
+                address.add("대구 수성구 무학로 151 라벨라쿠치나\n");
+                
+                attract.add("더락");
+                attract.add("라벨라쿠치나");
+            } else if (i == 2) {
+                address.add("대구 남구 대봉로 89 현짬뽕\n");
+                address.add("대구 수성구 동대구로 219 아웃백스테이크하우스\n");
+                address.add("대구 남구 현충로1길 16 앞산주택\n");
+                address.add("대구 수성구 수성못6길 10 2층 미즈컨테이너 수성점\n");
+                address.add("대구 남구 대명복개로 96 자환이네왕족발 본점\n");
+                
+                attract.add("현짬뽕");
+                attract.add("아웃백스테이크하우스");
+                attract.add("앞산주택");
+                attract.add("미즈컨테이너 수성점");
+                attract.add("지환이네\n왕족발 본점");
+            }
+    
             data.setAddress(address);
             data.setPlaceName(attract);
             
-        
             mSubScheduleList.add(data);
         }
         
@@ -112,5 +130,6 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
                 break;
         }
     }
+    
     
 }

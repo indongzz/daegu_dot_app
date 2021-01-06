@@ -1,6 +1,7 @@
 package com.kop.daegudot.MySchedule;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.KakaoMap.MapMainActivity;
@@ -21,7 +23,7 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
     private static MainScheduleInfo mMainSchedule;
     private static Context mContext;
     
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView nthDay;
         TextView detailAddress;
         
@@ -31,28 +33,25 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
             nthDay = itemView.findViewById(R.id.tv_nthDay);
             detailAddress = itemView.findViewById(R.id.tv_detail);
             
-            TextView.OnClickListener onClickListener = new TextView.OnClickListener() {
+            nthDay.setOnClickListener(this);
+            detailAddress.setOnClickListener(this);
+        }
+        
+        @Override
+        public void onClick(View v) {
+            int pos = getAdapterPosition();
     
-                @Override
-                public void onClick(View v) {
-                    int pos = getAdapterPosition();
-    
-                    if (pos != RecyclerView.NO_POSITION) {
-                        // 세부 일정 클릭하여 MapMainActivity로 넘어가기
-                        String whatDay = mSubScheduleList.get(pos).getDate();
-                        Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
-    
-                        Intent intent = new Intent(mContext, MapMainActivity.class);
-                        intent.putExtra("MainSchedule", mMainSchedule);
-                        intent.putParcelableArrayListExtra("SubScheduleList", mSubScheduleList);
-                        intent.putExtra("position", pos);
-                        mContext.startActivity(intent);
-                    }
-                }
-            };
-    
-            nthDay.setOnClickListener(onClickListener);
-            detailAddress.setOnClickListener(onClickListener);
+            if (pos != RecyclerView.NO_POSITION) {
+                // 세부 일정 클릭하여 MapMainActivity로 넘어가기
+                String whatDay = mSubScheduleList.get(pos).getDate();
+                Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
+        
+                Intent intent = new Intent(mContext, MapMainActivity.class);
+                intent.putExtra("MainSchedule", mMainSchedule);
+                intent.putParcelableArrayListExtra("SubScheduleList", mSubScheduleList);
+                intent.putExtra("position", pos);
+                mContext.startActivity(intent);
+            }
         }
         
     }

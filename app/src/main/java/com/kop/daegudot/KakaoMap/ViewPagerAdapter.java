@@ -2,11 +2,15 @@ package com.kop.daegudot.KakaoMap;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -26,11 +30,13 @@ import com.kop.daegudot.R;
 import java.util.ArrayList;
 
 public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.ViewHolder> {
+    private static final String TAG = "ViewPagerAdapter";
     static Context mContext;
     ArrayList<SubScheduleInfo> mSubScheduleList;
     
     RecyclerView mRecyclerView;
     MainScheduleInfo mMainSchedule;
+    ScheduleRecyclerViewAdapter adapter;
     
     ViewPagerAdapter(Context context, ArrayList<SubScheduleInfo> subScheduleList) {
         mContext = context;
@@ -55,6 +61,7 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
         @Override
         public void onClick(View v) {
             int position = getAdapterPosition();
+            Log.i(TAG, "onClick: " + position+" 여기 포지션");
             switch(v.getId()) {
                 case R.id.left_btn:
                     if (position > 0)
@@ -76,37 +83,53 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
         View view = inflater.inflate(R.layout.bottom_sheet_schedule, parent, false);
         ViewPagerAdapter.ViewHolder vh = new ViewPagerAdapter.ViewHolder(view);
     
+    
         mRecyclerView = view.findViewById(R.id.BSScheduleList);
+        mRecyclerView.getLayoutParams().width = 830;
         
-        LinearLayoutManager layoutManager =
-                new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false);
-        mRecyclerView.setLayoutManager(layoutManager);
+        // 자식 recyclerview 가 scroll 할 때 부모가 같이 scroll 하는 것을 방지
+        RecyclerView.OnItemTouchListener mScrollTouchListener =
+                new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                int action = e.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_MOVE:
+                        rv.getParent().requestDisallowInterceptTouchEvent(true);
+                        break;
+                }
+                return false;
+            }
+        
+            @Override
+            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+            
+            }
+        
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+            
+            }
+        };
     
-    
-        ScheduleRecyclerViewAdapter adapter =
-                new ScheduleRecyclerViewAdapter(mSubScheduleList.get(0).getPlaceName(), mContext);
-    
-        mRecyclerView.setAdapter(adapter);
-    
+        mRecyclerView.addOnItemTouchListener(mScrollTouchListener);
+        
         int[] ATTRS = new int[]{android.R.attr.listDivider};
-    
+
         TypedArray a = mContext.obtainStyledAttributes(ATTRS);
         Drawable divider = a.getDrawable(0);
         divider.setAlpha(0);
-        int inset = view.getResources().getDimensionPixelSize(R.dimen.recyclerView_margin);
+        int inset = 10;
         InsetDrawable insetDivider = new InsetDrawable(divider, inset, 0, inset, 0);
-        
+
         a.recycle();
-    
+
         DividerItemDecoration itemDecoration =
                 new DividerItemDecoration(mContext, DividerItemDecoration.HORIZONTAL);
         itemDecoration.setDrawable(insetDivider);
-        
+
         mRecyclerView.addItemDecoration(itemDecoration);
-    
-        
-//        float width = (float) 320 / mSubScheduleList.get(0).getPlaceName().size() - 2;
-//        mRecyclerView.addItemDecoration(new RecyclerViewDecoration(dpToPx(mContext, width)));
+       
         
         return vh;
     }
@@ -115,17 +138,31 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String text = (position + 1) + " 일차";
         holder.nthday.setText(text);
+        
+        Log.i(TAG, "position: " + position + " / " + text + "대체 뭐가 문제야??");
     
         if (position == 0) {
             holder.leftBtn.setBackgroundResource(R.drawable.blank_arrow_left);
             holder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
-        } else if (position == getItemCount() - 1) {
+        } else if (position == mSubScheduleList.size() - 1) {
             holder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
             holder.rightBtn.setBackgroundResource(R.drawable.blank_arrow_right);
         } else {
             holder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
             holder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
         }
+        
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false);
+        mRecyclerView.setLayoutManager(layoutManager);
+    
+    
+        adapter = new ScheduleRecyclerViewAdapter(mSubScheduleList.get(position).getPlaceName(), mContext);
+    
+        mRecyclerView.setAdapter(adapter);
+    
+    //    setRecyclerViewDivider();
+       
     }
     
     @Override
@@ -133,15 +170,21 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
         return mSubScheduleList.size();
     }
     
-    // change dp to pixel
-    public int dpToPx(Context context, float dp) {
-        return (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
-    }
+//    public void setRecyclerViewDivider() {
+//
+//        float width = (float) 320 / getItemCount();
+//        mRecyclerView.addItemDecoration(new RecyclerViewDecoration(dpToPx(mContext, width)));
+//    }
+    
+//    // change dp to pixel
+//    public int dpToPx(Context context, float dp) {
+//        return (int) TypedValue.applyDimension(
+//                TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+//    }
 }
 
 // RecyclerView 사이 간격 조절
-class RecyclerViewDecoration extends RecyclerView.ItemDecoration {
+//class RecyclerViewDecoration extends RecyclerView.ItemDecoration {
 //    private final int divWidth;
 //
 //    public RecyclerViewDecoration(int divWidth) {
@@ -157,5 +200,5 @@ class RecyclerViewDecoration extends RecyclerView.ItemDecoration {
 //            outRect.right = divWidth;
 //        }
 //    }
-
-}
+//
+//}
