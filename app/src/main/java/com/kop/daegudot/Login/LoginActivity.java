@@ -28,6 +28,15 @@ import com.kakao.usermgmt.LoginButton;
 import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
 import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.R;
+import com.kop.daegudot.network.RestApiService;
+import com.kop.daegudot.network.RestfulAdapter;
+
+import java.util.HashMap;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     // Google Login
@@ -42,7 +51,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     SharedPreferences pref ;
     public static SharedPreferences.Editor editor;
-
+    
+    // Register 객체
+    private static User user;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,10 +62,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         //   getHashKey();
 
+        user = new User();
+        
         pref = getSharedPreferences("data", MODE_PRIVATE);
         editor = pref.edit();
-
-        checkAlreadyLogin();
+    
+        // TODO: 자동로그인 활성화
+    //    checkAlreadyLogin();
 
         /* Google Sign In */
         findViewById(R.id.signin_google).setOnClickListener(this);
@@ -92,6 +107,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Log.d("checkAlreadyLogin", "Already Logged in");
         }
     }
+    
+    public static void setRegisterInfo(String email, String password, char type) {
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setType(type);
+    }
+    
+    public void testRx() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi();
+    
+        HashMap<String, Object> hashmap = new HashMap<String, Object> ();
+        Observable<Long> observable = service.postRegister(hashmap);
+        
+        /*
+        Disposable disposable = observable
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .
+        */
+    }
 
     // SignIn Clicked
     private void googleSignIn() {
@@ -121,7 +157,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
             firebaseAuthWithGoogle(account.getIdToken());
         }
         catch (ApiException e) {
@@ -146,6 +181,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             editor.putString("passwd", "google");
                             editor.putString("name", user.getDisplayName());
                             editor.commit();
+                            
+                            Log.i(TAG, "firebaseAuthWithGoogle email: " + user.getEmail());
+                            Log.i(TAG, "firebaseAuthWithGoogle name: " + user.getDisplayName());
+                            
+                            setRegisterInfo(user.getEmail(), "google", 'g');
 
                             updateUI(true);
                         } else {
