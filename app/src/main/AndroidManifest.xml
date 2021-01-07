@@ -19,6 +19,7 @@
         <activity android:name=".Login.EmailSignUpActivity" />
         <activity android:name=".Login.EmailLoginActivity" />
         <activity android:name=".Login.LoginActivity" />
+        <activity android:name=".Recommend.AddRecommendActivity" />
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
