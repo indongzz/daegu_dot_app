@@ -7,25 +7,40 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Range;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import android.widget.ListView;
 import android.widget.TextView;
+
+import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener;
+import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
+import com.applikeysolutions.cosmocalendar.utils.SelectionType;
+import com.applikeysolutions.cosmocalendar.view.CalendarView;
+
+import com.kop.daegudot.R;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.MainActivity;
-import com.kop.daegudot.R;
-
-import java.util.ArrayList;
-import java.util.Collections;
-
 
 public class MyScheduleFragment extends Fragment implements View.OnClickListener {
     View view;
     private ArrayList<MainScheduleInfo> mList = new ArrayList<>();
     private RecyclerView recyclerView;
     private MainScheduleAdapter adapter;
+
     
     public MyScheduleFragment() {
         // Required empty public constructor
@@ -45,7 +60,7 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
 
         TextView title = view.findViewById(R.id.title);
         title.setText("내 일정");
-        
+
         recyclerView = view.findViewById(R.id.dateList);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));

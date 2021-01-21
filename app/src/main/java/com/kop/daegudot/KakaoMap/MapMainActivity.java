@@ -8,6 +8,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -47,11 +48,11 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     ViewPager2 mViewPager;
     ViewPagerAdapter adapter;
     
-    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_main);
+
         View view = getWindow().getDecorView();
         
         mTitle = findViewById(R.id.title);
