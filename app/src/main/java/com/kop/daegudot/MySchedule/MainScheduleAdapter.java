@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +19,12 @@ import com.kop.daegudot.R;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
-    private static ArrayList<DateInfo> mDateList;
+public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapter.ViewHolder> {
+    private static ArrayList<MainScheduleInfo> mMainScheduleList;
     private static Context mContext;
     
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener, View.OnLongClickListener{
         Button button;
         
         ViewHolder(View itemView) {
@@ -38,16 +38,19 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             int pos = getAdapterPosition();
-            DateInfo dateInfo = mDateList.get(pos);
-            Toast.makeText(mContext, dateInfo.getTextString(), Toast.LENGTH_SHORT).show();
+            MainScheduleInfo mainScheduleInfo = mMainScheduleList.get(pos);
+            Toast.makeText(mContext, mainScheduleInfo.getDateString(), Toast.LENGTH_SHORT).show();
         
-            ItineraryDialog dialog = new ItineraryDialog(mContext, pos, mDateList, new ItineraryDialog.ItineraryDialogListener() {
+            
+            SubScheduleDialog dialog = new SubScheduleDialog(mContext, mainScheduleInfo,
+                    new SubScheduleDialog.SubScheduleDialogListener() {
                 @Override
                 public void dialogEventListener() {
                     deleteListItem();
                 }
             });
-            Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            Objects.requireNonNull(dialog.getWindow())
+                    .setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.setCanceledOnTouchOutside(true);
             dialog.setCancelable(true);
             dialog.show();
@@ -67,7 +70,7 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
             builder.setPositiveButton("예",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            mDateList.remove(getAdapterPosition());
+                            mMainScheduleList.remove(getAdapterPosition());
                             notifyItemRemoved(getAdapterPosition());
                             
                             // TODO: DB에서 데이터 삭제하기
@@ -83,14 +86,14 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
         }
     }
     
-    DateAdapter(Context context, ArrayList<DateInfo> list) {
+    MainScheduleAdapter(Context context, ArrayList<MainScheduleInfo> list) {
         mContext = context;
-        mDateList = list;
+        mMainScheduleList = list;
     }
     
     @NonNull
     @Override
-    public DateAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MainScheduleAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
         View view = inflater.inflate(R.layout.layout_datelist_item, parent, false);
@@ -100,13 +103,13 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ViewHolder> {
     
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String textDate = mDateList.get(position).getTextString();
+        String textDate = mMainScheduleList.get(position).getButtonString();
         holder.button.setText(textDate);
     }
     
     @Override
     public int getItemCount() {
-        return mDateList.size();
+        return mMainScheduleList.size();
     }
     
     

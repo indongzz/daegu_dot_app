@@ -1,5 +1,6 @@
 package com.kop.daegudot.MySchedule;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -12,23 +13,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.R;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 
 
 public class MyScheduleFragment extends Fragment implements View.OnClickListener {
     View view;
-    private ArrayList<DateInfo> mList = new ArrayList<>();
+    private ArrayList<MainScheduleInfo> mList = new ArrayList<>();
     private RecyclerView recyclerView;
-    private DateAdapter adapter;
+    private MainScheduleAdapter adapter;
     
     public MyScheduleFragment() {
         // Required empty public constructor
@@ -53,7 +50,7 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         
-        adapter = new DateAdapter(getContext(), mList);
+        adapter = new MainScheduleAdapter(getContext(), mList);
         recyclerView.setAdapter(adapter);
         
         Button addOther = view.findViewById(R.id.addOtherSBtn);
@@ -64,14 +61,14 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     
     private void prepareData() {
         // TODO: get date data from DB
-        DateInfo data = new DateInfo();
+        MainScheduleInfo data = new MainScheduleInfo();
         String firstdate = "20.11.14";
         String lastDate = "20.11.16";
         data.setmFirstDate(firstdate);
         data.setmLastDate(lastDate);
         data.setmDDate();
         
-        DateInfo data2 = new DateInfo();
+        MainScheduleInfo data2 = new MainScheduleInfo();
         String firstdate2 = "20.12.09";
         String lastDate2 = "20.12.16";
         data2.setmFirstDate(firstdate2);
@@ -99,4 +96,12 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
                 break;
         }
     }
+    
+//    public void ConvertToMapMainActivity() {
+//        Intent intent = new Intent(getContext(), MapMainActivity.class);
+//        intent.putExtra("firstDay", mFirstDay);
+//        intent.putExtra("lastDay", mLastDay);
+//
+//        startActivity(intent);
+//    }
 }

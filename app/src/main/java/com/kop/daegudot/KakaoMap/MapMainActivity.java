@@ -1,19 +1,20 @@
 package com.kop.daegudot.KakaoMap;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.widget.NestedScrollView;
+import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.TypedValue;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.kop.daegudot.MySchedule.MainScheduleInfo;
+import com.kop.daegudot.MySchedule.SubScheduleInfo;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -22,26 +23,39 @@ import net.daum.mf.map.api.MapView;
 
 import java.util.ArrayList;
 
-public class MapMainActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener {
-    private static final String LOG_TAG = "MapMainActivity";
+public class MapMainActivity extends AppCompatActivity implements MapView.MapViewEventListener,
+        MapView.POIItemEventListener, View.OnClickListener {
+    private static final String TAG = "MapMainActivity";
     private MapView mMapView;
-    Button[] mCategory;
-    Button[] mHashTag;
-    Button mToggleBtn;
+    
+    TextView mTitle;    // default = 장소 검색
     ImageButton mBackBtn;
-    int flag = 1;
+    
+    MapMarkerItems mMapMarkerItems;     // set map markerItems
+    MapUIControl mMapUIControl;         // to control category and hash tag button
+    
+    // get Main and sub schedule list from previous activity
+    MainScheduleInfo mMainSchedule;
+    ArrayList<SubScheduleInfo> mSubScheduleList;
+    int position = 0; // default = first page
     
     ArrayList<MarkerInfo> mMarkerItems;
     private BottomSheetBehavior mBSBPlace;
     PlaceBottomSheet placeBottomSheet;
+    private BottomSheetBehavior mBSBSchedule;
+//    ScheduleBottomSheet scheduleBottomSheet;
+    ViewPager2 mViewPager;
+    ViewPagerAdapter adapter;
+    
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_main);
+        View view = getWindow().getDecorView();
         
-        TextView title = findViewById(R.id.title);
-        title.setText("장소 검색");
+        mTitle = findViewById(R.id.title);
+        mTitle.setText("장소 검색");
         
         mMapView = findViewById(R.id.map_view);
     
@@ -52,126 +66,97 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
         mBackBtn = findViewById(R.id.backBtn);
         mBackBtn.setOnClickListener(this);
-        mToggleBtn = findViewById(R.id.toggle_btn);
-        mToggleBtn.setOnClickListener(this);
         
-        setCategoryBtn();
-        setHashBtn();
-    
-        String[] address = {
-                "대구광역시 중구 남산로 4길 112",
-                "대구광역시 중구 서성로 6-1",
-                "대구광역시 동구동화사 1길 1",
-                "대구광역시 중구 국채보상로 670",
-                "대구광역시 중구 동성로 2길 80"
-        };
-        String[] attractname = { "성모당", "서상돈 고택", "동화사 보사계 유공비", "국채보상운동기념공원", "2.28기념중앙공원" };
-        String[] tel = {
-                "053-250-3000", "053-256-3762",
-                "53-982-0101-2", "053-254-9401",
-                "053-254-9405"
-        };
+        // Set Hash Tag button and Category button
+        mMapUIControl = new MapUIControl(this, view);
+        mMapUIControl.setCategoryBtn();
+        mMapUIControl.setHashBtn();
         
-        // 나중에 data read후에 markerinfo에 담기
-         mMarkerItems = new ArrayList<>();
+        // Set MarkerItems
+        mMapMarkerItems = new MapMarkerItems(this, mMapView);
+        mMapMarkerItems.setMarkerItems();
+        mMarkerItems = mMapMarkerItems.getMarkerItems();
         
-        for (int i = 0; i < 5; i++) {
-            MarkerInfo markerItem = new MarkerInfo(this);
-            markerItem.setAddress(address[i]);
-            markerItem.setName(attractname[i]);
-            markerItem.setTel(tel[i]);
-            markerItem.setRate((float) (i+0.5));
-            markerItem.setLike(false);
-            mMarkerItems.add(markerItem);
-        }
+        getSchedule();
         
-        for (int i = 0; i< 5; i++) {
-            MapPOIItem marker = new MapPOIItem();
-            marker.setItemName(mMarkerItems.get(i).getName());
-            marker.setTag(i);
-            marker.setMapPoint(mMarkerItems.get(i).getAddressPoint());
-            marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-            marker.setCustomImageResourceId(R.drawable.blue_pin);
-            marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-            marker.setCustomImageAnchor(0.5f, 1.0f);
-            marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
-            marker.setShowCalloutBalloonOnTouch(false);
-            mMapView.addPOIItem(marker);
-        }
+        placeBottomSheet =
+                new PlaceBottomSheet(this, mMarkerItems, mMainSchedule, mSubScheduleList);
         
-        placeBottomSheet = new PlaceBottomSheet(this, mMarkerItems);
-        
-        CoordinatorLayout lBottomSheet = (CoordinatorLayout) findViewById(R.id.bottomSheet);
-        mBSBPlace = BottomSheetBehavior.from(lBottomSheet);
+        CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
+        mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
         
-        mBSBPlace.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+//        mBSBPlace.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+//            @Override
+//            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+//
+//            }
+//
+//            @Override
+//            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+//
+//            }
+//        });
         
-            }
-    
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+        mViewPager = findViewById(R.id.viewPager);
+        adapter = new ViewPagerAdapter(this, mSubScheduleList);
+        mViewPager.setAdapter(adapter);
+        mViewPager.setNestedScrollingEnabled(false);
         
-            }
-        });
+        
+//        scheduleBottomSheet = new ScheduleBottomSheet(this, mMainSchedule, mSubScheduleList);
+        NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
+        mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
+        
+        // move to n일차
+        mViewPager.setCurrentItem(position);
     }
     
-    public void setCategoryBtn() {
-        int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
-        int margin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
+    public void adapterChange(int position) {
+        Log.i(TAG, "adapterchange: " + "position: " + position);
+        adapter.adapter.notifyItemChanged(position);
+    }
     
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, height);
-        params.setMargins(margin, 0, margin, 0);
+    public void getSchedule() {
+        Intent intent = getIntent();
+        mMainSchedule = intent.getParcelableExtra("MainSchedule");
+        mSubScheduleList = intent.getParcelableArrayListExtra("SubScheduleList");
+        position = intent.getIntExtra("position", 0);
     
-        LinearLayout layout = findViewById(R.id.linear_layout);
-        String[] catString = {"카테고리1", "카테고리2", "카테고리3", "카테고리4", "카테고리5"};
-        int size = catString.length;
+        mMainSchedule.getDateBetween();
+        String titleString = null;
     
-        mCategory = new Button[size];
+        
+        if (mMainSchedule != null) {
+            //   System.out.println(mMainSchedule.getmFirstDate());
+            titleString = mMainSchedule.getDateString();
+        }
     
-        for (int i = 0; i < size; i++) {
-            mCategory[i] = new Button(this);
-            mCategory[i].setText(catString[i]);
-            mCategory[i].setTextSize(12);
-            mCategory[i].setLayoutParams(params);
-            mCategory[i].setPadding(1, 1, 1, 1);
-            mCategory[i].setBackground(getDrawable(R.drawable.round_line_btn));
-            layout.addView(mCategory[i]);
+        if (mSubScheduleList != null) {
+            SubScheduleInfo ssi = mSubScheduleList.get(0);
+            //  ArrayList<String> list = ssi.getAddress();
+            //   System.out.println("list" + list.get(0) + mSubScheduleList.size() + mSubScheduleList.get(0).getPlaceName());
+        }
+    
+        mTitle.setText(titleString);
+    }
+    
+    // click event
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.backBtn:
+                finish();
+                break;
         }
     }
     
-    public void setHashBtn() {
-        int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
-        int margin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
-        
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, height);
-        params.setMargins(margin, 0, margin, 0);
-        
-        LinearLayout layout = findViewById(R.id.linear_layout);
-        String[] catString = {"해시태그1", "해시태그2", "해시태그3", "해시태그4", "해시태그5"};
-        int size = catString.length;
-        
-        mHashTag = new Button[size];
-        
-        for (int i = 0; i < size; i++) {
-            mHashTag[i] = new Button(this);
-            mHashTag[i].setText(catString[i]);
-            mHashTag[i].setTextSize(12);
-            mHashTag[i].setLayoutParams(params);
-            mHashTag[i].setPadding(1, 1, 1, 1);
-            mHashTag[i].setBackground(getDrawable(R.drawable.round_line_btn));
-            layout.addView(mHashTag[i]);
-            
-            mHashTag[i].setVisibility(View.GONE);
-        }
-    }
-    
+    // marker POIItem click event
     @Override
     public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
         placeBottomSheet.changePlaceBottomSheet(mapPOIItem.getTag());
         mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
+        mBSBSchedule.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
     
     @Override
@@ -189,37 +174,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     }
     
-    
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.toggle_btn:
-                if (flag == 1) {
-                    for (Button button : mCategory) {
-                        button.setVisibility(View.GONE);
-                    }
-                    for (Button button : mHashTag) {
-                        button.setVisibility(View.VISIBLE);
-                    }
-                    mToggleBtn.setText("카테고리");
-                    flag = 0;
-                } else {
-                    for (Button button : mCategory) {
-                        button.setVisibility(View.VISIBLE);
-                    }
-                    for (Button button : mHashTag) {
-                        button.setVisibility(View.GONE);
-                    }
-                    mToggleBtn.setText("#해시태그");
-                    flag = 1;
-                }
-                break;
-            case R.id.backBtn:
-                finish();
-                break;
-        }
-    }
-    
+    // MapView Click event
     @Override
     public void onMapViewInitialized(MapView mapView) {
     
@@ -238,6 +193,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     @Override
     public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
+        mBSBSchedule.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
     
     @Override
