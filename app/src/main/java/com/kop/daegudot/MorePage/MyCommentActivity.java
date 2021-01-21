@@ -27,7 +27,7 @@ public class MyCommentActivity extends AppCompatActivity {
         this.mContext = getApplicationContext();
 
         prepareMenu();
-        
+
         // TODO: 뒤로가기 버튼 구현 필요
         TextView title = findViewById(R.id.title);
         title.setText("내가 쓴 댓글");
