@@ -19,6 +19,10 @@ import com.applikeysolutions.cosmocalendar.view.CalendarView;
 import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.R;
 
+import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.MySchedule.MyScheduleFragment;
+import com.kop.daegudot.R;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
@@ -27,14 +31,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class AddScheduleFragment extends Fragment {
+public class AddScheduleFragment extends Fragment implements View.OnClickListener {
     View view;
     CalendarView mCalendar;
     Button mCalendarBtn;
     String mStartDate;
     String mEndDate;
-    int flag = 1;
-
+     int flag = 1;
 
     public AddScheduleFragment() {
         // Required empty public constructor
@@ -58,8 +61,10 @@ public class AddScheduleFragment extends Fragment {
         mCalendar = view.findViewById(R.id.calendar);
         mCalendarBtn = view.findViewById(R.id.calendarBtn);
 
+        mCalendarBtn.setOnClickListener(this);
+
         mCalendar.setSelectionType(SelectionType.RANGE);
-        
+
         mCalendar.setSelectionManager(new RangeSelectionManager(new OnDaySelectedListener() {
             @Override
             public void onDaySelected() {
@@ -70,12 +75,16 @@ public class AddScheduleFragment extends Fragment {
                 int startMonth = startCal.get(Calendar.MONTH);
                 int startYear = startCal.get(Calendar.YEAR);
                 String startDate = (startMonth + 1) + "월" + startDay + "일";
+              
+                mFirstDay = startYear + "." + (startMonth + 1) + "." + startDay;
 
                 Calendar endCal = days.get(days.size() - 1);
                 int endDay = endCal.get(Calendar.DAY_OF_MONTH);
                 int endMonth = endCal.get(Calendar.MONTH);
                 int endYear = endCal.get(Calendar.YEAR);
                 String endDate = (endMonth + 1) + "월" + endDay + "일";
+
+                mLastDay = endYear + "." + (endMonth + 1) + "." + endDay;
 
                 String text = null;
                 if (startDate.equals(endDate)) {
@@ -89,7 +98,7 @@ public class AddScheduleFragment extends Fragment {
                     flag = 1;
                 else flag = 0;
                 
-                mStartDate = startDate;
+              Date = startDate;
                 mEndDate = endDate;
              }
         }));
@@ -109,5 +118,15 @@ public class AddScheduleFragment extends Fragment {
         });
 
          return view;
+    }
+
+    
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.calendarBtn:
+                // TODO: DB에 MainSchedule 추가
+                ((MainActivity)getActivity()).changeFragment(1, 0);
+        }
     }
 }

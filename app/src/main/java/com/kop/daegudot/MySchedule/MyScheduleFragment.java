@@ -1,5 +1,6 @@
 package com.kop.daegudot.MySchedule;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -11,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -30,12 +32,15 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.MainActivity;
 
-public class MyScheduleFragment extends Fragment {
+public class MyScheduleFragment extends Fragment implements View.OnClickListener {
     View view;
-    private ArrayList<DateInfo> mList = new ArrayList<>();
+    private ArrayList<MainScheduleInfo> mList = new ArrayList<>();
     private RecyclerView recyclerView;
-    private DateAdapter adapter;
+    private MainScheduleAdapter adapter;
+
     
     public MyScheduleFragment() {
         // Required empty public constructor
@@ -44,6 +49,7 @@ public class MyScheduleFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        prepareData();
     }
 
     @Override
@@ -54,65 +60,63 @@ public class MyScheduleFragment extends Fragment {
 
         TextView title = view.findViewById(R.id.title);
         title.setText("내 일정");
-        
-        // TODO: get date data from DB
-        DateInfo data = new DateInfo();
-        String firstdate = "20.11.14";
-        String lastDate = "20.11.16";
-        data.setFirstDate(firstdate);
-        data.setLastDate(lastDate);
-        data.setdDate(getDDay(firstdate, lastDate));
-    
-    
-        DateInfo data2 = new DateInfo();
-        String firstdate2 = "20.10.14";
-        String lastDate2 = "20.10.16";
-        data2.setFirstDate(firstdate2);
-        data2.setLastDate(lastDate2);
-        data2.setdDate(getDDay(firstdate2, lastDate2));
-    
-        mList.add(data);
-        mList.add(data2);
-        
-        Collections.sort(mList, new Comparator<DateInfo>() {
-            @Override
-            public int compare(DateInfo o1, DateInfo o2) {
-                return o1.getdDate().compareTo(o2.getdDate());
-            }
-        });
-        
-        
-        
+
         recyclerView = view.findViewById(R.id.dateList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         
-        adapter = new DateAdapter(getContext(), mList);
+        adapter = new MainScheduleAdapter(getContext(), mList);
         recyclerView.setAdapter(adapter);
         
-        
-    //    adapter.notifyDataSetChanged();
-        
+        Button addOther = view.findViewById(R.id.addOtherSBtn);
+        addOther.setOnClickListener(this);
+    
         return view;
     }
     
-    public String getDDay(String first, String last) {
-        String format = "yy.MM.dd";
-        String dday = null;
-    
-        SimpleDateFormat dateFormat = new SimpleDateFormat(format);
-        try {
-            Date startDate = dateFormat.parse(first);
-            System.out.println(startDate);
-            Date today = Calendar.getInstance().getTime();
-            System.out.println(today);
-            long diff = (startDate.getTime() - today.getTime()) / (24 * 60 * 60 * 1000);
-            System.out.println(diff + "일");
-            dday = String.valueOf(diff);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+    private void prepareData() {
+        // TODO: get date data from DB
+        MainScheduleInfo data = new MainScheduleInfo();
+        String firstdate = "20.11.14";
+        String lastDate = "20.11.16";
+        data.setmFirstDate(firstdate);
+        data.setmLastDate(lastDate);
+        data.setmDDate();
         
-        return dday;
-    }
+        MainScheduleInfo data2 = new MainScheduleInfo();
+        String firstdate2 = "20.12.09";
+        String lastDate2 = "20.12.16";
+        data2.setmFirstDate(firstdate2);
+        data2.setmLastDate(lastDate2);
+        data2.setmDDate();
 
+        mList.add(data);
+        mList.add(data2);
+    
+        Collections.sort(mList);
+    }
+    
+    
+    public void refresh() {
+        // 데이터 추가 시 갱신
+        // adapter.notifyDataSetChanged();
+    }
+    
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.addOtherSBtn:
+                // 0 = MyScheduleFragment, 1 = AddScheduleFragment
+                ((MainActivity)getActivity()).changeFragment(0, 1);
+                break;
+        }
+    }
+    
+//    public void ConvertToMapMainActivity() {
+//        Intent intent = new Intent(getContext(), MapMainActivity.class);
+//        intent.putExtra("firstDay", mFirstDay);
+//        intent.putExtra("lastDay", mLastDay);
+//
+//        startActivity(intent);
+//    }
 }

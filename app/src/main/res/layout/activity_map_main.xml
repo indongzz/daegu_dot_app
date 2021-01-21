@@ -6,9 +6,95 @@
     android:layout_height="match_parent"
     tools:context=".KakaoMap.MapMainActivity">
 
+
+    <include
+        layout="@layout/layout_top_title"
+        android:id="@+id/top_title"
+        />
+
     <net.daum.mf.map.api.MapView
         android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
+
+        android:layout_below="@id/top_title"
+        android:layout_marginTop="73dp" />
+
+    <androidx.appcompat.widget.SearchView
+       android:id="@+id/search_view"
+       android:layout_width="350dp"
+       android:layout_height="40dp"
+       android:layout_centerHorizontal="true"
+       android:layout_below="@id/top_title"
+       android:background="@drawable/search_layout"
+       android:layout_marginTop="10dp"
+       app:queryHint="검색 지역을 입력하세요"
+       />
+
+    <HorizontalScrollView
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search_view"
+        android:layout_marginVertical="10dp"
+        android:layout_marginStart="10dp">
+
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/linear_layout"
+            android:orientation="horizontal">
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <Button
+        android:id="@+id/toggle_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:text="#해시태그"
+        android:theme="@style/tagStyle2"
+        android:background="@drawable/btn_blue"
+        android:layout_below="@id/search_view"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginVertical="10dp"
+        />
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        >
+        <include
+            layout="@layout/bottom_sheet_place"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            app:behavior_peekHeight="210dp"
+            app:behavior_hideable="true"
+            />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            app:behavior_peekHeight="210dp"
+            app:behavior_hideable="true"
+            >
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                >
+            </androidx.viewpager2.widget.ViewPager2>
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 </RelativeLayout>
