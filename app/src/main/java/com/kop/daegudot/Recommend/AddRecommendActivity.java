@@ -19,11 +19,15 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
     private static final String TAG = "AddRecommendActivity";
     
     ImageButton backBtn;
+    Button mAddMyScheduleBtn;
     EditText mRecommendTitle;
     EditText mRecommendContent;
     ChipGroup mChipGroup;
     RatingBar mRatingBar;
     Button mConfirmBtn;
+    
+    // TODO: 해시태그 리스트 변경
+    String[] hashs = {"해시태그1", "해시태그2", "해시태그3", "해시태그4"};
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +39,9 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         backBtn = findViewById(R.id.backBtn);
         backBtn.setOnClickListener(this);
         
+        // View 설정
+        mAddMyScheduleBtn = findViewById(R.id.add_mysch_btn);
+        mAddMyScheduleBtn.setOnClickListener(this);
         mRecommendTitle = findViewById(R.id.et_title);
         mRecommendContent = findViewById(R.id.et_content);
         mRatingBar = findViewById(R.id.rating_bar);
@@ -44,21 +51,18 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         setChipGroup();
     }
     
-    public void setChipGroup() {
+    public void setChipGroup() {    // 여러 개 선택할 수 있는 chip group
         mChipGroup = findViewById(R.id.chip_group);
         
-        String[] hashs = {"해시태그1", "해시태그2", "해시태그3", "해시태그4"};
         Chip[] chips = new Chip[hashs.length];
         
         for(int i = 0; i < hashs.length; i++) {
-            chips[i] = (Chip)getLayoutInflater().inflate(R.layout.layout_chip_choice, mChipGroup, false);
+            chips[i] = (Chip)getLayoutInflater()
+                    .inflate(R.layout.layout_chip_choice, mChipGroup, false);
             chips[i].setText(hashs[i]);
             
             mChipGroup.addView(chips[i]);
         }
-        
-        mChipGroup.setSingleSelection(true);
-        
     }
     
     @Override
@@ -67,9 +71,13 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
             case R.id.backBtn:
                 finish();
                 break;
+            case R.id.add_mysch_btn:
+                // TODO: 내 일정 list 가져와서 선택하기
+                
+                break;
             case R.id.confirm_btn:
                 // TODO: 버튼 확인 후 내용 모두 저장
-                Log.i(TAG, "chip group id: " + mChipGroup.getCheckedChipId());
+                Log.i(TAG, "chip group id: " + mChipGroup.getCheckedChipIds());
                 Log.i(TAG, "rating bar" + mRatingBar.getRating());
                 
                 finish();
