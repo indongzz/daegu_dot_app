@@ -22,6 +22,8 @@ import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class MapMainActivity extends AppCompatActivity implements MapView.MapViewEventListener,
@@ -44,7 +46,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     private BottomSheetBehavior mBSBPlace;
     PlaceBottomSheet placeBottomSheet;
     private BottomSheetBehavior mBSBSchedule;
-//    ScheduleBottomSheet scheduleBottomSheet;
+    //    ScheduleBottomSheet scheduleBottomSheet;
     ViewPager2 mViewPager;
     ViewPagerAdapter adapter;
     
@@ -52,19 +54,19 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_main);
-
+        
         View view = getWindow().getDecorView();
         
         mTitle = findViewById(R.id.title);
         mTitle.setText("장소 검색");
         
         mMapView = findViewById(R.id.map_view);
-    
+        
         mMapView.setPOIItemEventListener(this);
         mMapView.setMapViewEventListener(this);
         mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(35.871344, 128.601705), true);
         mMapView.setZoomLevel(6, true);
-    
+        
         mBackBtn = findViewById(R.id.backBtn);
         mBackBtn.setOnClickListener(this);
         
@@ -78,6 +80,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mMapMarkerItems.setMarkerItems();
         mMarkerItems = mMapMarkerItems.getMarkerItems();
         
+        // TODO: get Schedule from DB or add Schedule
         getSchedule();
         
         placeBottomSheet =
@@ -86,7 +89,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
         mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
-        
+
 //        mBSBPlace.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
 //            @Override
 //            public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -103,8 +106,8 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         adapter = new ViewPagerAdapter(this, mSubScheduleList);
         mViewPager.setAdapter(adapter);
         mViewPager.setNestedScrollingEnabled(false);
-        
-        
+
+
 //        scheduleBottomSheet = new ScheduleBottomSheet(this, mMainSchedule, mSubScheduleList);
         NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
@@ -113,32 +116,64 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mViewPager.setCurrentItem(position);
     }
     
-    public void adapterChange(int position) {
+    public void adapterChange(int position, int tag) {
+        ArrayList<String> placeName;
+        ArrayList<String> address;
+        
+        placeName = mSubScheduleList.get(position).getPlaceName();
+        address = mSubScheduleList.get(position).getAddress();
+        placeName.add(mMarkerItems.get(tag).getName());
+        address.add(mMarkerItems.get(tag).getAddress());
+        
+        mSubScheduleList.get(position).setAddress(address);
+        mSubScheduleList.get(position).setPlaceName(placeName);
+        
         Log.i(TAG, "adapterchange: " + "position: " + position);
         adapter.adapter.notifyItemChanged(position);
     }
     
     public void getSchedule() {
         Intent intent = getIntent();
+        // 홈에서 mainschedule 눌러서 접근 시
         mMainSchedule = intent.getParcelableExtra("MainSchedule");
         mSubScheduleList = intent.getParcelableArrayListExtra("SubScheduleList");
         position = intent.getIntExtra("position", 0);
-    
-        mMainSchedule.getDateBetween();
-        String titleString = null;
-    
+        // 일정 추가 할 때
+        String addStartDay = intent.getStringExtra("startDay");
+        String addEndDay = intent.getStringExtra("endDay");
+        
         
         if (mMainSchedule != null) {
-            //   System.out.println(mMainSchedule.getmFirstDate());
-            titleString = mMainSchedule.getDateString();
+            Log.i(TAG, "mMainSchedule: " + mMainSchedule);
+            mMainSchedule.getDateBetween();
+        } else {
+            Log.i(TAG, "mMainSchedule is null add new MainSchedule");
+            mMainSchedule = new MainScheduleInfo();
+            mMainSchedule.setmFirstDate(addStartDay);
+            mMainSchedule.setmLastDate(addEndDay);
+            mMainSchedule.setmDDate();
+            
+            mSubScheduleList = new ArrayList<>();
+            for (int i = 0; i < mMainSchedule.getDateBetween(); i++) {
+                SubScheduleInfo data = new SubScheduleInfo();
+                LocalDate[] dateArray = mMainSchedule.getDateArray();
+                String dateText = i + 1 + "일차 - "
+                        + dateArray[i].format(DateTimeFormatter.ofPattern("MM/dd"));
+                
+                data.setDate(dateText);
+                
+                ArrayList<String> address = new ArrayList<>();
+                ArrayList<String> attract = new ArrayList<>();
+                
+                data.setAddress(address);
+                data.setPlaceName(attract);
+                
+                mSubScheduleList.add(data);
+            }
         }
-    
-        if (mSubScheduleList != null) {
-            SubScheduleInfo ssi = mSubScheduleList.get(0);
-            //  ArrayList<String> list = ssi.getAddress();
-            //   System.out.println("list" + list.get(0) + mSubScheduleList.size() + mSubScheduleList.get(0).getPlaceName());
-        }
-    
+        
+        String titleString = mMainSchedule.getDateString();
+        
         mTitle.setText(titleString);
     }
     

@@ -84,7 +84,6 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     }
     
     public void addToSubscheduleList() {
-        final MarkerInfo markerInfo = mMarkerList.get(mTag);
         
         int days = mMainSchedule.getDateBetween(); // mSubSchedule.size()
         final String[] list = new String[days];
@@ -106,25 +105,12 @@ public class PlaceBottomSheet implements Button.OnClickListener {
                 .setPositiveButton("선택", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // TODO: add to Subschedule list
                         int position = checkedItem[0];
-                        
+        
                         Log.i(TAG, "선택한 날짜 position: " + position);
-                        SubScheduleInfo subScheduleInfo = mSubScheduleList.get(position);
                         
-                        //place name
-                        ArrayList<String> placeName = subScheduleInfo.getPlaceName();
-                        placeName.add(markerInfo.getName());
-                        
-                        //place address
-                        ArrayList<String> address = subScheduleInfo.getAddress();
-                        address.add(markerInfo.getAddress());
-                        
-                        Log.i("PlaceBottomSheet", mSubScheduleList.get(position).getDate());
-                        mSubScheduleList.get(position).setAddress(address);
-                        mSubScheduleList.get(position).setPlaceName(placeName);
-                        
-                        ((MapMainActivity)mContext).adapterChange(position);
+                        // position으로 선택한 날짜를, tag로 marker를 알 수 있게 함
+                        ((MapMainActivity)mContext).adapterChange(position, mTag);
                         
                         dialog.dismiss();
                     }

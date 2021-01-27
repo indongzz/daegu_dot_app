@@ -1,4 +1,9 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+ext {
+    key0 = 'key0'
+    daegu_dot = 'daegu_dot'
+    snsaccount = 'C:\\Users\\user\\Documents\\SM_Project\\snsaccount.jks'
+    var = key0
+}// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
     repositories {

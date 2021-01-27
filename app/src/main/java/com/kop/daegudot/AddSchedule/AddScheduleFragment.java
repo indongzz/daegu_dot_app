@@ -2,15 +2,16 @@ package com.kop.daegudot.AddSchedule;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
-import com.applikeysolutions.cosmocalendar.settings.lists.DisabledDaysCriteria;
 import com.applikeysolutions.cosmocalendar.utils.*;
 import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener;
 import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
@@ -20,23 +21,20 @@ import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.R;
 
 import com.kop.daegudot.MainActivity;
-import com.kop.daegudot.MySchedule.MyScheduleFragment;
-import com.kop.daegudot.R;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalField;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class AddScheduleFragment extends Fragment implements View.OnClickListener {
+    final static private String TAG = "AddScheduleFragment";
     View view;
     CalendarView mCalendar;
     Button mCalendarBtn;
-    String mStartDate;
-    String mEndDate;
+    String mStartDate, mEndDate;
+    String mBtnDay1, mBtnDay2;
      int flag = 1;
 
     public AddScheduleFragment() {
@@ -71,35 +69,32 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                 List<Calendar> days = mCalendar.getSelectedDates();
 
                 Calendar startCal = days.get(0);
-                int startDay = startCal.get(Calendar.DAY_OF_MONTH);
-                int startMonth = startCal.get(Calendar.MONTH);
-                int startYear = startCal.get(Calendar.YEAR);
-                String startDate = (startMonth + 1) + "월" + startDay + "일";
-              
-                mFirstDay = startYear + "." + (startMonth + 1) + "." + startDay;
-
+                LocalDate localStart = LocalDateTime.ofInstant(
+                        startCal.toInstant(), startCal.getTimeZone().toZoneId()).toLocalDate();
+                        
+                mBtnDay1 = localStart.format(DateTimeFormatter.ofPattern("M월d일"));
+                mStartDate = localStart.format(DateTimeFormatter.ofPattern("yy.MM.dd"));
+                Log.i(TAG, "mStartDate: " + mStartDate + "mbtnday1: " + mBtnDay1);
+                
                 Calendar endCal = days.get(days.size() - 1);
-                int endDay = endCal.get(Calendar.DAY_OF_MONTH);
-                int endMonth = endCal.get(Calendar.MONTH);
-                int endYear = endCal.get(Calendar.YEAR);
-                String endDate = (endMonth + 1) + "월" + endDay + "일";
+                LocalDate localEnd = LocalDateTime.ofInstant(
+                        endCal.toInstant(), endCal.getTimeZone().toZoneId()).toLocalDate();
 
-                mLastDay = endYear + "." + (endMonth + 1) + "." + endDay;
+                mBtnDay2 = localEnd.format(DateTimeFormatter.ofPattern("M월d일"));
+                mEndDate = localEnd.format(DateTimeFormatter.ofPattern("yy.MM.dd"));
 
                 String text = null;
-                if (startDate.equals(endDate)) {
-                    text = startDate + " - ";
+                if (mBtnDay1.equals(mBtnDay2)) {
+                    text = mBtnDay1 + " - ";
                 } else {
-                    text = startDate + " - " + endDate;
+                    text = mBtnDay1 + " - " + mBtnDay2;
                 }
                 mCalendarBtn.setText(text);
                 
                 if (text.length() > 10)
                     flag = 1;
                 else flag = 0;
-                
-              Date = startDate;
-                mEndDate = endDate;
+    
              }
         }));
         
@@ -113,6 +108,9 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                     intent.putExtra("startDay", mStartDate);
                     intent.putExtra("endDay", mEndDate);
                     startActivity(intent);
+                    flag = 0;
+                } else {
+                    Toast.makeText(getContext(), "날짜를 선택해주세요", Toast.LENGTH_SHORT).show();
                 }
             }
         });
