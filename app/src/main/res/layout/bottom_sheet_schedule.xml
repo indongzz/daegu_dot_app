@@ -46,7 +46,7 @@
 
         <View
             android:id="@+id/line"
-            android:layout_width="300dp"
+            android:layout_width="0dp"
             android:layout_height="2dp"
             android:background="@color/dimmedBlue"
             app:layout_constraintTop_toTopOf="parent"

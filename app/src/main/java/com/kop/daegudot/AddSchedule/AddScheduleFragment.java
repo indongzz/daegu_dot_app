@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -80,7 +81,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                         endCal.toInstant(), endCal.getTimeZone().toZoneId()).toLocalDate();
 
                 mBtnDay2 = localEnd.format(DateTimeFormatter.ofPattern("M월d일"));
-                mEndDate = localStart.format(DateTimeFormatter.ofPattern("yy.MM.dd"));
+                mEndDate = localEnd.format(DateTimeFormatter.ofPattern("yy.MM.dd"));
 
                 String text = null;
                 if (mBtnDay1.equals(mBtnDay2)) {
@@ -107,6 +108,9 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                     intent.putExtra("startDay", mStartDate);
                     intent.putExtra("endDay", mEndDate);
                     startActivity(intent);
+                    flag = 0;
+                } else {
+                    Toast.makeText(getContext(), "날짜를 선택해주세요", Toast.LENGTH_SHORT).show();
                 }
             }
         });
