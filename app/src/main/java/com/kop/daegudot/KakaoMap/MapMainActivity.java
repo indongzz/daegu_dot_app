@@ -120,24 +120,30 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     public void getSchedule() {
         Intent intent = getIntent();
+        // 홈에서 mainschedule 눌러서 접근 시
         mMainSchedule = intent.getParcelableExtra("MainSchedule");
         mSubScheduleList = intent.getParcelableArrayListExtra("SubScheduleList");
         position = intent.getIntExtra("position", 0);
-    
-        mMainSchedule.getDateBetween();
-        String titleString = null;
-    
+        // 일정 추가 할 때
+        String addStartDay = intent.getStringExtra("startDay");
+        String addEndDay = intent.getStringExtra("endDay");
+        
         
         if (mMainSchedule != null) {
-            //   System.out.println(mMainSchedule.getmFirstDate());
-            titleString = mMainSchedule.getDateString();
+            Log.i(TAG, "mMainSchedule: " + mMainSchedule);
+            mMainSchedule.getDateBetween();
         }
-    
-        if (mSubScheduleList != null) {
-            SubScheduleInfo ssi = mSubScheduleList.get(0);
-            //  ArrayList<String> list = ssi.getAddress();
-            //   System.out.println("list" + list.get(0) + mSubScheduleList.size() + mSubScheduleList.get(0).getPlaceName());
+        else {
+            Log.i(TAG, "mMainSchedule is null add new MainSchedule");
+            mMainSchedule = new MainScheduleInfo();
+            mMainSchedule.setmFirstDate(addStartDay);
+            mMainSchedule.setmLastDate(addEndDay);
+            mMainSchedule.setmDDate();
+            
+            mSubScheduleList = new ArrayList<>();
         }
+        
+        String titleString = mMainSchedule.getDateString();
     
         mTitle.setText(titleString);
     }
