@@ -1,14 +1,19 @@
 package com.kop.daegudot.Recommend;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -16,6 +21,8 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.kop.daegudot.R;
+
+import java.util.Objects;
 
 public class RecommendFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "RecommendFragment";
@@ -25,6 +32,7 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
     ChipGroup mChipGroup;
     
     ListView mListView;
+    RecommendHashtagListAdapter adapter;
     
     public RecommendFragment() {
         // Required empty public constructor
@@ -50,12 +58,23 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
         mChipGroup = mView.findViewById(R.id.btns_group);
         setHashtagBtns();
         
-        mListView = mView.findViewById(R.id.list_recommend);
+        mListView = mView.findViewById(R.id.listview);
+        adapter = new RecommendHashtagListAdapter();
+        mListView.setAdapter(adapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getContext(), RecommendListActivity.class);
+                intent.putExtra("hashtag", hashtags[position]);
+                startActivity(intent);
+            }
+        });
+        
+        setRecommendImageList();
         
         // 우측 하단 글 작성 버튼
         FloatingActionButton fab = mView.findViewById(R.id.fab);
         fab.setOnClickListener(this);
-        
         
         return mView;
     }
@@ -64,26 +83,33 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
         int n = hashtags.length;
         
         final Chip[] chips = new Chip[n];
-        
+    
         for(int i = 0; i < n; i++) {
             chips[i] = (Chip)getLayoutInflater()
                     .inflate(R.layout.layout_chip_hash1, mChipGroup, false);
             chips[i].setText(hashtags[i]);
             chips[i].setTag(hashtags[i]);
+            chips[i].setId(i);
             chips[i].setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
-                    Intent intent2 = new Intent(getContext(), RecommendListActivity.class);
-                    Log.i(TAG, "hashtag: " + v.getTag().toString());
-                    intent2.putExtra("hashtag", v.getTag().toString());
-                    startActivity(intent2);
+                    Log.i(TAG, "getid: " + v.getId());
+                    mListView.smoothScrollToPositionFromTop(v.getId(), 0, 100);
                 }
             });
             mChipGroup.addView(chips[i]);
         }
+    }
     
-    
-
+    public void setRecommendImageList() {
+        int n = hashtags.length;
+        Drawable[] drawables = new Drawable[n];
+        drawables[0] = ContextCompat.getDrawable(getActivity(), R.drawable.picex);
+        drawables[1] = ContextCompat.getDrawable(getActivity(), R.drawable.pic_eat);
+        
+        for (int i = 0; i < n; i++) {
+            adapter.addItem(drawables[i%2],"#" + hashtags[i]);
+        }
     }
     
     @Override

@@ -36,6 +36,5 @@ public class DrawerHandler {
         postRating.setRating(mPost.getRating());
         postWriter.setText(mPost.getWriter());
         postContent.setText(mPost.getContent());
-
     }
 }

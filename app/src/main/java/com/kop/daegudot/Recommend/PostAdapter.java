@@ -21,7 +21,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     private static Context mContext;
     private ArrayList<PostList> mPostList;
     
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView title;
         private RatingBar ratingBar;
         private TextView writer;
@@ -44,6 +44,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             Log.i(TAG, "context:" + mContext);
             ((RecommendListActivity) mContext).openDrawer(itemView.getId());
         }
+        
     }
     
     PostAdapter(Context context, ArrayList<PostList> postList) {
@@ -74,6 +75,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         holder.itemView.setId(mPostList.get(position).getId());
         
     }
+    
     
     @Override
     public int getItemCount() {

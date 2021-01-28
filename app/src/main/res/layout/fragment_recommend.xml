@@ -6,37 +6,43 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Recommend.RecommendFragment">
 
-    <include
-        android:id="@+id/top_title"
-        layout="@layout/layout_top_title" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
 
+        <include
+            android:id="@+id/top_title"
+            layout="@layout/layout_top_title" />
+
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/btns_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_title"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintVertical_bias="0.1"
             app:singleSelection="true"
             app:selectionRequired="true"
             >
         </com.google.android.material.chip.ChipGroup>
 
         <ListView
-            android:id="@+id/list_recommend"
+            android:id="@+id/listview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btns_group"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_marginHorizontal="30dp"
+            android:maxWidth="500dp"
+            android:layout_marginTop="10dp"
+            android:paddingBottom="200dp"
+            android:clipToPadding="false"
+            android:transcriptMode="alwaysScroll"
+            android:dividerHeight="30dp"
+            android:divider="@color/white"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"

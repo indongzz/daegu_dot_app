@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RatingBar;
@@ -73,18 +74,25 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-        
+            
             }
     
             @Override
             public void onDrawerOpened(@NonNull View drawerView) {
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNDEFINED);
-                ;
+                int n = Math.min(mRecyclerView.getChildCount(), 10);
+                for (int i = 0; i < n; i++) {
+                    mRecyclerView.getChildAt(i).setClickable(false);
+                }
             }
     
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
                 drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    int n = Math.min(mRecyclerView.getChildCount(), 10);
+                for (int i = 0; i < n; i++) {
+                    mRecyclerView.getChildAt(i).setClickable(true);
+                }
             }
     
             @Override
