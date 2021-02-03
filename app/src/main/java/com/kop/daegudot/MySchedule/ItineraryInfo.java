@@ -1,10 +1,8 @@
 package com.kop.daegudot.MySchedule;
 
-import java.util.ArrayList;
-
 public class ItineraryInfo {
     private String date;
-    private ArrayList<String> address;
+    private String address;
     
     public String getDate() {
         return date;
@@ -14,21 +12,11 @@ public class ItineraryInfo {
         this.date = date;
     }
     
-    public ArrayList<String> getAddress() {
+    public String getAddress() {
         return address;
     }
     
-    public void setAddress(ArrayList<String> address) {
+    public void setAddress(String address) {
         this.address = address;
-    }
-    
-    public String getAddressString() {
-        String text = "";
-        
-        for (String t : address) {
-            text += t;
-        }
-        
-        return text;
     }
 }

@@ -34,9 +34,8 @@
             android:layout_alignParentEnd="true"
             android:layout_margin="10dp"/>
 
-    </RelativeLayout>
-
-
+  </RelativeLayout>
+  
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/itineraryList"
         android:layout_width="400dp"

@@ -84,7 +84,8 @@ public class MarkerInfo {
         try {
             list = geocoder.getFromLocationName(address, 20);
          //   System.out.println(list);
-            mapPoint = MapPoint.mapPointWithGeoCoord(list.get(0).getLatitude(), list.get(0).getLongitude());
+            mapPoint = MapPoint.mapPointWithGeoCoord(
+                    list.get(0).getLatitude(), list.get(0).getLongitude());
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("GetLocationName", "location error");
