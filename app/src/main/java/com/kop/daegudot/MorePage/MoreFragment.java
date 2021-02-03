@@ -2,8 +2,10 @@ package com.kop.daegudot.MorePage;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -23,6 +25,7 @@ public class MoreFragment<onItemClickListener> extends Fragment{
     View view;
     private Context mContext;
     private ArrayList<String> mArrayList;
+    private ArrayList<Integer> mIconList;
     private ListView mListView;
     private MoreAdapter mMoreAdpater;
 
@@ -50,7 +53,7 @@ public class MoreFragment<onItemClickListener> extends Fragment{
 
         mListView = (ListView) view.findViewById(R.id.more_list);
 
-        mMoreAdpater = new MoreAdapter(mContext, mArrayList);
+        mMoreAdpater = new MoreAdapter(mContext, mArrayList, mIconList);
         mListView.setAdapter(mMoreAdpater);
         mListView.setOnItemClickListener(onItemClickListener);
 
@@ -64,6 +67,12 @@ public class MoreFragment<onItemClickListener> extends Fragment{
         mArrayList.add("내가 쓴 글");
         mArrayList.add("내가 쓴 댓글");
         mArrayList.add("찜");
+        
+        mIconList = new ArrayList<>();
+        mIconList.add(R.drawable.profile_image);
+        mIconList.add(R.drawable.mypost);
+        mIconList.add(R.drawable.mycomment);
+        mIconList.add(R.drawable.wish);
     }
 
     AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener(){

@@ -18,8 +18,9 @@
             android:id="@+id/more_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@android:color/black"
-            android:dividerHeight="1dp"/>
+            android:divider="@color/transparent"
+            android:layout_marginHorizontal="10dp"
+            />
     </LinearLayout>
 
 </FrameLayout>

@@ -15,12 +15,10 @@
             android:id="@+id/top_title"
             layout="@layout/layout_top_title" />
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/myreview_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:divider="@android:color/black"
-            android:dividerHeight="1dp"/>
+            android:layout_height="match_parent"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

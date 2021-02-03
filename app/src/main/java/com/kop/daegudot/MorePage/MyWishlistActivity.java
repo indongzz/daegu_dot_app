@@ -1,23 +1,27 @@
 package com.kop.daegudot.MorePage;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.kop.daegudot.KakaoMap.MarkerInfo;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 
-public class MyWishlistActivity extends AppCompatActivity {
+public class MyWishlistActivity extends AppCompatActivity implements View.OnClickListener {
+    private final static String TAG = "MyWishListActivity";
     private Context mContext;
-    private ArrayList<String> mArrayList;
-    private ListView mListView;
+    private ArrayList<MarkerInfo> mWishList;
+    private RecyclerView mRecyclerView;
     private WishlistAdapter mWishlistAdapter;
 
     @Override
@@ -28,42 +32,48 @@ public class MyWishlistActivity extends AppCompatActivity {
 
         prepareMenu();
 
-        // TODO: 뒤로가기 버튼 구현 필요
         TextView title = findViewById(R.id.title);
         title.setText("찜 목록");
+        ImageButton backbtn = findViewById(R.id.backBtn);
+        backbtn.setOnClickListener(this);
+        
 
-        /*TODO: 찜 리스트 xml 수정 필요
-           -> 현재는 WishlistAdapter에서 더보기 첫 페이지에서 사용되는 xml 사용*/
-        mListView = (ListView) findViewById(R.id.mywish_list);
-        mListView.setOnItemClickListener(onItemClickListener);
-        mWishlistAdapter = new WishlistAdapter(mContext, mArrayList);
-        mListView.setAdapter(mWishlistAdapter);
+        mRecyclerView = findViewById(R.id.mywish_list);
+        mWishlistAdapter = new WishlistAdapter(mContext, mWishList);
+        mRecyclerView.setAdapter(mWishlistAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        mRecyclerView.addItemDecoration(
+                new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
     }
 
-    //TODO: 찜한 여행지 읽어와서 ArrayList에 담기
     private void prepareMenu(){
-        mArrayList = new ArrayList<>();
-        mArrayList.add("여기에");
-        mArrayList.add("찜한 여행지");
-        mArrayList.add("넣어주세요!");
-    }
-
-    AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener(){
-        @Override
-        public void onItemClick(AdapterView parent, View view, int position, long id) {
-            switch (position){
-                case 0:
-                    Toast.makeText(mContext, "여기에",Toast.LENGTH_SHORT).show();
-                    break;
-                case 1:
-                    Toast.makeText(mContext, "찜한 여행지",Toast.LENGTH_SHORT).show();
-                    break;
-                case 2:
-                    Toast.makeText(mContext, "넣어주세요!",Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    break;
-            }
+        //TODO: 찜한 여행지 읽어와서 ArrayList에 담기
+        mWishList = new ArrayList<>();
+        
+        for (int i = 0; i < 3; i++) {
+            MarkerInfo data = new MarkerInfo(this);
+            
+            data.setName("hello " + i);
+            data.setAddress("서울특별시");
+            data.setImage(R.drawable.daegu);
+            data.setSummary("어디어디어디임");
+            data.setRate(4);
+            data.setLike(true);
+    
+            mWishList.add(data);
         }
-    };
+        
+        for (int i = 0; i < 3; i++) {
+            Log.d(TAG, "mWishList name: " + mWishList.get(i).getName());
+        }
+    }
+    
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.backBtn:
+                finish();
+                break;
+        }
+    }
 }
