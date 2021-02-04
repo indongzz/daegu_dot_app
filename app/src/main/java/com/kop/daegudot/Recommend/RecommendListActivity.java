@@ -2,7 +2,10 @@ package com.kop.daegudot.Recommend;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,13 +15,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     DrawerLayout drawer;
     View mView;
     
+    PostScheduleBottomSheet postScheduleBottomSheet;
+    BottomSheetBehavior bottomSheetBehavior;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +77,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-            
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
     
             @Override
@@ -84,6 +87,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 for (int i = 0; i < n; i++) {
                     mRecyclerView.getChildAt(i).setClickable(false);
                 }
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
             }
     
             @Override
@@ -93,11 +97,13 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 for (int i = 0; i < n; i++) {
                     mRecyclerView.getChildAt(i).setClickable(true);
                 }
+    
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
     
             @Override
             public void onDrawerStateChanged(int newState) {
-        
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
         });
         
@@ -105,6 +111,13 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         backbtn2.setOnClickListener(this);
         TextView drawerTitle = findViewById(R.id.drawer_title);
         drawerTitle.setText("");
+        
+        postScheduleBottomSheet = new PostScheduleBottomSheet(mContext, mView);
+        postScheduleBottomSheet.setViews();
+        
+        ConstraintLayout bsLayout = findViewById(R.id.schedule_bottomsheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bsLayout);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
     
     public void temporarySet() {
