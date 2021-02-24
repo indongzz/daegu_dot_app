@@ -18,6 +18,7 @@ public class MarkerInfo {
     private String tel;
     private float rate;
     private boolean like;
+    private int image;
     Context mContext;
     
     public MarkerInfo(Context context) {
@@ -99,5 +100,13 @@ public class MarkerInfo {
     
     public boolean isLiked() {
         return like;
+    }
+    
+    public int getImage() {
+        return image;
+    }
+    
+    public void setImage(int image) {
+        this.image = image;
     }
 }
