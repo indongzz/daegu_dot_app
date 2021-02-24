@@ -205,9 +205,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         String nickname = "test123";
         String pw = "test1234";
         char type = 'a';
-        String encryptedPassWord = encryptSHA256(pw);
+        //String encryptedPassWord = encryptSHA256(pw);
 
-        UserRequest userRequest = new UserRequest(email, nickname, encryptedPassWord, type);
+        UserRequest userRequest = new UserRequest(email, nickname, /*encryptedPassWord*/ pw, type);
         startRx(userRequest);
 
         Intent intent = new Intent(LoginActivity.this, EmailLoginActivity.class);
@@ -282,9 +282,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 .subscribeWith(new DisposableObserver<UserResponse>() {
                     @Override
                     public void onNext(UserResponse response) {
-                        // next code
-                        /*Intent intent = new Intent(LoginActivity.this, EmailLoginActivity.class);
-                        startActivity(intent);*/
+                        Log.d("RX", response.toString());
                     }
 
                     @Override

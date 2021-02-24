@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RestfulAdapter {
 
-    private static String BASE_URL = "http://14.47.180.109/";
+    private static String BASE_URL = "http://14.47.180.109:369/";
 
     private final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
     private final Retrofit.Builder builder = new Retrofit.Builder()
