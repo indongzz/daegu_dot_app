@@ -36,7 +36,6 @@ import com.kop.daegudot.network.UserResponse;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -59,6 +58,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public static SharedPreferences.Editor editor;
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
+    // Register 객체
+    private static User user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,10 +68,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         //   getHashKey();
 
+        user = new User();
+
         pref = getSharedPreferences("data", MODE_PRIVATE);
         editor = pref.edit();
 
-        checkAlreadyLogin();
+        // TODO: 자동로그인 활성화
+        //    checkAlreadyLogin();
 
         /* Google Sign In */
         findViewById(R.id.signin_google).setOnClickListener(this);
@@ -108,6 +113,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Log.d("checkAlreadyLogin", "Already Logged in");
         }
     }
+
+    public static void setRegisterInfo(String email, String password, char type) {
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setType(type);
+    }
+
+/*    public void testRx() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi();
+
+        HashMap<String, Object> hashmap = new HashMap<String, Object> ();
+        Observable<Long> observable = service.postRegister(hashmap);
+
+        *//*
+        Disposable disposable = observable
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .
+        *//*
+    }*/
 
     // SignIn Clicked
     private void googleSignIn() {
@@ -155,13 +181,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-
+                            setRegisterInfo(user.getEmail(), "google", 'g');
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             editor.putString("email", user.getEmail());
                             editor.putString("passwd", "google");
                             editor.putString("name", user.getDisplayName());
                             editor.commit();
+
+                            Log.i(TAG, "firebaseAuthWithGoogle email: " + user.getEmail());
+                            Log.i(TAG, "firebaseAuthWithGoogle name: " + user.getDisplayName());
+
+                            setRegisterInfo(user.getEmail(), "google", 'g');
 
                             updateUI(true);
                         } else {
