@@ -2,13 +2,9 @@ package com.kop.daegudot.MySchedule;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,35 +13,26 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.R;
 
-import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 
-public class ItineraryDialog extends Dialog implements View.OnClickListener {   // 세부 일정
+public class ItineraryDialog extends Dialog {   // 세부 일정
     private Context mContext;
     private RecyclerView recyclerView;
     private ItineraryAdapter adapter;
+    Bundle dateData;
     String firstDay, lastDay;
     Date[] date;
-    int mPosition;
-    ArrayList<DateInfo> mDateList;
     
     private ArrayList<ItineraryInfo> mDay = new ArrayList<>();
-    private ItineraryDialogListener dialogListener;
     
-    public ItineraryDialog(@NonNull Context context, int position, ArrayList<DateInfo> dateList, ItineraryDialogListener dialogListener) {
+    public ItineraryDialog(@NonNull Context context, Bundle data) {
         super(context);
         this.mContext = context;
-        mPosition = position;
-        mDateList = dateList;
-        this.dialogListener = dialogListener;
-    }
-    
-    public interface ItineraryDialogListener {
-        void dialogEventListener();
+        dateData = data;
     }
     
     public void onCreate(Bundle savedInstanceState) {
@@ -56,48 +43,40 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         layoutParams.dimAmount = 0.8f;
         getWindow().setAttributes(layoutParams);
         
-        
         setContentView(R.layout.itinerary_dialog);
         
-        firstDay = mDateList.get(mPosition).getmFirstDate();
-        lastDay = mDateList.get(mPosition).getmLastDate();
+        firstDay = dateData.getString("first");
+        lastDay = dateData.getString("last");
         
         TextView dialogTitle = findViewById(R.id.dialogTitle);
-        String title = mDateList.get(mPosition).getTextString();
+        String title = firstDay.substring(3, 8) + " ~ " + lastDay.substring(3, 8);
         dialogTitle.setText(title);
-    
-        Button deleteBtn = findViewById(R.id.deleteBtn);
-        deleteBtn.setOnClickListener(this);
         
-        setItineraryText();
+        /* 세부 일정 날짜 */
+        int num = setAscendingDate(firstDay, lastDay);
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd");
+        for (int i = 0; i < num; i++) {
+            // TODO: 그 날짜 세부 일정 불러오기
+            ItineraryInfo data = new ItineraryInfo();
+            String dateText = i + 1 + "일차 - " + dateFormat.format(date[i]);
+            
+            data.setDate(dateText);
+            
+            // 세부 일정 개수별로 String에 붙이기
+            String address = "";
+            address="대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n";
+            address += "대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n";
+            data.setAddress(address);
+            
+            mDay.add(data);
+        }
     
         recyclerView = findViewById(R.id.itineraryList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     
         adapter = new ItineraryAdapter(getContext(), mDay);
         recyclerView.setAdapter(adapter);
-    }
-    
-    public void setItineraryText() {
-        /* 세부 일정 날짜 */
-        int num = setAscendingDate(firstDay, lastDay);
-    
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd");
-        for (int i = 0; i < num; i++) {
-            // TODO: 그 날짜 세부 일정 불러오기
-            ItineraryInfo data = new ItineraryInfo();
-            String dateText = i + 1 + "일차 - " + dateFormat.format(date[i]);
-        
-            data.setDate(dateText);
-        
-            ArrayList<String> address = new ArrayList<>();
-        
-            address.add("대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n");
-            address.add("대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n");
-            data.setAddress(address);
-        
-            mDay.add(data);
-        }
     }
     
     public int setAscendingDate(String first, String last) {
@@ -121,15 +100,4 @@ public class ItineraryDialog extends Dialog implements View.OnClickListener {   
         
         return count;
     }
-    
-    @Override
-    public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.deleteBtn:
-                dialogListener.dialogEventListener();
-                dismiss();
-                break;
-        }
-    }
-    
 }

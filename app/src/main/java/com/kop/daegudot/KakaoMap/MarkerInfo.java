@@ -18,6 +18,7 @@ public class MarkerInfo {
     private String tel;
     private float rate;
     private boolean like;
+    private int image;
     Context mContext;
     
     public MarkerInfo(Context context) {
@@ -83,7 +84,8 @@ public class MarkerInfo {
         try {
             list = geocoder.getFromLocationName(address, 20);
          //   System.out.println(list);
-            mapPoint = MapPoint.mapPointWithGeoCoord(list.get(0).getLatitude(), list.get(0).getLongitude());
+            mapPoint = MapPoint.mapPointWithGeoCoord(
+                    list.get(0).getLatitude(), list.get(0).getLongitude());
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("GetLocationName", "location error");
@@ -98,5 +100,13 @@ public class MarkerInfo {
     
     public boolean isLiked() {
         return like;
+    }
+    
+    public int getImage() {
+        return image;
+    }
+    
+    public void setImage(int image) {
+        this.image = image;
     }
 }

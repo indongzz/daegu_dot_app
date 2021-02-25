@@ -10,8 +10,9 @@
     <color name="lightGray">#808080</color>
     <color name="lighterGray">#e8e8e8</color>
     <color name="lightBlue">#0487D9</color>
+    <color name="transparentgray">#50808080</color>
+    <color name="dimmedBlue">#B8D3E4</color>
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
     <color name="transparent">#00ff0000</color>
-    <color name="transparentgray">#50808080</color>
 </resources>

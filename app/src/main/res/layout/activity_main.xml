@@ -44,19 +44,20 @@
                 <ImageButton
                     android:id="@+id/myScheduleBtn"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:background="#ffffff"
                     android:src="@drawable/sch_colored"
                     android:scaleType="fitCenter"
                     android:padding="13dp"
                     android:layout_marginBottom="5dp"
+                    android:layout_gravity="center_horizontal"
                     />
                 <TextView
                     android:id="@+id/mySch_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="내 일정"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:textColor="@color/colorPrimaryDark"
                     android:layout_gravity="center_horizontal|bottom"
                     android:layout_marginTop="1dp"
@@ -78,13 +79,14 @@
                     android:scaleType="fitCenter"
                     android:padding="13dp"
                     android:layout_marginBottom="5dp"
+                    android:layout_gravity="center_horizontal"
                     />
                 <TextView
                     android:id="@+id/addSch_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="일정 추가"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:layout_gravity="center_horizontal|bottom"
                     android:layout_marginTop="1dp"/>
             </FrameLayout>
@@ -103,13 +105,14 @@
                     android:scaleType="fitCenter"
                     android:padding="13dp"
                     android:layout_marginBottom="5dp"
+                    android:layout_gravity="center_horizontal"
                     />
                 <TextView
                     android:id="@+id/recom_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="추천"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:layout_gravity="center_horizontal|bottom"
                     android:layout_marginTop="1dp"/>
             </FrameLayout>
@@ -126,15 +129,16 @@
                     android:background="#ffffff"
                     android:src="@drawable/more"
                     android:padding="13dp"
-                    android:layout_marginBottom="5dp"
                     android:scaleType="fitCenter"
+                    android:layout_marginBottom="5dp"
+                    android:layout_gravity="center_horizontal"
                     />
                 <TextView
                     android:id="@+id/more_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="더보기"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:layout_gravity="center_horizontal|bottom"
                     android:layout_marginTop="1dp"/>
             </FrameLayout>

@@ -1,6 +1,20 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 android {
+    signingConfigs {
+        key {
+            storeFile file('C:\\Users\\user\\Documents\\SM_Project\\snsaccount.jks')
+            keyAlias key0
+            storePassword daegu_dot
+            keyPassword daegu_dot
+        }
+        debug {
+            storeFile file(snsaccount)
+            storePassword daegu_dot
+            keyAlias key0
+            keyPassword daegu_dot
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {

@@ -14,8 +14,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".Recommend.RecommendListActivity"
-            android:windowSoftInputMode="adjustResize"/>
+
+        <activity android:name=".MorePage.MyReviewStoryActivity"></activity>
+        <activity android:name=".MorePage.MyCommentActivity" />
+        <activity android:name=".MorePage.MyWishlistActivity" />
+        <activity android:name=".MorePage.MyInformationActivity" />
+	<activity android:name=".Recommend.RecommendListActivity" 
+		android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".KakaoMap.MapMainActivity" />
         <activity android:name=".Login.SignUpAddInfoActivity" />
         <activity android:name=".Login.EmailSignUpActivity" />
