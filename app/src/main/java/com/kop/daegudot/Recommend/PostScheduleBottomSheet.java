@@ -44,13 +44,13 @@ public class PostScheduleBottomSheet {
         test.add("ㅁ여소명소");
     
         ArrayList<String> test2 = new ArrayList<>();
-        test.add("명소명소");
-        test.add("카페");
-        test.add("ㅁ여소명소");
+        test2.add("명소명소");
+        test2.add("카페");
+        test2.add("ㅁ여소명소");
     
         ArrayList<String> test3 = new ArrayList<>();
-        test.add("명소명소");
-        test.add("카페");
+        test3.add("명소명소");
+        test3.add("카페");
         
         PostScheduleItem data = new PostScheduleItem();
         data.setDay(1);
@@ -71,5 +71,4 @@ public class PostScheduleBottomSheet {
         mScheduleList.add(data3);
         
     }
-    
 }

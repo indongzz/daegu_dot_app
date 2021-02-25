@@ -1,6 +1,6 @@
 package com.kop.daegudot.Recommend;
 
-public class PostList {
+public class PostItem {
     private String title;
     private String content;
     private float rating;

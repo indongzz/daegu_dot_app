@@ -19,7 +19,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     private static final String TAG = "PostAdapter";
     
     private static Context mContext;
-    private ArrayList<PostList> mPostList;
+    private ArrayList<PostItem> mPostList;
     
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView title;
@@ -47,7 +47,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         
     }
     
-    PostAdapter(Context context, ArrayList<PostList> postList) {
+    PostAdapter(Context context, ArrayList<PostItem> postList) {
         Log.i(TAG, "init");
         mContext = context;
         mPostList = postList;

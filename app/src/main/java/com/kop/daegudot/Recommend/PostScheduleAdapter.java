@@ -59,7 +59,7 @@ public class PostScheduleAdapter extends RecyclerView.Adapter<PostScheduleAdapte
         int n = mPostScheduleList.get(position).getPlaceName().size();
         Chip[] chips = new Chip[n];
         Log.d(TAG, "position: " + position + ", n: " + n);
-        Log.d(TAG, "mpostschedulie: " + mPostScheduleList.get(position).getDay());
+        Log.d(TAG, "mpostschedule: " + mPostScheduleList.get(position).getDay());
         for(int i = 0; i < n; i++) {
             chips[i] = (Chip) li.inflate(R.layout.layout_chip_choice, holder.chipGroup, false);
             chips[i].setText(mPostScheduleList.get(position).getPlaceName().get(i));

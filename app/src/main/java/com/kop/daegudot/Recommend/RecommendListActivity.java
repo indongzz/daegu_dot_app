@@ -3,9 +3,7 @@ package com.kop.daegudot.Recommend;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,12 +30,13 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     RecyclerView mRecyclerView;
     PostAdapter mAdapter;
     
-    ArrayList<PostList> mPostList = new ArrayList<>();
+    ArrayList<PostItem> mPostList = new ArrayList<>();
     DrawerLayout drawer;
     View mView;
     
     PostScheduleBottomSheet postScheduleBottomSheet;
     BottomSheetBehavior bottomSheetBehavior;
+    DrawerHandler mDrawerHandler;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +76,6 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
     
             @Override
@@ -87,7 +85,8 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 for (int i = 0; i < n; i++) {
                     mRecyclerView.getChildAt(i).setClickable(false);
                 }
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+                
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
     
             @Override
@@ -97,13 +96,14 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 for (int i = 0; i < n; i++) {
                     mRecyclerView.getChildAt(i).setClickable(true);
                 }
+                
+                Log.d(TAG, "state: " + bottomSheetBehavior.getState());
     
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
     
             @Override
             public void onDrawerStateChanged(int newState) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
         });
         
@@ -129,7 +129,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         String[] content = {"내용1", "내용2", "내용3", "내용4"};
         
         for (int i = 0; i < 4; i++) {
-            PostList data = new PostList();
+            PostItem data = new PostItem();
             data.setTitle(title[i]);
             data.setRating(rating[i]);
             data.setWriter(writer[i]);
@@ -138,16 +138,14 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
             //TODO : id 할당
             data.setId(i);
             
-            Log.i(TAG, "comment: " + data.getCommentString());
-            
             mPostList.add(data);
             
         }
     }
     
     public void openDrawer(int id) {
-        PostList post = null;
-        for (PostList o : mPostList) {
+        PostItem post = null;
+        for (PostItem o : mPostList) {
             if (id == o.getId()) {
                 post = o;
                 break;
@@ -155,12 +153,9 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         }
         
         if (post != null) {
-            Log.i(TAG, "post: " + post.getTitle());
-    
             drawer.openDrawer(GravityCompat.END);
-            DrawerHandler drawerHandler = new DrawerHandler(mView, post);
-            drawerHandler.setDrawer();
-            
+            mDrawerHandler = new DrawerHandler(mContext, mView, post);
+            mDrawerHandler.setDrawer();
         }
         else {
             Log.e(TAG, "post: null");
