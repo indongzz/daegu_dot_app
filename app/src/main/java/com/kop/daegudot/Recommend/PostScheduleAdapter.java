@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -63,9 +64,16 @@ public class PostScheduleAdapter extends RecyclerView.Adapter<PostScheduleAdapte
         for(int i = 0; i < n; i++) {
             chips[i] = (Chip) li.inflate(R.layout.layout_chip_choice, holder.chipGroup, false);
             chips[i].setText(mPostScheduleList.get(position).getPlaceName().get(i));
-            chips[i].setTag(i);
+            chips[i].setTag(mPostScheduleList.get(position).getPlaceName().get(i));
             chips[i].setId(i);
             holder.chipGroup.addView(chips[i]);
+            chips[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO: Marker 찍은 후에 Map의 해당 marker로 이동하기
+                    Toast.makeText(mContext, v.getTag() + "marker로 이동하기", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
         
     }

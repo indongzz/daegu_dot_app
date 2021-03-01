@@ -43,14 +43,4 @@
 
     </androidx.drawerlayout.widget.DrawerLayout>
 
-    <include
-        android:id="@+id/schedule_bottomsheet"
-        layout="@layout/bottom_sheet_post_schedule"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:behavior_hideable="true"
-        app:behavior_peekHeight="50dp"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

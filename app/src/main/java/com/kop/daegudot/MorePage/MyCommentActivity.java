@@ -12,14 +12,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.kop.daegudot.R;
-import com.kop.daegudot.Recommend.PostList;
+import com.kop.daegudot.Recommend.PostItem;
 
 import java.util.ArrayList;
 
 public class MyCommentActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MyCommentActivity";
     private Context mContext;
-    private ArrayList<PostList> mPostList;
+    private ArrayList<PostItem> mPostList;
     private RecyclerView mRecyclerView;
     private MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
 
@@ -55,7 +55,7 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
         String[] content = {"내용1", "내용2", "내용3", "내용4"};
         
         for (int i = 0; i < 4; i++) {
-            PostList data = new PostList();
+            PostItem data = new PostItem();
             data.setTitle(title[i]);
             data.setRating(rating[i]);
             data.setWriter(writer[i]);

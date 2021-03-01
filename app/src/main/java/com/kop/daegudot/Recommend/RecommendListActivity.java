@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,11 +14,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -33,9 +38,6 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     ArrayList<PostItem> mPostList = new ArrayList<>();
     DrawerLayout drawer;
     View mView;
-    
-    PostScheduleBottomSheet postScheduleBottomSheet;
-    BottomSheetBehavior bottomSheetBehavior;
     DrawerHandler mDrawerHandler;
     
     @Override
@@ -60,9 +62,9 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         
         mRecyclerView = findViewById(R.id.recommend_list_view);
         
+        // TODO: delete
         temporarySet();
         
-        Log.i(TAG, "size: " + mPostList.size());
         mAdapter = new PostAdapter(mContext, mPostList);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -85,8 +87,6 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 for (int i = 0; i < n; i++) {
                     mRecyclerView.getChildAt(i).setClickable(false);
                 }
-                
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
     
             @Override
@@ -96,10 +96,6 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 for (int i = 0; i < n; i++) {
                     mRecyclerView.getChildAt(i).setClickable(true);
                 }
-                
-                Log.d(TAG, "state: " + bottomSheetBehavior.getState());
-    
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
     
             @Override
@@ -112,12 +108,6 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         TextView drawerTitle = findViewById(R.id.drawer_title);
         drawerTitle.setText("");
         
-        postScheduleBottomSheet = new PostScheduleBottomSheet(mContext, mView);
-        postScheduleBottomSheet.setViews();
-        
-        ConstraintLayout bsLayout = findViewById(R.id.schedule_bottomsheet);
-        bottomSheetBehavior = BottomSheetBehavior.from(bsLayout);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
     
     public void temporarySet() {
@@ -162,6 +152,10 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         }
     }
     
+    public FragmentManager getFM() {
+        return getSupportFragmentManager();
+    }
+    
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -170,6 +164,9 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 break;
             case R.id.drawer_backBtn:
                 drawer.closeDrawer(GravityCompat.END);
+                InputMethodManager keyboardManager =
+                        (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                keyboardManager.hideSoftInputFromWindow(mView.getWindowToken(), 0);
                 break;
         }
     }

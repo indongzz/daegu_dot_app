@@ -12,14 +12,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.R;
-import com.kop.daegudot.Recommend.PostList;
+import com.kop.daegudot.Recommend.PostItem;
 
 import java.util.ArrayList;
 
 public class MyReviewAndCommentAdapter extends RecyclerView.Adapter<MyReviewAndCommentAdapter.ViewHolder> {
     private static final String TAG = "MyReViewAndCommentAdapter";
     private static Context mContext;
-    private ArrayList<PostList> mPostList;
+    private ArrayList<PostItem> mPostList;
     
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView title;
@@ -46,7 +46,7 @@ public class MyReviewAndCommentAdapter extends RecyclerView.Adapter<MyReviewAndC
         
     }
     
-    MyReviewAndCommentAdapter(Context context, ArrayList<PostList> postList) {
+    MyReviewAndCommentAdapter(Context context, ArrayList<PostItem> postList) {
         Log.i(TAG, "init");
         mContext = context;
         mPostList = postList;
