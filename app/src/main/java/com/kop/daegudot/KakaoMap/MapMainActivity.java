@@ -11,11 +11,13 @@ import android.util.Log;
 
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.SubScheduleInfo;
+import com.kop.daegudot.Network.Place;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -42,13 +44,15 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     ArrayList<SubScheduleInfo> mSubScheduleList;
     int position = 0; // default = first page
     
-    ArrayList<MarkerInfo> mMarkerItems;
+    // RX PoiItems
+    ArrayList<Place> mPlaceList;
     private BottomSheetBehavior mBSBPlace;
     PlaceBottomSheet placeBottomSheet;
     private BottomSheetBehavior mBSBSchedule;
-    //    ScheduleBottomSheet scheduleBottomSheet;
     ViewPager2 mViewPager;
     ViewPagerAdapter adapter;
+    
+    public ProgressBar progressBar;     // 로딩 중
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,16 +63,19 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         mTitle = findViewById(R.id.title);
         mTitle.setText("장소 검색");
+    
+        mBackBtn = findViewById(R.id.backBtn);
+        mBackBtn.setOnClickListener(this);
         
+        progressBar = findViewById(R.id.progress_bar);
+        
+        /* Map View */
         mMapView = findViewById(R.id.map_view);
         
         mMapView.setPOIItemEventListener(this);
         mMapView.setMapViewEventListener(this);
         mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(35.871344, 128.601705), true);
-        mMapView.setZoomLevel(6, true);
-        
-        mBackBtn = findViewById(R.id.backBtn);
-        mBackBtn.setOnClickListener(this);
+        mMapView.setZoomLevel(4, true);
         
         // Set Hash Tag button and Category button
         mMapUIControl = new MapUIControl(this, view);
@@ -78,52 +85,43 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         // Set MarkerItems
         mMapMarkerItems = new MapMarkerItems(this, mMapView);
         mMapMarkerItems.setMarkerItems();
-        mMarkerItems = mMapMarkerItems.getMarkerItems();
+//        mMarkerItems = mMapMarkerItems.getMarkerItems();
+        mPlaceList = updatePlaceList();
         
         // TODO: get Schedule from DB or add Schedule
         getSchedule();
         
+        /* BottomSheet */
         placeBottomSheet =
-                new PlaceBottomSheet(this, mMarkerItems, mMainSchedule, mSubScheduleList);
+                new PlaceBottomSheet(this, mMainSchedule, mSubScheduleList);
         
         CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
         mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-//        mBSBPlace.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-//            @Override
-//            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-//
-//            }
-//
-//            @Override
-//            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-//
-//            }
-//        });
         
         mViewPager = findViewById(R.id.viewPager);
         adapter = new ViewPagerAdapter(this, mSubScheduleList);
         mViewPager.setAdapter(adapter);
         mViewPager.setNestedScrollingEnabled(false);
-
-
-//        scheduleBottomSheet = new ScheduleBottomSheet(this, mMainSchedule, mSubScheduleList);
+        
         NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
         
         // move to n일차
         mViewPager.setCurrentItem(position);
+        
     }
     
     public void adapterChange(int position, int tag) {
+        /* update Place list */
+        mPlaceList = updatePlaceList();
         ArrayList<String> placeName;
         ArrayList<String> address;
         
         placeName = mSubScheduleList.get(position).getPlaceName();
         address = mSubScheduleList.get(position).getAddress();
-        placeName.add(mMarkerItems.get(tag).getName());
-        address.add(mMarkerItems.get(tag).getAddress());
+        placeName.add(mPlaceList.get(tag).getAttractName());
+        address.add(mPlaceList.get(tag).getAddress());
         
         mSubScheduleList.get(position).setAddress(address);
         mSubScheduleList.get(position).setPlaceName(placeName);
@@ -177,6 +175,10 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mTitle.setText(titleString);
     }
     
+    public ArrayList<Place> updatePlaceList() {
+        return mMapMarkerItems.getPlaceList();
+    }
+    
     // click event
     @Override
     public void onClick(View v) {
@@ -218,7 +220,6 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     @Override
     public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
-    
     }
     
     @Override
@@ -254,6 +255,14 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     @Override
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
-    
+        ArrayList<MapPOIItem> lists = mMapMarkerItems.getmMarkerList();
+
+        mapView.removeAllPOIItems();
+        
+        for (MapPOIItem item: lists) {
+            if (mapView.getMapPointBounds().contains(item.getMapPoint())) {
+                mapView.addPOIItem(item);
+            }
+        }
     }
 }

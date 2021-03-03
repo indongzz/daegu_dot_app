@@ -105,6 +105,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
 
         // Todo:
         //  db에 회원가입 정보 저장하기 : email, pw, nickName
+        //LoginActivity.setRegisterInfo(email, pw, 'N');
     }
 
     public boolean checkInfo() {
