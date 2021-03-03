@@ -6,7 +6,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -15,17 +14,6 @@ import com.kop.daegudot.AddSchedule.AddScheduleFragment;
 import com.kop.daegudot.MorePage.MoreFragment;
 import com.kop.daegudot.MySchedule.MyScheduleFragment;
 import com.kop.daegudot.Recommend.RecommendFragment;
-import com.kop.daegudot.network.Contributor;
-import com.kop.daegudot.network.RestApiService;
-import com.kop.daegudot.network.RestfulAdapter;
-
-import java.util.List;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableObserver;
-import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
     private ImageButton[] bottomBtns;

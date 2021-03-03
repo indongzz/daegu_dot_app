@@ -1,7 +1,7 @@
-package com.kop.daegudot.network;
+package com.kop.daegudot.Network.User;
 
 public class UserResponse {
-    public Long id;
+    public long id;
     public String email;
     public String nickname;
     public String password;

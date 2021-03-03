@@ -28,20 +28,10 @@ import com.kakao.usermgmt.LoginButton;
 import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
 import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.R;
-import com.kop.daegudot.network.RestApiService;
-import com.kop.daegudot.network.RestfulAdapter;
-import com.kop.daegudot.network.UserRequest;
-import com.kop.daegudot.network.UserResponse;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableObserver;
-import io.reactivex.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     // Google Login
@@ -56,7 +46,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     SharedPreferences pref ;
     public static SharedPreferences.Editor editor;
-    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
 
     // Register 객체
     private static User user;
@@ -74,7 +64,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         editor = pref.edit();
 
         // TODO: 자동로그인 활성화
-        //    checkAlreadyLogin();
+        // checkAlreadyLogin();
 
         /* Google Sign In */
         findViewById(R.id.signin_google).setOnClickListener(this);
@@ -231,16 +221,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public void convertToEmailLogin() {
-
-        String email = "test";
-        String nickname = "test123";
-        String pw = "test1234";
-        char type = 'a';
-        //String encryptedPassWord = encryptSHA256(pw);
-
-        UserRequest userRequest = new UserRequest(email, nickname, /*encryptedPassWord*/ pw, type);
-        startRx(userRequest);
-
         Intent intent = new Intent(LoginActivity.this, EmailLoginActivity.class);
         startActivity(intent);
     }
@@ -272,10 +252,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     protected void onDestroy() {
         super.onDestroy();
         Session.getCurrentSession().removeCallback(sessionCallback);
-
-        if (!mCompositeDisposable.isDisposed()) {
-            mCompositeDisposable.dispose();
-        }
     }
 
 
@@ -303,29 +279,4 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
     */
-
-    private void startRx(UserRequest userRequest) {
-        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
-        Observable<UserResponse> observable = service.requestLogin(userRequest);
-
-        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<UserResponse>() {
-                    @Override
-                    public void onNext(UserResponse response) {
-                        Log.d("RX", response.toString());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d("RX", e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.d("RX", "complete");
-                    }
-                })
-        );
-    }
 }

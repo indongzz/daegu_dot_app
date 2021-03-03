@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +15,10 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.kop.daegudot.Network.Map.MapResponse;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -21,8 +26,16 @@ import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class MapMainActivity extends AppCompatActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener {
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private static final String LOG_TAG = "MapMainActivity";
     private MapView mMapView;
     Button[] mCategory;
@@ -57,7 +70,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         setCategoryBtn();
         setHashBtn();
-    
+
         String[] address = {
                 "대구광역시 중구 남산로 4길 112",
                 "대구광역시 중구 서성로 6-1",
@@ -71,10 +84,10 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
                 "53-982-0101-2", "053-254-9401",
                 "053-254-9405"
         };
-        
+
         // 나중에 data read후에 markerinfo에 담기
          mMarkerItems = new ArrayList<>();
-        
+
         for (int i = 0; i < 5; i++) {
             MarkerInfo markerItem = new MarkerInfo(this);
             markerItem.setAddress(address[i]);
@@ -84,7 +97,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
             markerItem.setLike(false);
             mMarkerItems.add(markerItem);
         }
-        
+
         for (int i = 0; i< 5; i++) {
             MapPOIItem marker = new MapPOIItem();
             marker.setItemName(mMarkerItems.get(i).getName());
@@ -98,7 +111,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
             marker.setShowCalloutBalloonOnTouch(false);
             mMapView.addPOIItem(marker);
         }
-        
+
         placeBottomSheet = new PlaceBottomSheet(this, mMarkerItems);
         
         CoordinatorLayout lBottomSheet = (CoordinatorLayout) findViewById(R.id.bottomSheet);
@@ -263,5 +276,31 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     @Override
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
     
+    }
+
+    //여행지 장소 읽어오는 함수
+    //테스트 해봤는데... 에러 뜸...
+    private void addMapRx() {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
+        Observable<List<MapResponse>> observable = service.getPlaceList();
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<List<MapResponse>>() {
+                    @Override
+                    public void onNext(List<MapResponse> mapResponseList) {
+                        Log.d("RX", "SUCCESS!");
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
+                    }
+                })
+        );
     }
 }

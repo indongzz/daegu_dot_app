@@ -4,8 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,15 +12,25 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.R;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserLogin;
+import com.kop.daegudot.Network.User.UserResponse;
 
-import org.w3c.dom.Text;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class EmailSignUpActivity extends AppCompatActivity implements View.OnClickListener{
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
     ImageButton backBtn;
 
     EditText editNickName, editEmail, editPw, editPwCheck;
@@ -33,6 +41,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
     String emailValidation = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
     boolean NICK_CHECKED = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,18 +87,14 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.btn_SignUp:
-                if (checkInfo()) {
-                    addData();
-                    convertToMainActivity();
-                }
+                if(checkInfo()) DuplicateEmailRx(email);
                 break;
             case R.id.backBtn:
                 finish();
                 break;
             case R.id.btn_checkDup:
                 nickName = editNickName.getText().toString();
-
-                checkNickName(nickName);
+                checkNickName();
                 break;
         }
     }
@@ -105,7 +110,8 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
 
         // Todo:
         //  db에 회원가입 정보 저장하기 : email, pw, nickName
-        //LoginActivity.setRegisterInfo(email, pw, 'N');
+        UserRegister userRegister = new UserRegister(email, pw, nickName,'N');
+        addUserRx(userRegister);
     }
 
     public boolean checkInfo() {
@@ -120,7 +126,6 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         }
 
         if (email.matches(emailValidation) && email.length() > 0) {
-            // 이메일 형식이 맞으면 넘어가기
             Log.d("CheckInfo", "email 형식 맞음" + email);
         } else {
             editEmail.requestFocus();
@@ -143,22 +148,17 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
     }
 
 
-    public void checkNickName(String name) {
-        int len = name.length();
+    public void checkNickName() {
+        int len = nickName.length();
 
         if (len == 0) {
             Toast.makeText(getApplicationContext(), "닉네임을 입력해주세요", Toast.LENGTH_SHORT).show();
         } else if (len < 2 || len > 6) {
             Toast.makeText(getApplicationContext(), "닉네임은 2글자 이상 6글자 이하로 설정해주세요", Toast.LENGTH_SHORT).show();
         } else {
-            // Todo: db 닉네임 중복 확인
-            //  중복 아닌 경우
-            NICK_CHECKED = true;
-
-            //  중복 인 경우
-            Toast.makeText(getApplicationContext(), "중복된 닉네임 입니다", Toast.LENGTH_SHORT).show();
-            // NICK_CHECKED = false;
-
+            //닉네임 중복체크
+            //중복X: NICK_CHECKED=true, 중복O: NICK_CHECKED=false;
+            DuplicateNicknameRx(nickName);
         }
     }
 
@@ -167,5 +167,90 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void setNickDup(boolean status){
+        NICK_CHECKED = status;
+    }
+
+    //중복 검사 영역은 서버 자체에서 API가 잘못 구현된 상황
+    //수정하여 develop 업로드 예정
+    private void DuplicateNicknameRx(String nickname) {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
+        Observable<UserResponse> observable = service.checkNickDup(nickname);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        Log.d("RX", response.toString());
+                        setNickDup(false);
+                        Toast.makeText(getApplicationContext(), "사용 중인 닉네임 입니다", Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                        setNickDup(true);
+                        Toast.makeText(getApplicationContext(), "사용 가능한 닉네임 입니다", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
+                    }
+                })
+        );
+    }
+    private void DuplicateEmailRx(String email) {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
+        Observable<UserResponse> observable = service.checkEmailDup(email);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        //회원 정보 존재
+                        Log.d("RX", response.toString());
+                        Toast.makeText(getApplicationContext(), "회원 정보가 존재합니다.", Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+                        //새로 가입
+                        Log.d("RX", e.getMessage());
+                        addData();
+                        convertToMainActivity();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
+                    }
+                })
+        );
+    }
+    private void addUserRx(UserRegister userRegister) {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
+        Observable<Long> observable = service.registerUser(userRegister);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Long>() {
+                    @Override
+                    public void onNext(Long id) {
+                        Log.d("RX", id+"가 추가되었습니다.");
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
+                    }
+                })
+        );
     }
 }

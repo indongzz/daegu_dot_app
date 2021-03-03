@@ -1,4 +1,4 @@
-package com.kop.daegudot.network;
+package com.kop.daegudot.Network;
 
 public class Place {
     private String address;
