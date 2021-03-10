@@ -21,48 +21,15 @@ public class Documents {
     public class Address {
         @SerializedName("place_name")
         @Expose
-        private String addressName;
+        public String placeName;
         @SerializedName("address_name")
         @Expose
-        private String address;
+        public String address;
         @SerializedName("x")
         @Expose
-        private double x;
+        public double x;
         @SerializedName("y")
         @Expose
-        private double y;
-    
-        public String getAddressName() {
-            return addressName;
-        }
-    
-        public void setAddressName(String addressName) {
-            this.addressName = addressName;
-        }
-    
-        public String getAddress() {
-            return address;
-        }
-    
-        public void setAddress(String address) {
-            this.address = address;
-        }
-    
-        public double getX() {
-            return x;
-        }
-    
-        public void setX(double x) {
-            this.x = x;
-        }
-    
-        public double getY() {
-            return y;
-        }
-    
-        public void setY(double y) {
-            this.y = y;
-        }
-    
+        public double y;
     }
 }

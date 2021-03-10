@@ -12,7 +12,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.SubScheduleInfo;
-import com.kop.daegudot.Network.Place;
+import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;

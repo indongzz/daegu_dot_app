@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.SubScheduleInfo;
-import com.kop.daegudot.Network.Place;
+import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -84,8 +84,8 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         // Set MarkerItems
         mMapMarkerItems = new MapMarkerItems(this, mMapView);
-//        mMapMarkerItems.setMarkerItems();
-        mMapMarkerItems.startRx2(128.601705,35.871344);
+        mMapMarkerItems.setMarkerItems();
+//        mMapMarkerItems.startRx2(128.601705,35.871344);
         mPlaceList = updatePlaceList();
         
         // TODO: get Schedule from DB or add Schedule
@@ -196,6 +196,9 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
         mBSBSchedule.setState(BottomSheetBehavior.STATE_HIDDEN);
         prevPOIItem = mapPOIItem;
+        Log.d("RX", "selected lat long: " + mapPOIItem.getMapPoint().getMapPointGeoCoord().latitude + " " +
+                mapPOIItem.getMapPoint().getMapPointGeoCoord().longitude);
+                
     }
     
     @Override

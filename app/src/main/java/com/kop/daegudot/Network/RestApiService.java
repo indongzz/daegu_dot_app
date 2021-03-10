@@ -2,6 +2,8 @@ package com.kop.daegudot.Network;
 
 import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Login.User;
+import com.kop.daegudot.Network.Map.Place;
+import com.kop.daegudot.Network.Map.PlaceGeo;
 
 import java.util.List;
 
@@ -11,6 +13,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -34,6 +37,9 @@ public interface RestApiService {
 
     @GET("/places/list")
     Observable<List<Place>> getPlaceList();
+    
+    @PUT("/places/location")
+    Observable<Long> updateLocation(@Body List<PlaceGeo> placeGeoList);
     
     /* get MapPoint by address */
     @GET("v2/local/search/address.json")

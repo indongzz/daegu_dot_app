@@ -15,7 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <activity android:name=".MorePage.MyReviewStoryActivity"></activity>
+        <activity android:name=".Network.Map.PlaceGeoUpdateActivity" />
+        <activity android:name=".MorePage.MyReviewStoryActivity" />
         <activity android:name=".MorePage.MyCommentActivity" />
         <activity android:name=".MorePage.MyWishlistActivity" />
         <activity android:name=".MorePage.MyInformationActivity" />

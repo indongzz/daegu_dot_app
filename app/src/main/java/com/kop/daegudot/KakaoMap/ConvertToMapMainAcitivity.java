@@ -6,7 +6,7 @@
 //
 //import com.kop.daegudot.MySchedule.MainScheduleInfo;
 //import com.kop.daegudot.MySchedule.SubScheduleInfo;
-//import com.kop.daegudot.Network.Place;
+//import com.kop.daegudot.Network.Map.Place;
 //import com.kop.daegudot.Network.RestApiService;
 //import com.kop.daegudot.Network.RestfulAdapter;
 //

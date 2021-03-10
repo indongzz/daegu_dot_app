@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
-import com.kop.daegudot.Network.Place;
+import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.R;
@@ -14,7 +14,6 @@ import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
@@ -141,43 +140,56 @@ public class MapMarkerItems {
         
         for (int i = 0; i < n; i++) {
             MapPOIItem marker = new MapPOIItem();
-            
-            marker.setItemName(mPlaceList.get(i).attractName);
+            Place place = mPlaceList.get(i);
+            marker.setItemName(place.attractName);
             marker.setTag(i);
+//            Log.d("RX_ADDRESSS", "address: " + place.address);
+            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
+                    Double.parseDouble(place.latitude), Double.parseDouble(place.longitude));
+            Log.d("RX_ADDRESS", "lat long: " + place.latitude + " " + place.longitude);
+            marker.setMapPoint(mapPoint);
+            marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+            marker.setCustomImageResourceId(R.drawable.blue_pin);
+            marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+            marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
+            marker.setShowCalloutBalloonOnTouch(false);
+            mMapView.addPOIItem(marker);
+            mMarkerList.add(marker);
             
-            Call<Documents> data = service2.getSearchAddress(key, mPlaceList.get(i).address);
-            int finalI = i;
-            data.enqueue(new Callback<Documents>() {
-                @Override
-                public void onResponse(Call<Documents> call, Response<Documents> response) {
-//                    Log.d("RX_ADDRESS", "code: " + response.body());
-                    Documents body = response.body();
-                    
-                    if (response.body() != null && body.getDocuments().size() != 0) {
-                        Documents.Address address = body.getDocuments().get(0);
-//                        Log.d("RX_ADDRESSS", "address: " + address.getAddressName());
-                        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
-                                address.getY(), address.getX());
-                        mPlaceList.get(finalI).mapPoint = mapPoint;
-                        marker.setMapPoint(mapPoint);
-                        marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-                        marker.setCustomImageResourceId(R.drawable.blue_pin);
-                        marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-                        marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
-                        marker.setShowCalloutBalloonOnTouch(false);
-                        mMapView.addPOIItem(marker);
-                        mMarkerList.add(marker);
-                    } else {
-                        Log.d("RX_ADDRESS", mPlaceList.get(finalI).address);
-                    }
-                }
-                
-                @Override
-                public void onFailure(Call<Documents> call, Throwable t) {
-                    Log.d("RX_ADDRESS", "Failure!!");
-                    t.printStackTrace();
-                }
-            });
+//            Call<Documents> data = service2.getSearchAddress(key, mPlaceList.get(i).address);
+//            int finalI = i;
+//            data.enqueue(new Callback<Documents>() {
+//                @Override
+//                public void onResponse(Call<Documents> call, Response<Documents> response) {
+////                    Log.d("RX_ADDRESS", "code: " + response.body());
+//                    Documents body = response.body();
+//
+//                    if (response.body() != null && body.getDocuments().size() != 0) {
+//                        Documents.Address address = body.getDocuments().get(0);
+//                        Log.d("RX_ADDRESSS", "address: " + address.address);
+////                        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
+////                                address.y, address.x);
+//                        Log.d("RX_ADDRESS", "Map: " + address.y + " , " + address.x);
+////                        mPlaceList.get(finalI).mapPoint = mapPoint;
+////                        marker.setMapPoint(mapPoint);
+//                        marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+//                        marker.setCustomImageResourceId(R.drawable.blue_pin);
+//                        marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+//                        marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
+//                        marker.setShowCalloutBalloonOnTouch(false);
+//                        mMapView.addPOIItem(marker);
+//                        mMarkerList.add(marker);
+//                    } else {
+//                        Log.d("RX_ADDRESS", mPlaceList.get(finalI).address);
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<Documents> call, Throwable t) {
+//                    Log.d("RX_ADDRESS", "Failure!!");
+//                    t.printStackTrace();
+//                }
+//            });
         }
     }
     
@@ -257,9 +269,9 @@ public class MapMarkerItems {
         int tagNum = 0;
         for (Documents.Address address : arrayList) {
             MapPOIItem marker = new MapPOIItem();
-            marker.setItemName(address.getAddressName());
+            marker.setItemName(address.placeName);
             marker.setTag(tagNum++);
-            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(address.getY(), address.getX());
+            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(address.y, address.x);
             marker.setMapPoint(mapPoint);
             marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
             marker.setCustomImageResourceId(R.drawable.blue_pin);
@@ -270,11 +282,9 @@ public class MapMarkerItems {
             mMarkerList.add(marker);
         
             Place place = new Place();
-            place.mapPoint = mapPoint;
             place.like = true;
-            place.address = address.getAddress();
-            place.attractName = address.getAddressName();
-        
+            place.address = address.address;
+            place.attractName = address.placeName;
             mPlaceList.add(place);
         
             /* Progress Loading done */

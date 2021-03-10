@@ -1,9 +1,8 @@
-package com.kop.daegudot.Network;
-
-import net.daum.mf.map.api.MapPoint;
+package com.kop.daegudot.Network.Map;
 
 // public 으로 변수 변경
 public class Place {
+    public long id;
     public String address;
     public String attractContents;
     public String attractName;
@@ -11,5 +10,6 @@ public class Place {
     public String telephone;
     public float rate;
     public boolean like;
-    public MapPoint mapPoint;
+    public String longitude;
+    public String latitude;
 }
