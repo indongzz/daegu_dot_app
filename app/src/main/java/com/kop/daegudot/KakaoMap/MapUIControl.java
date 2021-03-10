@@ -6,25 +6,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import androidx.core.content.ContextCompat;
+
 import com.kop.daegudot.R;
 
-public class MapUIControl implements View.OnClickListener {
+public class MapUIControl {
     Context mContext;
     View mView;
     
     Button[] mCategory;
-    Button[] mHashTag;
-    
-    Button mToggleBtn;
-    
-    int flag = 1;
+    int current = 0;
     
     MapUIControl(Context context, View view) {
         mContext = context;
         mView = view;
-    
-        mToggleBtn = mView.findViewById(R.id.toggle_btn);
-        mToggleBtn.setOnClickListener(this);
     }
 
     public void setCategoryBtn() {
@@ -35,73 +30,35 @@ public class MapUIControl implements View.OnClickListener {
         params.setMargins(margin, 0, margin, 0);
 
         LinearLayout layout = mView.findViewById(R.id.linear_layout);
-        String[] catString = {"카테고리1", "카테고리2", "카테고리3", "카테고리4", "카테고리5"};
+        String[] catString = {"명소", "숙박", "음식", "카페"};
         int size = catString.length;
 
         mCategory = new Button[size];
 
         for (int i = 0; i < size; i++) {
             mCategory[i] = new Button(mContext);
+            mCategory[i].setId(1000+i);
             mCategory[i].setText(catString[i]);
             mCategory[i].setTextSize(12);
             mCategory[i].setLayoutParams(params);
             mCategory[i].setPadding(1, 1, 1, 1);
-            mCategory[i].setBackground(mContext.getDrawable(R.drawable.round_line_btn));
+            mCategory[i].setBackground(ContextCompat.getDrawable(mContext, R.drawable.round_line_btn));
+            final int next = i;
+            mCategory[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    changeButtonUI(next);
+                    current = next;
+                }
+            });
             layout.addView(mCategory[i]);
         }
     }
     
-    
-    public void setHashBtn() {
-        int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, mContext.getResources().getDisplayMetrics());
-        int margin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, mContext.getResources().getDisplayMetrics());
-        
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, height);
-        params.setMargins(margin, 0, margin, 0);
-        
-        LinearLayout layout = mView.findViewById(R.id.linear_layout);
-        String[] catString = {"해시태그1", "해시태그2", "해시태그3", "해시태그4", "해시태그5"};
-        int size = catString.length;
-        
-        mHashTag = new Button[size];
-        
-        for (int i = 0; i < size; i++) {
-            mHashTag[i] = new Button(mContext);
-            mHashTag[i].setText(catString[i]);
-            mHashTag[i].setTextSize(12);
-            mHashTag[i].setLayoutParams(params);
-            mHashTag[i].setPadding(1, 1, 1, 1);
-            mHashTag[i].setBackground(mContext.getDrawable(R.drawable.round_line_btn));
-            layout.addView(mHashTag[i]);
-            
-            mHashTag[i].setVisibility(View.GONE);
-        }
-    }
-    
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.toggle_btn:
-                if (flag == 1) {
-                    for (Button button : mCategory) {
-                        button.setVisibility(View.GONE);
-                    }
-                    for (Button button : mHashTag) {
-                        button.setVisibility(View.VISIBLE);
-                    }
-                    mToggleBtn.setText("카테고리");
-                    flag = 0;
-                } else {
-                    for (Button button : mCategory) {
-                        button.setVisibility(View.VISIBLE);
-                    }
-                    for (Button button : mHashTag) {
-                        button.setVisibility(View.GONE);
-                    }
-                    mToggleBtn.setText("#해시태그");
-                    flag = 1;
-                }
-                break;
-        }
+    public void changeButtonUI(int next) {
+        mCategory[current].setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        mCategory[current].setBackground(ContextCompat.getDrawable(mContext, R.drawable.round_line_btn));
+        mCategory[next].setTextColor(ContextCompat.getColor(mContext, R.color.white));
+        mCategory[next].setBackground(ContextCompat.getDrawable(mContext, R.drawable.btn_blue));
     }
 }

@@ -51,6 +51,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     private BottomSheetBehavior mBSBSchedule;
     ViewPager2 mViewPager;
     ViewPagerAdapter adapter;
+    MapPOIItem prevPOIItem = null;
     
     public ProgressBar progressBar;     // 로딩 중
     
@@ -75,17 +76,16 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mMapView.setPOIItemEventListener(this);
         mMapView.setMapViewEventListener(this);
         mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(35.871344, 128.601705), true);
-        mMapView.setZoomLevel(4, true);
+        mMapView.setZoomLevel(3, true);
         
         // Set Hash Tag button and Category button
         mMapUIControl = new MapUIControl(this, view);
         mMapUIControl.setCategoryBtn();
-        mMapUIControl.setHashBtn();
         
         // Set MarkerItems
         mMapMarkerItems = new MapMarkerItems(this, mMapView);
-        mMapMarkerItems.setMarkerItems();
-//        mMarkerItems = mMapMarkerItems.getMarkerItems();
+//        mMapMarkerItems.setMarkerItems();
+        mMapMarkerItems.startRx2(128.601705,35.871344);
         mPlaceList = updatePlaceList();
         
         // TODO: get Schedule from DB or add Schedule
@@ -120,8 +120,8 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         placeName = mSubScheduleList.get(position).getPlaceName();
         address = mSubScheduleList.get(position).getAddress();
-        placeName.add(mPlaceList.get(tag).getAttractName());
-        address.add(mPlaceList.get(tag).getAddress());
+        placeName.add(mPlaceList.get(tag).attractName);
+        address.add(mPlaceList.get(tag).address);
         
         mSubScheduleList.get(position).setAddress(address);
         mSubScheduleList.get(position).setPlaceName(placeName);
@@ -195,6 +195,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         placeBottomSheet.changePlaceBottomSheet(mapPOIItem.getTag());
         mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
         mBSBSchedule.setState(BottomSheetBehavior.STATE_HIDDEN);
+        prevPOIItem = mapPOIItem;
     }
     
     @Override
@@ -231,6 +232,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
         mBSBSchedule.setState(BottomSheetBehavior.STATE_EXPANDED);
+        prevPOIItem = null;
     }
     
     @Override
@@ -263,6 +265,11 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
             if (mapView.getMapPointBounds().contains(item.getMapPoint())) {
                 mapView.addPOIItem(item);
             }
+        }
+        
+        // 이전에 클릭한 POIItem 띄우기
+        if (prevPOIItem != null) {
+            mapView.selectPOIItem(prevPOIItem, true);
         }
     }
 }

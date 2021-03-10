@@ -43,11 +43,13 @@ public interface RestApiService {
     );
     
     /* get place by category */
-    @GET("v2/local/search/category.{format}")
+    @GET("v2/local/search/category.json")
     Call<Documents> getPlacebyCategory(
             @Header("Authorization") String key,
+            @Query("category_group_code") String category_group_code,
             @Query("x") String x,
             @Query("y") String y,
             @Query("radius") int radius
     );
+    
 }

@@ -19,16 +19,18 @@ public class Documents {
     }
     
     public class Address {
-        @SerializedName("address_name")
+        @SerializedName("place_name")
         @Expose
         private String addressName;
+        @SerializedName("address_name")
+        @Expose
+        private String address;
         @SerializedName("x")
         @Expose
         private double x;
         @SerializedName("y")
         @Expose
         private double y;
-    
     
         public String getAddressName() {
             return addressName;
@@ -37,6 +39,15 @@ public class Documents {
         public void setAddressName(String addressName) {
             this.addressName = addressName;
         }
+    
+        public String getAddress() {
+            return address;
+        }
+    
+        public void setAddress(String address) {
+            this.address = address;
+        }
+    
         public double getX() {
             return x;
         }

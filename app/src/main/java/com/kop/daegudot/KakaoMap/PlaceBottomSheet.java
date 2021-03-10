@@ -51,13 +51,13 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         updatePlaceList();
         Place item = mPlaceList.get(tag);
         
-        title.setText(item.getAttractName());
-        address.setText(item.getAddress());
+        title.setText(item.attractName);
+        address.setText(item.address);
 //        summary.setText(item.getAttractContents());
         summary.setText("너무 길어서 일단 안보이게 하게쑵니다");
-        rating.setRating(item.getRate());
+        rating.setRating(item.rate);
         
-        if (mPlaceList.get(mTag).isLiked()) {
+        if (mPlaceList.get(mTag).like) {
             mHeartBtn.setBackgroundResource(R.drawable.full_heart);
         } else {
             mHeartBtn.setBackgroundResource(R.drawable.heart);
@@ -100,12 +100,12 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.heart_btn:
-                if (mPlaceList.get(mTag).isLiked()) { // 좋아요 했으면 취소
+                if (mPlaceList.get(mTag).like) { // 좋아요 했으면 취소
                     mHeartBtn.setBackgroundResource(R.drawable.heart);
-                    mPlaceList.get(mTag).setLike(false);
+                    mPlaceList.get(mTag).like = false;
                 } else {    // 좋아요 안했으면 좋아요
                     mHeartBtn.setBackgroundResource(R.drawable.full_heart);
-                    mPlaceList.get(mTag).setLike(true);
+                    mPlaceList.get(mTag).like = true;
                 }
                 break;
             case R.id.addToSch_btn:
