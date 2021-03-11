@@ -19,7 +19,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     private static final String TAG = "PostAdapter";
     
     private static Context mContext;
-    private ArrayList<PostList> mPostList;
+    private ArrayList<PostItem> mPostList;
     
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView title;
@@ -40,18 +40,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         
         @Override
         public void onClick(View v) {
-            Log.i(TAG, "id: " + itemView.getId());
-            Log.i(TAG, "context:" + mContext);
             ((RecommendListActivity) mContext).openDrawer(itemView.getId());
         }
         
     }
     
-    PostAdapter(Context context, ArrayList<PostList> postList) {
-        Log.i(TAG, "init");
+    PostAdapter(Context context, ArrayList<PostItem> postList) {
         mContext = context;
         mPostList = postList;
-        Log.i(TAG, "Adapter context: " + mContext);
     }
     
     @NonNull
@@ -60,13 +56,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.layout_post_list, parent,false);
     
-        Log.i(TAG, "ViewHolder");
         return new ViewHolder(view);
     }
     
     @Override
     public void onBindViewHolder(@NonNull PostAdapter.ViewHolder holder, int position) {
-        Log.i(TAG, "position: " + position);
         
         holder.title.setText(mPostList.get(position).getTitle());
         holder.ratingBar.setRating(mPostList.get(position).getRating());
@@ -75,7 +69,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         holder.itemView.setId(mPostList.get(position).getId());
         
     }
-    
     
     @Override
     public int getItemCount() {

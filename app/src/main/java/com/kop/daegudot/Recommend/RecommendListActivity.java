@@ -2,8 +2,10 @@ package com.kop.daegudot.Recommend;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,13 +14,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
-import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -31,10 +35,10 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     RecyclerView mRecyclerView;
     PostAdapter mAdapter;
     
-    ArrayList<PostList> mPostList = new ArrayList<>();
+    ArrayList<PostItem> mPostList = new ArrayList<>();
     DrawerLayout drawer;
     View mView;
-    
+    DrawerHandler mDrawerHandler;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,9 +62,9 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         
         mRecyclerView = findViewById(R.id.recommend_list_view);
         
+        // TODO: delete
         temporarySet();
         
-        Log.i(TAG, "size: " + mPostList.size());
         mAdapter = new PostAdapter(mContext, mPostList);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -74,7 +78,6 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-            
             }
     
             @Override
@@ -97,7 +100,6 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     
             @Override
             public void onDrawerStateChanged(int newState) {
-        
             }
         });
         
@@ -105,6 +107,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         backbtn2.setOnClickListener(this);
         TextView drawerTitle = findViewById(R.id.drawer_title);
         drawerTitle.setText("");
+        
     }
     
     public void temporarySet() {
@@ -116,7 +119,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         String[] content = {"내용1", "내용2", "내용3", "내용4"};
         
         for (int i = 0; i < 4; i++) {
-            PostList data = new PostList();
+            PostItem data = new PostItem();
             data.setTitle(title[i]);
             data.setRating(rating[i]);
             data.setWriter(writer[i]);
@@ -125,16 +128,14 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
             //TODO : id 할당
             data.setId(i);
             
-            Log.i(TAG, "comment: " + data.getCommentString());
-            
             mPostList.add(data);
             
         }
     }
     
     public void openDrawer(int id) {
-        PostList post = null;
-        for (PostList o : mPostList) {
+        PostItem post = null;
+        for (PostItem o : mPostList) {
             if (id == o.getId()) {
                 post = o;
                 break;
@@ -142,16 +143,17 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         }
         
         if (post != null) {
-            Log.i(TAG, "post: " + post.getTitle());
-    
             drawer.openDrawer(GravityCompat.END);
-            DrawerHandler drawerHandler = new DrawerHandler(mView, post);
-            drawerHandler.setDrawer();
-            
+            mDrawerHandler = new DrawerHandler(mContext, mView, post);
+            mDrawerHandler.setDrawer();
         }
         else {
             Log.e(TAG, "post: null");
         }
+    }
+    
+    public FragmentManager getFM() {
+        return getSupportFragmentManager();
     }
     
     @Override
@@ -162,6 +164,9 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 break;
             case R.id.drawer_backBtn:
                 drawer.closeDrawer(GravityCompat.END);
+                InputMethodManager keyboardManager =
+                        (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                keyboardManager.hideSoftInputFromWindow(mView.getWindowToken(), 0);
                 break;
         }
     }
