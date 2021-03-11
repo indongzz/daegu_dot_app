@@ -12,6 +12,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -55,7 +56,15 @@ public interface RestApiService {
             @Query("category_group_code") String category_group_code,
             @Query("x") String x,
             @Query("y") String y,
-            @Query("radius") int radius
+            @Query("radius") int radius,
+            @Query("page") int page
+    );
+    
+    @GET("v2/local/search/category.json")
+    Call<Documents> getPlacebyCategoryRect(
+            @Header("Authorization") String key,
+            @Query("category_group_code") String category_group_code,
+            @Query("rect") String coord
     );
     
 }

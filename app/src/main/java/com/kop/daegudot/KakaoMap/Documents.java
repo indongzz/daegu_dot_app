@@ -2,6 +2,7 @@ package com.kop.daegudot.KakaoMap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.kop.daegudot.Network.Map.Place;
 
 import java.util.List;
 
@@ -31,5 +32,19 @@ public class Documents {
         @SerializedName("y")
         @Expose
         public double y;
+        @SerializedName("category_group_code")
+        @Expose
+        public String category;
+    
+        @Override
+        public boolean equals(Object object) {
+            boolean equalName = false;
+        
+            if (object instanceof Address){
+                equalName = this.placeName.equals(((Address) object).placeName);
+            }
+        
+            return equalName;
+        }
     }
 }

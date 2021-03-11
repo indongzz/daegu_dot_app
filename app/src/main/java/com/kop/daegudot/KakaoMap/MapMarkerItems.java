@@ -44,6 +44,8 @@ public class MapMarkerItems {
     ArrayList<Place> mPlaceList;
     ArrayList<MapPOIItem> mMarkerList;
     ArrayList<Documents.Address> mAccomdList, mFoodList, mCafeList;
+    ArrayList<MapPOIItem> mMarkerCategoryList;
+    int tagNum = 0;
     
     private String key = "KakaoAK " + "fede27d02cb9592216a0a526b8683677";
     
@@ -55,8 +57,8 @@ public class MapMarkerItems {
         mAccomdList = new ArrayList<>();
         mFoodList = new ArrayList<>();
         mCafeList = new ArrayList<>();
+        mMarkerCategoryList = new ArrayList<>();
         
-    
         /* RxJava Error 난 경우 멈추지 않고 계속하기 */
         RxJavaPlugins.setErrorHandler(e -> {
             if (e instanceof UndeliverableException) {
@@ -92,6 +94,10 @@ public class MapMarkerItems {
     }
     
     public ArrayList<Place> getPlaceList() {
+        Log.d(TAG, "Place n: " + mPlaceList.size());
+        for (Place o : mPlaceList) {
+            Log.d(TAG, "id: " + o.id + " tag: " + o.tag + " name: " + o.attractName);
+        }
         return mPlaceList;
     }
     
@@ -109,7 +115,7 @@ public class MapMarkerItems {
                             @Override
                             public void onNext(List<Place> response) {
                                 Log.d("RX", "Next");
-                                mPlaceList = (ArrayList<Place>) response;
+                                mPlaceList.addAll(response);
                             }
                     
                             @Override
@@ -121,7 +127,7 @@ public class MapMarkerItems {
                             public void onComplete() {
                                 Log.d("RX", "complete");
                                 
-                                setMarkerRx();
+                                setServerMarker();
                                 
                                 /* Progress Loading done */
                                 ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
@@ -133,63 +139,25 @@ public class MapMarkerItems {
     /* get MapPoint by Address
      * set Markers on map
      */
-    private void setMarkerRx() {
-        RestApiService service2 = RestfulAdapter.getInstance().getKakaoServiceApi();
+    private void setServerMarker() {
         
-        int n = mPlaceList.size();
-        
-        for (int i = 0; i < n; i++) {
-            MapPOIItem marker = new MapPOIItem();
-            Place place = mPlaceList.get(i);
-            marker.setItemName(place.attractName);
-            marker.setTag(i);
-//            Log.d("RX_ADDRESSS", "address: " + place.address);
-            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
-                    Double.parseDouble(place.latitude), Double.parseDouble(place.longitude));
-            Log.d("RX_ADDRESS", "lat long: " + place.latitude + " " + place.longitude);
-            marker.setMapPoint(mapPoint);
-            marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-            marker.setCustomImageResourceId(R.drawable.blue_pin);
-            marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-            marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
-            marker.setShowCalloutBalloonOnTouch(false);
-            mMapView.addPOIItem(marker);
-            mMarkerList.add(marker);
-            
-//            Call<Documents> data = service2.getSearchAddress(key, mPlaceList.get(i).address);
-//            int finalI = i;
-//            data.enqueue(new Callback<Documents>() {
-//                @Override
-//                public void onResponse(Call<Documents> call, Response<Documents> response) {
-////                    Log.d("RX_ADDRESS", "code: " + response.body());
-//                    Documents body = response.body();
-//
-//                    if (response.body() != null && body.getDocuments().size() != 0) {
-//                        Documents.Address address = body.getDocuments().get(0);
-//                        Log.d("RX_ADDRESSS", "address: " + address.address);
-////                        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
-////                                address.y, address.x);
-//                        Log.d("RX_ADDRESS", "Map: " + address.y + " , " + address.x);
-////                        mPlaceList.get(finalI).mapPoint = mapPoint;
-////                        marker.setMapPoint(mapPoint);
-//                        marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-//                        marker.setCustomImageResourceId(R.drawable.blue_pin);
-//                        marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-//                        marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
-//                        marker.setShowCalloutBalloonOnTouch(false);
-//                        mMapView.addPOIItem(marker);
-//                        mMarkerList.add(marker);
-//                    } else {
-//                        Log.d("RX_ADDRESS", mPlaceList.get(finalI).address);
-//                    }
-//                }
-//
-//                @Override
-//                public void onFailure(Call<Documents> call, Throwable t) {
-//                    Log.d("RX_ADDRESS", "Failure!!");
-//                    t.printStackTrace();
-//                }
-//            });
+        for (Place place: mPlaceList) {
+            if (place.category == null) {
+                mPlaceList.get(tagNum).tag = tagNum;
+                MapPOIItem marker = new MapPOIItem();
+                marker.setItemName(place.attractName);
+                marker.setTag(tagNum++);
+                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
+                        Double.parseDouble(place.latitude), Double.parseDouble(place.longitude));
+                marker.setMapPoint(mapPoint);
+                marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+                marker.setCustomImageResourceId(R.drawable.blue_pin2);
+                marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+                marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
+                marker.setShowCalloutBalloonOnTouch(false);
+                mMapView.addPOIItem(marker);
+                mMarkerList.add(marker);
+            }
         }
     }
     
@@ -202,93 +170,127 @@ public class MapMarkerItems {
         Log.d(TAG, "x: " + x + "  y: " + y);
         
         RestApiService service = RestfulAdapter.getInstance().getKakaoServiceApi();
-        Call<Documents> call = service.getPlacebyCategory(
-                key, "AD5", x + "",y + "", 10000);
         
-        Log.d(TAG, "call getPlace by Category");
-        call.enqueue(new Callback<Documents>() {
-            @Override
-            public void onResponse(Call<Documents> call, Response<Documents> response) {
-                if (response.isSuccessful()) {
-                    assert response.body() != null;
-                    Log.d(TAG, response.body().getDocuments().toString());
-                    mAccomdList.addAll(response.body().getDocuments());
-                    setPlaceMarker(mAccomdList);
-                    
+        for (int i = 1; i <= 5; i++) {
+            Call<Documents> call = service.getPlacebyCategory(
+                    key, "AD5", x + "", y + "", 20000, i);
+            int finalI = i;
+            call.enqueue(new Callback<Documents>() {
+                @Override
+                public void onResponse(Call<Documents> call, Response<Documents> response) {
+                    if (response.isSuccessful()) {
+                        assert response.body() != null;
+                        Log.d(TAG, response.body().getDocuments().toString());
+                        ArrayList<Documents.Address> documents =
+                                (ArrayList<Documents.Address>) response.body().getDocuments();
+                        mAccomdList.removeAll(documents); // 중복제거
+                        mAccomdList.addAll(documents);
+                        setPlaceMarker(mAccomdList);
+
                     call = service.getPlacebyCategory(
-                            key, "FD6", x + "", y + "", 10000);
+                            key, "FD6", x + "", y + "", 20000, finalI);
                     call.enqueue(new Callback<Documents>() {
                         @Override
                         public void onResponse(Call<Documents> call, Response<Documents> response) {
                             if (response.isSuccessful()) {
-                                mFoodList.addAll(response.body().getDocuments());
-    
+                                ArrayList<Documents.Address> food =
+                                        (ArrayList<Documents.Address>) response.body().getDocuments();
+                                mFoodList.removeAll(food); // 중복 제거
+                                mFoodList.addAll(food);
+
                                 setPlaceMarker(mFoodList);
                             } // FD if문 종료
                         }
-    
+
                         @Override
                         public void onFailure(Call<Documents> call, Throwable t) {
                             Log.d(TAG, "FD6. Failure Code");
                         }
                     });
-                } else {
-                    Log.d(TAG, "code: " + response.code());
-                }   // AD if문 종료
-                
-            }
+                    } else {
+                        Log.d(TAG, "code: " + response.code());
+                    }   // AD if문 종료
             
-            @Override
-            public void onFailure(Call<Documents> call, Throwable t) {
-            
-            }
-        });
-    
-        Call<Documents> cafeCall = service.getPlacebyCategory(
-                key, "CE7", x + "", y + "", 10000);
-        cafeCall.enqueue(new Callback<Documents>() {
-            @Override
-            public void onResponse(Call<Documents> call, Response<Documents> response) {
-                if (response.isSuccessful()) {
-                    mCafeList.addAll(response.body().getDocuments());
-                    setPlaceMarker(mCafeList);
-                } else {
-                    Log.d(TAG, "Cafe response error code: " + response.code());
                 }
-            }
         
-            @Override
-            public void onFailure(Call<Documents> call, Throwable t) {
-                Log.d(TAG, "Cafe Failure");
-            }
-        });
-    }
+                @Override
+                public void onFailure(Call<Documents> call, Throwable t) {
+            
+                }
+            });
+        }
     
+        for (int i = 0; i < 5; i++) {
+            Call<Documents> cafeCall = service.getPlacebyCategory(
+                    key, "CE7", x + "", y + "", 20000, i + 1);
+            cafeCall.enqueue(new Callback<Documents>() {
+                @Override
+                public void onResponse(Call<Documents> call, Response<Documents> response) {
+                    if (response.isSuccessful()) {
+                        ArrayList<Documents.Address> cafe =
+                                (ArrayList<Documents.Address>) response.body().getDocuments();
+                        mCafeList.removeAll(cafe);
+                        mCafeList.addAll(cafe);
+
+                        setPlaceMarker(mCafeList);
+                    } else {
+                        Log.d(TAG, "Cafe response error code: " + response.code());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Documents> call, Throwable t) {
+                    Log.d(TAG, "Cafe Failure");
+                }
+            });
+        }
+    }
+   
     // set Markers from kakao
     public void setPlaceMarker(ArrayList<Documents.Address> arrayList) {
-        int tagNum = 0;
+        Log.d(TAG, "n: " + arrayList.size());
         for (Documents.Address address : arrayList) {
-            MapPOIItem marker = new MapPOIItem();
-            marker.setItemName(address.placeName);
-            marker.setTag(tagNum++);
-            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(address.y, address.x);
-            marker.setMapPoint(mapPoint);
-            marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-            marker.setCustomImageResourceId(R.drawable.blue_pin);
-            marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-            marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
-            marker.setShowCalloutBalloonOnTouch(false);
-            mMapView.addPOIItem(marker);
-            mMarkerList.add(marker);
-        
+            // 추가 안한 경우 추가하기
             Place place = new Place();
             place.like = true;
             place.address = address.address;
             place.attractName = address.placeName;
-            mPlaceList.add(place);
+            place.category = address.category;
+            place.tag = tagNum;
+            if (!mPlaceList.contains(place)) {
+                mPlaceList.add(place);
+                MapPOIItem marker = new MapPOIItem();
+                marker.setItemName(address.placeName);
+                marker.setTag(tagNum++);
+                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(address.y, address.x);
+                marker.setMapPoint(mapPoint);
+                marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+                if (place.category.equals("AD5")) {
+//                    marker.setCustomImageResourceId(R.drawable.blue_pin);
+                    marker.setCustomImageResourceId(R.drawable.hotel_pin);
+                } else if (place.category.equals("FD6")) {
+//                    marker.setCustomImageResourceId(R.drawable.pink_pin);
+                    marker.setCustomImageResourceId(R.drawable.food_pin);
+                } else if (place.category.equals("CE7")) {
+//                    marker.setCustomImageResourceId(R.drawable.green_pin);
+                    marker.setCustomImageResourceId(R.drawable.cafe_pin);
+                }
+                marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+                marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
+                marker.setShowCalloutBalloonOnTouch(false);
+                
+                mMapView.addPOIItem(marker);
+                mMarkerList.add(marker);
+            }
         
             /* Progress Loading done */
             ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
         }
+//        for (Place place: mPlaceList) {
+//            Log.d(TAG, "id: " + place.id + " tag: " + place.tag + " Place: "+ place.attractName);
+//        }
     }
+    
+
+    
 }

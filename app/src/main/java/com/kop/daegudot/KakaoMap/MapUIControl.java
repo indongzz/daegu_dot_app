@@ -49,6 +49,7 @@ public class MapUIControl {
                 public void onClick(View v) {
                     changeButtonUI(next);
                     current = next;
+                    ((MapMainActivity)mContext).changeCategory(current);
                 }
             });
             layout.addView(mCategory[i]);

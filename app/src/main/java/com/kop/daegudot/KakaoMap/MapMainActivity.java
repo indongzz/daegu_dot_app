@@ -38,6 +38,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     MapMarkerItems mMapMarkerItems;     // set map markerItems
     MapUIControl mMapUIControl;         // to control category and hash tag button
+    int categoryFlag = 0;
     
     // get Main and sub schedule list from previous activity
     MainScheduleInfo mMainSchedule;
@@ -85,7 +86,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         // Set MarkerItems
         mMapMarkerItems = new MapMarkerItems(this, mMapView);
         mMapMarkerItems.setMarkerItems();
-//        mMapMarkerItems.startRx2(128.601705,35.871344);
+        mMapMarkerItems.startRx2(128.601705,35.871344);
         mPlaceList = updatePlaceList();
         
         // TODO: get Schedule from DB or add Schedule
@@ -196,9 +197,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
         mBSBSchedule.setState(BottomSheetBehavior.STATE_HIDDEN);
         prevPOIItem = mapPOIItem;
-        Log.d("RX", "selected lat long: " + mapPOIItem.getMapPoint().getMapPointGeoCoord().latitude + " " +
-                mapPOIItem.getMapPoint().getMapPointGeoCoord().longitude);
-                
+        Log.d(TAG, "map: " + mapPOIItem.getItemName() + " " + mapPOIItem.getTag());
     }
     
     @Override
@@ -262,17 +261,54 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
         ArrayList<MapPOIItem> lists = mMapMarkerItems.getmMarkerList();
 
-        mapView.removeAllPOIItems();
+        addPOItoMapView(lists);
+    }
+    
+    public void changeCategory(int category) {
+        mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
+        mBSBSchedule.setState(BottomSheetBehavior.STATE_EXPANDED);
+        prevPOIItem = null;
+        categoryFlag = category;
+        
+        ArrayList<MapPOIItem> lists = mMapMarkerItems.getmMarkerList();
+        addPOItoMapView(lists);
+    }
+    
+    public void addPOItoMapView(ArrayList<MapPOIItem> lists) {
+        mMapView.removeAllPOIItems();
         
         for (MapPOIItem item: lists) {
-            if (mapView.getMapPointBounds().contains(item.getMapPoint())) {
-                mapView.addPOIItem(item);
+            if (mMapView.getMapPointBounds().contains(item.getMapPoint())) {
+                if (checkCategory(item)) {
+                    mMapView.addPOIItem(item);
+                }
             }
         }
         
         // 이전에 클릭한 POIItem 띄우기
         if (prevPOIItem != null) {
-            mapView.selectPOIItem(prevPOIItem, true);
+            mMapView.selectPOIItem(prevPOIItem, true);
         }
+    }
+    
+    public boolean checkCategory(MapPOIItem item) {
+        boolean bool = false;
+        String category = mPlaceList.get(item.getTag()).category;
+        
+        if (category == null) {
+            if (categoryFlag == 0) {
+                bool = true;
+            }
+        } else {
+            if (categoryFlag == 1 && category.equals("AD5")) {  // 숙박
+                bool = true;
+            } else if (categoryFlag == 2 && category.equals("FD6")) {  // 음식
+                bool = true;
+            } else if (categoryFlag == 3 && category.equals("CE7")) {  // 카페
+                bool = true;
+            }
+        }
+        
+        return bool;
     }
 }

@@ -49,10 +49,23 @@ public class RestfulAdapter {
     }
     
     public RestApiService getKakaoServiceApi() {
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+    
+        if (!TextUtils.isEmpty(null)) {
+            AuthenticationInterceptor authInterceptor =
+                    new AuthenticationInterceptor("Bearer " + null);
+            clientBuilder.addInterceptor(authInterceptor);
+        }
+        
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        clientBuilder.addInterceptor(loggingInterceptor);
+        
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(KAKAO_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .client(clientBuilder.build()) //added for interceptor
                 .build();
         
         return retrofit.create(RestApiService.class);
