@@ -28,6 +28,18 @@ import com.kakao.usermgmt.LoginButton;
 import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
 import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.R;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     // Google Login
@@ -42,6 +54,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     SharedPreferences pref ;
     public static SharedPreferences.Editor editor;
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
+    // Register 객체
+    private static User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +66,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         //   getHashKey();
 
+        user = new User();
+
         pref = getSharedPreferences("data", MODE_PRIVATE);
         editor = pref.edit();
 
-        checkAlreadyLogin();
+        // TODO: 자동로그인 활성화
+            checkAlreadyLogin();
 
         /* Google Sign In */
         findViewById(R.id.signin_google).setOnClickListener(this);
@@ -92,6 +111,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Log.d("checkAlreadyLogin", "Already Logged in");
         }
     }
+
+    public static void setRegisterInfo(String email, String password, char type) {
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setType(type);
+    }
+
+/*    public void testRx() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi();
+
+        HashMap<String, Object> hashmap = new HashMap<String, Object> ();
+        Observable<Long> observable = service.postRegister(hashmap);
+
+        *//*
+        Disposable disposable = observable
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .
+        *//*
+    }*/
 
     // SignIn Clicked
     private void googleSignIn() {
@@ -139,13 +179,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-
+                            setRegisterInfo(user.getEmail(), "google", 'g');
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             editor.putString("email", user.getEmail());
                             editor.putString("passwd", "google");
                             editor.putString("name", user.getDisplayName());
                             editor.commit();
+
+                            Log.i(TAG, "firebaseAuthWithGoogle email: " + user.getEmail());
+                            Log.i(TAG, "firebaseAuthWithGoogle name: " + user.getDisplayName());
+
+                            setRegisterInfo(user.getEmail(), "google", 'g');
 
                             updateUI(true);
                         } else {
@@ -184,15 +229,50 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public void convertToEmailLogin() {
+        String email = "test";
+        String nickname = "test123";
+        String pw = "test1234";
+        char type = 'a';
+        //String encryptedPassWord = encryptSHA256(pw);
+
+        User userRequest = new User(email, nickname, /*encryptedPassWord*/ pw, type);
+        startRx(userRequest);
+
         Intent intent = new Intent(LoginActivity.this, EmailLoginActivity.class);
         startActivity(intent);
     }
 
+    private String encryptSHA256(String pw) {
+        StringBuilder result = new StringBuilder();
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(pw.getBytes("UTF-8"));
+
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    result.append('0');
+                }
+                result.append(hex);
+            }
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return result.toString();
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Session.getCurrentSession().removeCallback(sessionCallback);
+
+        if (!mCompositeDisposable.isDisposed()) {
+            mCompositeDisposable.dispose();
+        }
     }
 
 
@@ -220,4 +300,30 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
     */
+
+    private void startRx(User userRequest) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<User> observable = service.requestLogin(userRequest);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<User>() {
+                    @Override
+                    public void onNext(User response) {
+                        Log.d("RX", response.toString());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
+                    }
+                })
+        );
+    }
 }

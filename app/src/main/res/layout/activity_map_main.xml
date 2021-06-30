@@ -35,8 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/search_view"
         android:layout_marginVertical="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="100dp">
+        android:layout_marginHorizontal="10dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -48,17 +47,12 @@
 
     </HorizontalScrollView>
 
-    <Button
-        android:id="@+id/toggle_btn"
+    <ProgressBar
+        android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:text="#해시태그"
-        android:theme="@style/tagStyle2"
-        android:background="@drawable/btn_blue"
-        android:layout_below="@id/search_view"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="10dp"
-        android:layout_marginVertical="10dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminateTint="@color/colorPrimary"
         />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

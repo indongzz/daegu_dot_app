@@ -3,6 +3,7 @@ package com.kop.daegudot.MySchedule;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+//import com.kop.daegudot.KakaoMap.ConvertToMapMainAcitivity;
 import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.KakaoMap.MarkerInfo;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -29,7 +34,7 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
         
         ViewHolder(View itemView) {
             super(itemView);
-    
+            
             nthDay = itemView.findViewById(R.id.tv_nthDay);
             detailAddress = itemView.findViewById(R.id.tv_detail);
             
@@ -40,12 +45,12 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
         @Override
         public void onClick(View v) {
             int pos = getAdapterPosition();
-    
+            
             if (pos != RecyclerView.NO_POSITION) {
                 // 세부 일정 클릭하여 MapMainActivity로 넘어가기
                 String whatDay = mSubScheduleList.get(pos).getDate();
                 Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
-        
+
                 Intent intent = new Intent(mContext, MapMainActivity.class);
                 intent.putExtra("MainSchedule", mMainSchedule);
                 intent.putParcelableArrayListExtra("SubScheduleList", mSubScheduleList);
@@ -85,5 +90,5 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
         return mSubScheduleList.size();
     }
     
-    
+
 }
