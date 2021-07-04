@@ -5,15 +5,27 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
 public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnClickListener{
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     EditText editName, editEmail;
     ImageButton backBtn;
@@ -82,5 +94,33 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
         Intent intent = new Intent(SignUpAddInfoActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void duplicateNicknameRx(String nickname) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<UserResponse> observable = service.checkNickDup(nickname);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        Toast.makeText(getApplicationContext(), "중복된 닉네임 입니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("NICKNAME", "DUPLICATE NICKNAME");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(getApplicationContext(), "사용가능한 닉네임 입니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("NICKNAME", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("NICKNAME", "complete");
+                    }
+                })
+        );
     }
 }

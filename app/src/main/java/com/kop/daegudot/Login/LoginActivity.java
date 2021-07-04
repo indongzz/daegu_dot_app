@@ -27,19 +27,14 @@ import com.kakao.auth.Session;
 import com.kakao.usermgmt.LoginButton;
 import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
 import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.R;
-import com.kop.daegudot.Network.RestApiService;
-import com.kop.daegudot.Network.RestfulAdapter;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableObserver;
-import io.reactivex.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     // Google Login
@@ -57,7 +52,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     // Register 객체
-    private static User user;
+    private static UserRegister userRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +61,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         //   getHashKey();
 
-        user = new User();
+        userRegister = new UserRegister();
 
         pref = getSharedPreferences("data", MODE_PRIVATE);
         editor = pref.edit();
@@ -110,12 +105,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             finish();
             Log.d("checkAlreadyLogin", "Already Logged in");
         }
-    }
-
-    public static void setRegisterInfo(String email, String password, char type) {
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setType(type);
     }
 
 /*    public void testRx() {
@@ -179,7 +168,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            setRegisterInfo(user.getEmail(), "google", 'g');
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             editor.putString("email", user.getEmail());
@@ -189,8 +177,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                             Log.i(TAG, "firebaseAuthWithGoogle email: " + user.getEmail());
                             Log.i(TAG, "firebaseAuthWithGoogle name: " + user.getDisplayName());
-
-                            setRegisterInfo(user.getEmail(), "google", 'g');
 
                             updateUI(true);
                         } else {
@@ -234,9 +220,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         String pw = "test1234";
         char type = 'a';
         //String encryptedPassWord = encryptSHA256(pw);
-
-        User userRequest = new User(email, nickname, /*encryptedPassWord*/ pw, type);
-        startRx(userRequest);
 
         Intent intent = new Intent(LoginActivity.this, EmailLoginActivity.class);
         startActivity(intent);
@@ -300,30 +283,4 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
     */
-
-    private void startRx(User userRequest) {
-        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
-        RestApiService service =  restfulAdapter.getServiceApi(null);
-        Observable<User> observable = service.requestLogin(userRequest);
-
-        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<User>() {
-                    @Override
-                    public void onNext(User response) {
-                        Log.d("RX", response.toString());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d("RX", e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        Log.d("RX", "complete");
-                    }
-                })
-        );
-    }
 }

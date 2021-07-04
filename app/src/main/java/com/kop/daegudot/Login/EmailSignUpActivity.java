@@ -3,9 +3,6 @@ package com.kop.daegudot.Login;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,15 +11,23 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserRegister;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
-import org.w3c.dom.Text;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class EmailSignUpActivity extends AppCompatActivity implements View.OnClickListener{
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
     ImageButton backBtn;
 
     EditText editNickName, editEmail, editPw, editPwCheck;
@@ -80,7 +85,6 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
             case R.id.btn_SignUp:
                 if (checkInfo()) {
                     addData();
-                    convertToMainActivity();
                 }
                 break;
             case R.id.backBtn:
@@ -88,7 +92,6 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
                 break;
             case R.id.btn_checkDup:
                 nickName = editNickName.getText().toString();
-
                 checkNickName(nickName);
                 break;
         }
@@ -96,15 +99,22 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
 
     public void addData() {
         // 자동 로그인을 위한 정보 저장
-        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+        /*SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("email", email);
         editor.putString("name", nickName);
         editor.putString("pw", pw);
-        editor.apply();
+        editor.apply();*/
 
         // Todo:
         //  db에 회원가입 정보 저장하기 : email, pw, nickName
+        UserRegister userRegister = new UserRegister();
+        userRegister.email = email;
+        userRegister.nickname = nickName;
+        userRegister.password = pw;
+        userRegister.type = 'N';
+
+        registerRx(userRegister);
         //LoginActivity.setRegisterInfo(email, pw, 'N');
     }
 
@@ -152,20 +162,72 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
             Toast.makeText(getApplicationContext(), "닉네임은 2글자 이상 6글자 이하로 설정해주세요", Toast.LENGTH_SHORT).show();
         } else {
             // Todo: db 닉네임 중복 확인
-            //  중복 아닌 경우
-            NICK_CHECKED = true;
-
-            //  중복 인 경우
-            Toast.makeText(getApplicationContext(), "중복된 닉네임 입니다", Toast.LENGTH_SHORT).show();
-            // NICK_CHECKED = false;
-
+            duplicateNicknameRx(name);
         }
     }
 
 
-    public void convertToMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
+    public void convertToEmailLoginActivity() {
+        Intent intent = new Intent(this, EmailLoginActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void registerRx(UserRegister userRegister) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<Long> observable = service.registerUser(userRegister);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Long>() {
+                    @Override
+                    public void onNext(Long response) {
+                        Toast.makeText(getApplicationContext(), "회원가입에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("REGISTER", "REGISTER Success!");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(getApplicationContext(), "회원가입이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("REGISTER", e.getMessage());
+                        //ToDo: 로그인 화면으로 전환할지 바로 메인으로 넘어갈지 정하기
+                        convertToEmailLoginActivity();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("REGISTER", "complete");
+                    }
+                })
+        );
+    }
+    private void duplicateNicknameRx(String nickname) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<UserResponse> observable = service.checkNickDup(nickname);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        Toast.makeText(getApplicationContext(), "중복된 닉네임 입니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("NICKNAME", "DUPLICATE NICKNAME");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(getApplicationContext(), "사용가능한 닉네임 입니다.", Toast.LENGTH_SHORT).show();
+                        NICK_CHECKED = true;
+                        Log.d("NICKNAME", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("NICKNAME", "complete");
+                    }
+                })
+        );
     }
 }
