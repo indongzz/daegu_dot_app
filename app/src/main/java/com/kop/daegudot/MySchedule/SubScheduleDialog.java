@@ -3,7 +3,9 @@ package com.kop.daegudot.MySchedule;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -11,17 +13,34 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.KakaoMap.PlaceBottomSheet;
+import com.kop.daegudot.KakaoMap.ViewPagerAdapter;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.Schedule.SubSchedule;
 import com.kop.daegudot.R;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class SubScheduleDialog extends Dialog implements View.OnClickListener {   // 세부 일정
+    private static final String TAG = "SubScheduleDialog";
     private Context mContext;
     private RecyclerView recyclerView;
     private SubScheduleAdapter adapter;
@@ -30,6 +49,9 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
     
     private ArrayList<SubScheduleInfo> mSubScheduleList = new ArrayList<>();
     private SubScheduleDialogListener dialogListener;
+    
+    /* Rxjava*/
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     
     public SubScheduleDialog(@NonNull Context context, MainScheduleInfo mainScheduleInfo,
                              SubScheduleDialogListener dialogListener) {
@@ -73,53 +95,82 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
     
     public void setItineraryText() {
         /* 세부 일정 날짜 */
-        
-        LocalDate[] dateArray = mMainScheduleInfo.getDateArray();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd");
-        
-        for (int i = 0; i < mMainScheduleInfo.getDateBetween(); i++) {
-            // TODO: 그 날짜 세부 일정 불러오기
-            SubScheduleInfo data = new SubScheduleInfo();
-            String dateText = i + 1 + "일차 - " + dateArray[i].format(formatter);
-            
-            data.setDate(dateText);
-            
-            ArrayList<String> address = new ArrayList<>();
-            ArrayList<String> attract = new ArrayList<>();
-            
-            if (i == 0) {
-                address.add("대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n");
-                address.add("대구 중구 동성로2가 70-1 중앙떡볶이 중앙떡볶이 주소가 더 길어야해애애애\n");
     
-                attract.add("더락");
-                attract.add("중앙떡볶이");
-            } else if (i == 1) {
-                address.add("대구 중구 동성로2길 95 동성로 엔터테인먼트몰 더락\n");
-                address.add("대구 수성구 무학로 151 라벨라쿠치나\n");
-                
-                attract.add("더락");
-                attract.add("라벨라쿠치나");
-            } else if (i == 2) {
-                address.add("대구 남구 대봉로 89 현짬뽕\n");
-                address.add("대구 수성구 동대구로 219 아웃백스테이크하우스\n");
-                address.add("대구 남구 현충로1길 16 앞산주택\n");
-                address.add("대구 수성구 수성못6길 10 2층 미즈컨테이너 수성점\n");
-                address.add("대구 남구 대명복개로 96 자환이네왕족발 본점\n");
-                
-                attract.add("현짬뽕");
-                attract.add("아웃백스테이크하우스");
-                attract.add("앞산주택");
-                attract.add("미즈컨테이너 수성점");
-                attract.add("지환이네\n왕족발 본점");
-            }
-    
-            data.setAddress(address);
-            data.setPlaceName(attract);
-            
-            mSubScheduleList.add(data);
-        }
+        getSubScheduleRx(mMainScheduleInfo.getMainId());
+        
         
     }
+    
+    // get subschedules by main schedule id
+    private void getSubScheduleRx(long mainScheduleId) {
+        Log.d("RX " + TAG, "Start!!!!!!!!!!!!");
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
+        Observable<List<SubSchedule>> observable = service.getSubscheduleList(mainScheduleId);
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<List<SubSchedule>>() {
+                    @Override
+                    public void onNext(List<SubSchedule> response) {
+                        Log.d("RX " + TAG, "getsubschedule: " + "Next");
+                        if (response.size() == 0) {
+                            /* no subschedule maded need to make subschedule arraylist */
+                            
+                            LocalDate[] dateArray = mMainScheduleInfo.getDateArray();
+                            
+                            for (int i = 0; i < mMainScheduleInfo.getDateBetween(); i++) {
+                                SubScheduleInfo s = new SubScheduleInfo();
+                                String dateText = dateArray[i].toString();
+                                s.setDate(dateText);
+    
+                                ArrayList<String> address = new ArrayList<>();
+                                ArrayList<String> attract = new ArrayList<>();
+    
+                                s.setAddress(address);
+                                s.setPlaceName(attract);
+    
+                                mSubScheduleList.add(s);
+                            }
+                            
+                            Intent intent = new Intent(mContext, MapMainActivity.class);
+                            intent.putExtra("MainSchedule", mMainScheduleInfo);
+                            intent.putParcelableArrayListExtra("SubScheduleList", mSubScheduleList);
+                            intent.putExtra("mainId", mainScheduleId);
+                            mContext.startActivity(intent);
+                            
+                        } else {
+                            
+                            for (int i = 0; i < response.size(); i++) {
+                                SubScheduleInfo s = new SubScheduleInfo();
+                                s.setSubId(response.get(i).subId);
+                                s.setPlaceNum(response.get(i).placeId);
+                                s.setDate(response.get(i).date);
+                                
+                                ArrayList<String> address = new ArrayList<>();
+                                ArrayList<String> attract = new ArrayList<>();
+
+                                s.setAddress(address);
+                                s.setPlaceName(attract);
+                                
+                                mSubScheduleList.add(s);
+                            }
+                        }
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX " + TAG, "getsubschedule: " + e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX " + TAG, "getsubschedule: complete");
+                        
+                    }
+                })
+        );
+    }
+    
     
     @Override
     public void onClick(View v) {

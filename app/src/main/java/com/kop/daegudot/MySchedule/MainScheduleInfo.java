@@ -12,7 +12,10 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
     private String mLastDate;
     private LocalDate mFirstLocalDate;
     private LocalDate mLastLocalDate;
+    private String mStartDate;
+    private String mEndDate;
     private int mDDate;
+    private long mainId;
     
     public MainScheduleInfo() {
 
@@ -54,11 +57,46 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
         this.mLastDate = mLastDate;
     }
     
+    // ver.2
+    public String getmStartDate() {
+        return mStartDate;
+    }
+    
+    public void setmStartDate(String mStartDate) {
+        this.mStartDate = mStartDate;
+    }
+    
+    public String getmEndDate() {
+        return mEndDate;
+    }
+    
+    public void setmEndDate(String mEndDate) {
+        this.mEndDate = mEndDate;
+    }
+    
     public int getmDDate() {
         return mDDate;
     }
     
     public void setmDDate() {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yy.MM.dd");
+        mFirstLocalDate = LocalDate.parse(mStartDate);
+        mLastLocalDate = LocalDate.parse(mEndDate);
+        LocalDate today = LocalDate.now();
+        mDDate = (int) ChronoUnit.DAYS.between(today, mFirstLocalDate);
+        mFirstDate = mFirstLocalDate.format(format);
+        mLastDate = mLastLocalDate.format(format);
+    }
+    
+    public long getMainId() {
+        return mainId;
+    }
+    
+    public void setMainId(long mainId) {
+        this.mainId = mainId;
+    }
+    
+    public void setmDDate2() {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yy.MM.dd");
         mFirstLocalDate = LocalDate.parse(mFirstDate, format);
         mLastLocalDate = LocalDate.parse(mLastDate, format);

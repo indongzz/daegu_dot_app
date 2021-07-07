@@ -9,8 +9,9 @@ public class SubScheduleInfo  implements Parcelable {
     private String date;
     private ArrayList<String> address;
     private int mainTag;
-    private int placeNum;
+    private long placeNum;
     private ArrayList<String> placeName;
+    private long subId;
     
     public SubScheduleInfo() {
     
@@ -50,11 +51,11 @@ public class SubScheduleInfo  implements Parcelable {
         this.address = address;
     }
     
-    public int getPlaceNum() {
+    public long getPlaceNum() {
         return placeNum;
     }
     
-    public void setPlaceNum(int placeNum) {
+    public void setPlaceNum(long placeNum) {
         this.placeNum = placeNum;
     }
     
@@ -66,6 +67,13 @@ public class SubScheduleInfo  implements Parcelable {
         this.placeName = placeName;
     }
     
+    public long getSubId() {
+        return subId;
+    }
+    
+    public void setSubId(long subId) {
+        this.subId = subId;
+    }
     
     
     public String getAddressString() {

@@ -4,12 +4,15 @@ import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Login.User;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
+import com.kop.daegudot.Network.Schedule.MainSchedule;
+import com.kop.daegudot.Network.Schedule.SubSchedule;
 
 import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -67,4 +70,39 @@ public interface RestApiService {
             @Query("rect") String coord
     );
     
+    /* MainSchedule */
+    
+    /* make new main Schedule */
+    @POST("/schedule/main/register")
+    Observable<Long> saveMainSchedule(@Body MainSchedule mainSchedule);
+    
+    /* get all main schedules */
+    @GET("/schedule/main/{userId}")
+    Observable<List<MainSchedule>> getMainSchedule(@Path("userId") long userId);
+    
+    /* delete a main Schedule */
+    @DELETE("/schedule/main/delete/{mainScheduleId}")
+    Observable<Long> deleteMainSchedule(@Path("mainScheduleId") long mainScheduleId);
+    
+    /* update main Schedule */
+    @PUT("/schedule/main/update/{mainscheduleId}")
+    Observable<Long> updateMainSchedule(@Path("mainscheduleId") long mainScheduleId);
+    
+    /* SubSchedule */
+    
+    /* insert sub Schedule*/
+    @POST("/schedule/sub/register")
+    Observable<Long> saveSubSchedule(@Body SubSchedule subSchedule);
+    
+    /* get sub Schedule by main schedule */
+    @GET("/schedule/sub/{mainscheduleId}")
+    Observable<List<SubSchedule>> getSubscheduleList(@Path("mainscheduleId") long mainScheduleId);
+    
+    /* delete subschedule from main schedule */
+    @DELETE("/schedule/sub/delete/{subscheduleId}")
+    Observable<Long> deleteSubSchedule(@Path("subscheduleId") long subScheduleId);
+    
+    /* update Subschedule*/
+    @PUT("/schedule/sub/update/{subscheduleId}")
+    Observable<Long> updateSubSchedule(@Path("subscheduleId") long subscheduleId);
 }

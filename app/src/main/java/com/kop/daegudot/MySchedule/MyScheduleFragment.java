@@ -1,46 +1,42 @@
 package com.kop.daegudot.MySchedule;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Range;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import android.widget.ListView;
 import android.widget.TextView;
 
-import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener;
-import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
-import com.applikeysolutions.cosmocalendar.utils.SelectionType;
-import com.applikeysolutions.cosmocalendar.view.CalendarView;
-
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.Schedule.MainSchedule;
 import com.kop.daegudot.R;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
-import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.MainActivity;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class MyScheduleFragment extends Fragment implements View.OnClickListener {
     View view;
     private ArrayList<MainScheduleInfo> mList = new ArrayList<>();
     private RecyclerView recyclerView;
     private MainScheduleAdapter adapter;
-
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     
     public MyScheduleFragment() {
         // Required empty public constructor
@@ -49,7 +45,8 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        prepareData();
+        
+        selectAllMainSchedule();
     }
 
     @Override
@@ -65,35 +62,54 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         
-        adapter = new MainScheduleAdapter(getContext(), mList);
-        recyclerView.setAdapter(adapter);
-        
         Button addOther = view.findViewById(R.id.addOtherSBtn);
         addOther.setOnClickListener(this);
     
+        Collections.sort(mList);
+        adapter = new MainScheduleAdapter(getContext(), mList);
+        recyclerView.setAdapter(adapter);
+        
         return view;
     }
     
-    private void prepareData() {
-        // TODO: get date data from DB
-        MainScheduleInfo data = new MainScheduleInfo();
-        String firstdate = "20.11.14";
-        String lastDate = "20.11.16";
-        data.setmFirstDate(firstdate);
-        data.setmLastDate(lastDate);
-        data.setmDDate();
-        
-        MainScheduleInfo data2 = new MainScheduleInfo();
-        String firstdate2 = "20.12.09";
-        String lastDate2 = "20.12.16";
-        data2.setmFirstDate(firstdate2);
-        data2.setmLastDate(lastDate2);
-        data2.setmDDate();
-
-        mList.add(data);
-        mList.add(data2);
+    private void selectAllMainSchedule() {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
+        Observable<List<MainSchedule>> observable = service.getMainSchedule(1);
     
-        Collections.sort(mList);
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<List<MainSchedule>>() {
+                    @Override
+                    public void onNext(List<MainSchedule> response) {
+                        Log.d("RX", "Next");
+                        if (response != null) {
+                            for (int i = 0; i < response.size(); i++) {
+                                MainSchedule m = response.get(i);
+                                MainScheduleInfo data = new MainScheduleInfo();
+                                data.setmStartDate(m.startDate);
+                                data.setmEndDate(m.endDate);
+                                data.setmDDate();
+                                // TODO: id 부분 받아오는거 해결되면 수정필요
+                                Log.d("RX myschedule", "id: " + m.mainId + " start: " + m.startDate);
+                                data.setMainId(m.mainId);
+                                mList.add(data);
+                            }
+                        }
+                    }
+                
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                    }
+                
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
+    
+                        Collections.sort(mList);
+                    }
+                })
+        );
     }
     
     
