@@ -3,6 +3,7 @@ package com.kop.daegudot.Login;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +28,8 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     EditText email;
     EditText pw;
+
+    SharedPreferences mTokenPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +73,8 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
         userLogin.password = pw.getText().toString();
 
         Log.d("LOGIN", userLogin.email + " "+userLogin.password);
-        loginRx(userLogin);
+        //로그인 네트워크
+        selectEmailAndPassword(userLogin);
     }
 
     public void convertToSignUp() {
@@ -84,7 +88,7 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
         finish();
     }
 
-    private void loginRx(UserLogin userLogin) {
+    private void selectEmailAndPassword(UserLogin userLogin) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
         Observable<UserResponse> observable = service.requestLogin(userLogin);
@@ -95,6 +99,13 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
                     @Override
                     public void onNext(UserResponse response) {
                         Log.d("LOGIN", "LOGIN SUCCESS");
+
+                        //토큰 저장하기
+                        mTokenPref = getSharedPreferences("data", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = mTokenPref.edit();
+                        editor.putString("token", response.token);
+                        editor.apply();
+
                         convertToMainActivity();
                     }
 
