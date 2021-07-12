@@ -21,6 +21,7 @@ import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.Schedule.MainSchedule;
+import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
 import com.kop.daegudot.R;
 
 import java.time.LocalDate;
@@ -89,7 +90,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                         startCal.toInstant(), startCal.getTimeZone().toZoneId()).toLocalDate();
                         
                 mBtnDay1 = localStart.format(DateTimeFormatter.ofPattern("M월d일"));
-                mStartDate = localStart.format(DateTimeFormatter.ofPattern("yy.MM.dd"));
+                mStartDate = localStart.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 Log.i(TAG, "mStartDate: " + mStartDate + "mbtnday1: " + mBtnDay1);
                 
                 Calendar endCal = days.get(days.size() - 1);
@@ -97,7 +98,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                         endCal.toInstant(), endCal.getTimeZone().toZoneId()).toLocalDate();
 
                 mBtnDay2 = localEnd.format(DateTimeFormatter.ofPattern("M월d일"));
-                mEndDate = localEnd.format(DateTimeFormatter.ofPattern("yy.MM.dd"));
+                mEndDate = localEnd.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
                 String text = null;
                 if (mBtnDay1.equals(mBtnDay2)) {
@@ -127,11 +128,13 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                     // save main schedule to DB
                     // complete: change to Kakao Map Activity
                     // failure: none
-                    MainSchedule mainSchedule = new MainSchedule();
-                    mainSchedule.startDate = localStart.toString();
-                    mainSchedule.endDate = localEnd.toString();
-                    mainSchedule.userId = 1;
-                    registerMainSchedule(mainSchedule);
+//                    UserResponse user = new UserResponse;
+//                    user.id = (long)1;
+                    MainScheduleRegister mainScheduleRegister = new MainScheduleRegister();
+                    mainScheduleRegister.startDate = localStart.toString();
+                    mainScheduleRegister.endDate = localEnd.toString();
+                    mainScheduleRegister.userId = 1;
+                    registerMainSchedule(mainScheduleRegister);
                 } else {
                     Toast.makeText(getContext(), "날짜를 선택해주세요", Toast.LENGTH_SHORT).show();
                 }
@@ -139,18 +142,20 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         }
     }
     
-   private void registerMainSchedule(MainSchedule mainSchedule) {
+   private void registerMainSchedule(MainScheduleRegister mainSchedule) {
        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
        
        Observable<Long> observable = service.saveMainSchedule(mainSchedule);
     
+       final long[] mainId = new long[1];
+       
        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                .observeOn(AndroidSchedulers.mainThread())
                .subscribeWith(new DisposableObserver<Long>() {
                    @Override
                    public void onNext(Long response) {
                        Log.d("RX", "Next" + " Response id:: " + response);
-                       mainSchedule.mainId = response;
+                       mainId[0] = response;
                    }
                 
                    @Override
@@ -166,7 +171,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                        Intent intent = new Intent(getContext(), MapMainActivity.class);
                        intent.putExtra("startDay", mStartDate);
                        intent.putExtra("endDay", mEndDate);
-                       intent.putExtra("mainId", mainSchedule.mainId);
+                       intent.putExtra("mainId", mainId);
                        startActivity(intent);
                        flag = 0;
                     

@@ -180,8 +180,9 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         } else {
             Log.i(TAG, "mMainSchedule is null add new MainSchedule");
             mMainSchedule = new MainScheduleInfo();
-            mMainSchedule.setmFirstDate(addStartDay);
-            mMainSchedule.setmLastDate(addEndDay);
+            Log.d(TAG, "mainSchedule start day: " + addStartDay + " " + addEndDay);
+            mMainSchedule.setmStartDate(addStartDay);
+            mMainSchedule.setmEndDate(addEndDay);
             mMainSchedule.setmDDate();
         
             mSubScheduleList = new ArrayList<>();
@@ -189,7 +190,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
                 SubScheduleInfo data = new SubScheduleInfo();
                 LocalDate[] dateArray = mMainSchedule.getDateArray();
                 String dateText = i + 1 + "일차 - "
-                        + dateArray[i].format(DateTimeFormatter.ofPattern("MM/dd"));
+                        + dateArray[i].format(DateTimeFormatter.ofPattern("MM.dd"));
             
                 data.setDate(dateText);
             

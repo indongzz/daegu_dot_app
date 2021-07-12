@@ -64,10 +64,11 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         
         Button addOther = view.findViewById(R.id.addOtherSBtn);
         addOther.setOnClickListener(this);
-    
+        
         Collections.sort(mList);
         adapter = new MainScheduleAdapter(getContext(), mList);
         recyclerView.setAdapter(adapter);
+        Log.d("MyScheduleFragment", "RecyclerView Adapter Done");
         
         return view;
     }
@@ -90,7 +91,9 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
                                 data.setmEndDate(m.endDate);
                                 data.setmDDate();
                                 // TODO: id 부분 받아오는거 해결되면 수정필요
-                                Log.d("RX myschedule", "id: " + m.mainId + " start: " + m.startDate);
+                                Log.d("RX myschedule", "id: " + m.mainId +
+                                        " start: " + m.startDate + " userid & email: " +
+                                        +m.user.id + m.user.email);
                                 data.setMainId(m.mainId);
                                 mList.add(data);
                             }
@@ -107,6 +110,7 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
                         Log.d("RX", "complete");
     
                         Collections.sort(mList);
+                        refresh();
                     }
                 })
         );
@@ -115,7 +119,7 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     
     public void refresh() {
         // 데이터 추가 시 갱신
-        // adapter.notifyDataSetChanged();
+         adapter.notifyDataSetChanged();
     }
     
     @Override

@@ -2,14 +2,14 @@ package com.kop.daegudot.MySchedule;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelable{
-    private String mFirstDate;
-    private String mLastDate;
+    // 2020-02-02 format
     private LocalDate mFirstLocalDate;
     private LocalDate mLastLocalDate;
     private String mStartDate;
@@ -22,8 +22,8 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
     }
 
     protected MainScheduleInfo(Parcel in) {
-        mFirstDate = in.readString();
-        mLastDate = in.readString();
+        mStartDate = in.readString();
+        mEndDate = in.readString();
         mFirstLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
         mLastLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
         mDDate = in.readInt();
@@ -40,22 +40,6 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
             return new MainScheduleInfo[size];
         }
     };
-    
-    public String getmFirstDate() {
-        return mFirstDate;
-    }
-    
-    public void setmFirstDate(String mFirstDate) {
-        this.mFirstDate = mFirstDate;
-    }
-    
-    public String getmLastDate() {
-        return mLastDate;
-    }
-    
-    public void setmLastDate(String mLastDate) {
-        this.mLastDate = mLastDate;
-    }
     
     // ver.2
     public String getmStartDate() {
@@ -84,8 +68,6 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
         mLastLocalDate = LocalDate.parse(mEndDate);
         LocalDate today = LocalDate.now();
         mDDate = (int) ChronoUnit.DAYS.between(today, mFirstLocalDate);
-        mFirstDate = mFirstLocalDate.format(format);
-        mLastDate = mLastLocalDate.format(format);
     }
     
     public long getMainId() {
@@ -96,24 +78,18 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
         this.mainId = mainId;
     }
     
-    public void setmDDate2() {
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yy.MM.dd");
-        mFirstLocalDate = LocalDate.parse(mFirstDate, format);
-        mLastLocalDate = LocalDate.parse(mLastDate, format);
-        LocalDate today = LocalDate.now();
-        mDDate = (int) ChronoUnit.DAYS.between(today, mFirstLocalDate);
-    }
-    
     public String getButtonString() {
         // 년도 제외하고 월 일만 추출 + D-day
         // 리스트뷰에 들어가는 버튼 이름에 사용함.
-        return mFirstDate.substring(3) + " ~ " + mLastDate.substring(3) + " / " + "D-" + mDDate;
+        return mStartDate.substring(5, 7) + "." + mStartDate.substring(8, 10)+ " ~ " +
+                mEndDate.substring(5, 7) + "." + mEndDate.substring(8, 10) + " / " + "D-" + mDDate;
     }
     
     public String getDateString() {
         // 월 일만 추출
         // title로 사용
-        return mFirstDate.substring(3) + " ~ " + mLastDate.substring(3);
+        return mStartDate.substring(5, 7) + "." + mStartDate.substring(8, 10)+ " ~ " +
+                mEndDate.substring(5, 7) + "." +  mEndDate.substring(8, 10);
     }
     
     
@@ -143,8 +119,8 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mFirstDate);
-        dest.writeString(mLastDate);
+        dest.writeString(mStartDate);
+        dest.writeString(mEndDate);
         dest.writeValue(mFirstLocalDate);
         dest.writeValue(mLastLocalDate);
         dest.writeInt(mDDate);
