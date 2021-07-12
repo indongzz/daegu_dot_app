@@ -83,8 +83,8 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.btn_SignUp:
-                if (checkInfo()) {
-                    addData();
+                if (checkInfo()) { //형식이 맞으면
+                    selectEmail(email); //이메일 중복검사 및 회원 가입
                 }
                 break;
             case R.id.backBtn:
@@ -106,15 +106,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         editor.putString("pw", pw);
         editor.apply();*/
 
-        // Todo:
-        //  db에 회원가입 정보 저장하기 : email, pw, nickName
-        UserRegister userRegister = new UserRegister();
-        userRegister.email = email;
-        userRegister.nickname = nickName;
-        userRegister.password = pw;
-        userRegister.type = 'N';
 
-        registerRx(userRegister);
         //LoginActivity.setRegisterInfo(email, pw, 'N');
     }
 
@@ -123,14 +115,15 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         pw = editPw.getText().toString();
         pwCheck = editPwCheck.getText().toString();
 
+        //닉네임 형식
         if (!NICK_CHECKED) {
             editNickName.requestFocus();
             Toast.makeText(getApplicationContext(), "닉네임 중복확인을 해주세요", Toast.LENGTH_SHORT).show();
             return false;
         }
 
+        //이메일 형식
         if (email.matches(emailValidation) && email.length() > 0) {
-            // 이메일 형식이 맞으면 넘어가기
             Log.d("CheckInfo", "email 형식 맞음" + email);
         } else {
             editEmail.requestFocus();
@@ -138,6 +131,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
             return false;
         }
 
+        //비밀번호 형식
         if (pw.length() < 4 || pw.length() > 20) {
             editPw.requestFocus();
             Toast.makeText(getApplicationContext(), "비밀번호는 4 ~ 20자 사이로 입력해주세요", Toast.LENGTH_SHORT).show();
@@ -162,7 +156,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
             Toast.makeText(getApplicationContext(), "닉네임은 2글자 이상 6글자 이하로 설정해주세요", Toast.LENGTH_SHORT).show();
         } else {
             // Todo: db 닉네임 중복 확인
-            duplicateNicknameRx(name);
+            selectNickname(name);
         }
     }
 
@@ -173,7 +167,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         finish();
     }
 
-    private void registerRx(UserRegister userRegister) {
+    private void insertUser(UserRegister userRegister) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
         Observable<Long> observable = service.registerUser(userRegister);
@@ -184,25 +178,26 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onNext(Long response) {
                         Toast.makeText(getApplicationContext(), "회원가입에 실패하였습니다.", Toast.LENGTH_SHORT).show();
-                        Log.d("REGISTER", "REGISTER Success!");
+                        Log.d("INSERT USER", "REGISTER Success!");
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Toast.makeText(getApplicationContext(), "회원가입이 완료되었습니다.", Toast.LENGTH_SHORT).show();
-                        Log.d("REGISTER", e.getMessage());
+                        Log.d("INSERT USER", e.getMessage());
                         //ToDo: 로그인 화면으로 전환할지 바로 메인으로 넘어갈지 정하기
                         convertToEmailLoginActivity();
+                        //ToDo: 토큰 읽어오기
                     }
 
                     @Override
                     public void onComplete() {
-                        Log.d("REGISTER", "complete");
+                        Log.d("INSERT USER", "complete");
                     }
                 })
         );
     }
-    private void duplicateNicknameRx(String nickname) {
+    private void selectNickname(String nickname) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
         Observable<UserResponse> observable = service.checkNickDup(nickname);
@@ -213,21 +208,59 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onNext(UserResponse response) {
                         Toast.makeText(getApplicationContext(), "중복된 닉네임 입니다.", Toast.LENGTH_SHORT).show();
-                        Log.d("NICKNAME", "DUPLICATE NICKNAME");
+                        Log.d("NICKNAME_DUP", "DUPLICATE NICKNAME" + " " + nickname);
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Toast.makeText(getApplicationContext(), "사용가능한 닉네임 입니다.", Toast.LENGTH_SHORT).show();
                         NICK_CHECKED = true;
-                        Log.d("NICKNAME", e.getMessage());
+                        Log.d("NICKNAME_DUP", e.getMessage() + " " + nickname);
                     }
 
                     @Override
                     public void onComplete() {
-                        Log.d("NICKNAME", "complete");
+                        Log.d("NICKNAME_DUP", "complete");
                     }
                 })
         );
     }
+    private void selectEmail(String email) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<UserResponse> observable = service.checkEmailDup(email);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        Toast.makeText(getApplicationContext(), "중복된 이메일 입니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("EMAIl_DUP", "DUPLICATE EMAIL" + " " + email);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(getApplicationContext(), "사용가능한 이메일 입니다.", Toast.LENGTH_SHORT).show();
+                        // Todo:
+                        //  db에 회원가입 정보 저장하기 : email, pw, nickName
+                        UserRegister userRegister = new UserRegister();
+                        userRegister.email = email;
+                        userRegister.nickname = nickName;
+                        userRegister.password = pw;
+                        userRegister.type = 'N';
+
+                        insertUser(userRegister);
+
+                        Log.d("EMAIL_DUP", e.getMessage() + " " + email);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("EMAIL_DUP", "complete");
+                    }
+                })
+        );
+    }
+
 }

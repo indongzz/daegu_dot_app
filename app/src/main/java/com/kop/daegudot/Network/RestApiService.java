@@ -28,7 +28,7 @@ public interface RestApiService {
     @POST("/user/register")
     Observable<Long> registerUser(@Body UserRegister userRegisterRequest);
 
-    @GET("/user/register/{email}")
+    @GET("/user/register/email/{email}")
     Observable<UserResponse> checkEmailDup(@Path("email") String email);
 
     @GET("/user/register/nickname/{nickname}")
@@ -67,5 +67,5 @@ public interface RestApiService {
             @Query("category_group_code") String category_group_code,
             @Query("rect") String coord
     );
-    
+
 }
