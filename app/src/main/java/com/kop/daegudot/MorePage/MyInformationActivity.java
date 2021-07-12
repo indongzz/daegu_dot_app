@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -17,12 +18,25 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.kop.daegudot.IntroPageActivity;
 import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserRegister;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
 public class MyInformationActivity extends AppCompatActivity implements View.OnClickListener {
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
     private Context mContext;
     private ArrayList<String> mArrayList;
     private ListView mListView;
@@ -32,6 +46,7 @@ public class MyInformationActivity extends AppCompatActivity implements View.OnC
     private TextView mEmail;
 
     private SharedPreferences pref;
+    private String mToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +65,10 @@ public class MyInformationActivity extends AppCompatActivity implements View.OnC
         mEmail = findViewById(R.id.profile_email);
         
         pref = getSharedPreferences("data", MODE_PRIVATE);
-        if (!Objects.equals(pref.getString("email", ""), "")) {
-            mEmail.setText(pref.getString("email", ""));
-        }
+        mToken = pref.getString("token", "");
+
+        //ToDo: 토큰으로 사용자 정보 가져오기
+        selectUserByToken();
 
         mListView = findViewById(R.id.myinfo_list);
         mListView.setOnItemClickListener(onItemClickListener);
@@ -73,12 +89,12 @@ public class MyInformationActivity extends AppCompatActivity implements View.OnC
             switch (position){
                 case 0: //비밀번호 변경 클릭
                     PasswordChangeDialog passwordChangeDialog =
-                            new PasswordChangeDialog(MyInformationActivity.this);
+                            new PasswordChangeDialog(MyInformationActivity.this, mToken);
                     passwordChangeDialog.callFunctionForPassword();
                     break;
                 case 1: //별명 변경 클릭
                     NicknameChangeDialog nicknameChangeDialog =
-                            new NicknameChangeDialog(MyInformationActivity.this);
+                            new NicknameChangeDialog(MyInformationActivity.this, mToken, mName.getText().toString());
                     nicknameChangeDialog.callFunctionForNickname();
                     break;
                 case 2:
@@ -118,4 +134,34 @@ public class MyInformationActivity extends AppCompatActivity implements View.OnC
         }
         
     }
+
+    //토큰으로 회원 정보 가져오기
+    private void selectUserByToken() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(mToken);
+        Observable<UserResponse> observable = service.getUserFromToken();
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        mName.setText(response.nickname);
+                        mEmail.setText(response.email);
+                        Log.d("TOKEN", "TOKEN OK" + " " + response.email);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("TOKEN", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("TOKEN", "complete");
+                    }
+                })
+        );
+    }
+
 }

@@ -1,12 +1,16 @@
 package com.kop.daegudot.Network;
 
 import com.kop.daegudot.KakaoMap.Documents;
-import com.kop.daegudot.Login.User;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
 import com.kop.daegudot.Network.Schedule.MainSchedule;
 import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
 import com.kop.daegudot.Network.Schedule.SubSchedule;
+import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
+import com.kop.daegudot.Network.More.MyInfo.PasswordUpdate;
+import com.kop.daegudot.Network.User.UserRegister;
+import com.kop.daegudot.Network.User.UserLogin;
+import com.kop.daegudot.Network.User.UserResponse;
 
 import java.util.List;
 
@@ -28,16 +32,16 @@ public interface RestApiService {
 
     /* Login */
     @POST("/user/register")
-    Observable<Long> registerUser(@Body User userRequest);
+    Observable<Long> registerUser(@Body UserRegister userRegisterRequest);
 
-    @GET("/user/register/{email}")
-    String checkEmailDup(@Path("email") String email);
+    @GET("/user/register/email/{email}")
+    Observable<UserResponse> checkEmailDup(@Path("email") String email);
 
-    @GET("/user/register/{nickname}")
-    Observable<List<User>> checkNickDup(@Path("email") String nickname);
+    @GET("/user/register/nickname/{nickname}")
+    Observable<UserResponse> checkNickDup(@Path("nickname") String nickname);
 
     @POST("/user/login")
-    Observable<User> requestLogin(@Body User userRequest);
+    Observable<UserResponse> requestLogin(@Body UserLogin userLogin);
 
     @GET("/places/list")
     Observable<List<Place>> getPlaceList();
@@ -105,4 +109,14 @@ public interface RestApiService {
     /* update Subschedule*/
     @PUT("/schedule/sub/update/{subscheduleId}")
     Observable<Long> updateSubSchedule(@Path("subscheduleId") long subscheduleId);
+
+    @GET("/user/info")
+    Observable<UserResponse> getUserFromToken();
+
+    @PUT("/user/update/nickname")
+    Observable<Long> updateUserNickname(@Body NicknameUpdate nicknameUpdate);
+
+    @PUT("/user/update/password")
+    Observable<Long> updateUserPassword(@Body PasswordUpdate passwordUpdate);
+
 }

@@ -5,19 +5,31 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserLogin;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
-public class EmailLoginActivity extends AppCompatActivity implements View.OnClickListener {
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
+public class EmailLoginActivity extends AppCompatActivity implements View.OnClickListener {
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     EditText email;
     EditText pw;
+
+    SharedPreferences mTokenPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,33 +62,19 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
                 finish();
                 break;
             case R.id.btn_login:
-                if (checkEmail()) {
-                    convertToMainActivity();
-                }
+                checkEmail();
                 break;
         }
     }
 
-    public boolean checkEmail() {
-        String sEmail = email.getText().toString();
-        String sPw = pw.getText().toString();
+    public void checkEmail(){
+        UserLogin userLogin = new UserLogin();
+        userLogin.email = email.getText().toString();
+        userLogin.password = pw.getText().toString();
 
-        // email 이 데이터베이스 정보와 일치 하면 shared pref
-        // if (sEmail.equals()~~?)
-        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-
-        editor.clear();
-        editor.apply();
-        editor.putString("email", sEmail);
-        editor.putString("pw", sPw);
-        editor.apply();
-
-
-        return true;
-        // else이면 Toast 출력
-        //Toast.makeText(getApplicationContext(), "아이디나 비밀번호가 일치하지 않습니다", Toast.LENGTH_SHORT);
-        // return false
+        Log.d("LOGIN", userLogin.email + " "+userLogin.password);
+        //로그인 네트워크
+        selectEmailAndPassword(userLogin);
     }
 
     public void convertToSignUp() {
@@ -90,4 +88,38 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
         finish();
     }
 
+    private void selectEmailAndPassword(UserLogin userLogin) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<UserResponse> observable = service.requestLogin(userLogin);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        Log.d("LOGIN", "LOGIN SUCCESS");
+
+                        //토큰 저장하기
+                        mTokenPref = getSharedPreferences("data", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = mTokenPref.edit();
+                        editor.putString("token", response.token);
+                        editor.apply();
+
+                        convertToMainActivity();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("LOGIN", e.getMessage());
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("LOGIN", "complete");
+                    }
+                })
+        );
+    }
 }
