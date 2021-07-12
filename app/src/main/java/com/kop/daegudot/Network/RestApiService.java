@@ -3,6 +3,8 @@ package com.kop.daegudot.Network;
 import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
+import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
+import com.kop.daegudot.Network.More.MyInfo.PasswordUpdate;
 import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.Network.User.UserLogin;
 import com.kop.daegudot.Network.User.UserResponse;
@@ -67,5 +69,14 @@ public interface RestApiService {
             @Query("category_group_code") String category_group_code,
             @Query("rect") String coord
     );
+
+    @GET("/user/info")
+    Observable<UserResponse> getUserFromToken();
+
+    @PUT("/user/update/nickname")
+    Observable<Long> updateUserNickname(@Body NicknameUpdate nicknameUpdate);
+
+    @PUT("/user/update/password")
+    Observable<Long> updateUserPassword(@Body PasswordUpdate passwordUpdate);
 
 }
