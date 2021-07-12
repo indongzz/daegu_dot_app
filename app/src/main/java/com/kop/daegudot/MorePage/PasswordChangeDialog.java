@@ -2,6 +2,7 @@ package com.kop.daegudot.MorePage;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -9,17 +10,31 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
+import com.kop.daegudot.Network.More.MyInfo.PasswordUpdate;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.R;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
 public class PasswordChangeDialog {
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
     private Context mContext;
     private EditText newPassword;
     private EditText newPasswordCheck;
     private Button changeBtn;
     private Button cancelBtn;
+    private String mToken;
 
-    public PasswordChangeDialog(Context context){
+    public PasswordChangeDialog(Context context, String token){
         mContext = context;
+        mToken = token;
     }
 
     public void callFunctionForPassword(){
@@ -47,7 +62,9 @@ public class PasswordChangeDialog {
                 if(newPwd.getBytes().length > 0 && checkPwd.getBytes().length>0) {
                     if (newPwd.equals(checkPwd)) {
                         //TODO: 변경된 비밀번호 서버로 넘겨주기
-                        Toast.makeText(mContext, "비밀번호 변경이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                        PasswordUpdate passwordUpdate = new PasswordUpdate();
+                        passwordUpdate.password = newPwd;
+                        updatePassword(passwordUpdate);
                     } else {
                         Toast.makeText(mContext, "비밀번호가 일치하지 않습니다.\n다시 입력해주세요.", Toast.LENGTH_SHORT).show();
                     }
@@ -66,5 +83,33 @@ public class PasswordChangeDialog {
                 dialog.dismiss();
             }
         });
+    }
+
+    //비밀번호 변경
+    private void updatePassword(PasswordUpdate passwordUpdate) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(mToken);
+        Observable<Long> observable = service.updateUserPassword(passwordUpdate);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Long>() {
+                    @Override
+                    public void onNext(Long response) {
+                        Toast.makeText(mContext, "비밀번호 변경이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("UPDATE_PASSWORD", "UPDATED" + " " + response);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("UPDATE_PASSWORD", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("UPDATE_PASSWORD", "complete");
+                    }
+                })
+        );
     }
 }
