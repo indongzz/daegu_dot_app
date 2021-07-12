@@ -1,9 +1,11 @@
 package com.kop.daegudot.Network;
 
 import com.kop.daegudot.KakaoMap.Documents;
-import com.kop.daegudot.Login.User;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
+import com.kop.daegudot.Network.User.UserRegister;
+import com.kop.daegudot.Network.User.UserLogin;
+import com.kop.daegudot.Network.User.UserResponse;
 
 import java.util.List;
 
@@ -12,7 +14,6 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -25,16 +26,16 @@ public interface RestApiService {
 
     /* Login */
     @POST("/user/register")
-    Observable<Long> registerUser(@Body User userRequest);
+    Observable<Long> registerUser(@Body UserRegister userRegisterRequest);
 
-    @GET("/user/register/{email}")
-    String checkEmailDup(@Path("email") String email);
+    @GET("/user/register/email/{email}")
+    Observable<UserResponse> checkEmailDup(@Path("email") String email);
 
-    @GET("/user/register/{nickname}")
-    Observable<List<User>> checkNickDup(@Path("email") String nickname);
+    @GET("/user/register/nickname/{nickname}")
+    Observable<UserResponse> checkNickDup(@Path("nickname") String nickname);
 
     @POST("/user/login")
-    Observable<User> requestLogin(@Body User userRequest);
+    Observable<UserResponse> requestLogin(@Body UserLogin userLogin);
 
     @GET("/places/list")
     Observable<List<Place>> getPlaceList();
@@ -66,5 +67,5 @@ public interface RestApiService {
             @Query("category_group_code") String category_group_code,
             @Query("rect") String coord
     );
-    
+
 }
