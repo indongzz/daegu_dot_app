@@ -43,7 +43,11 @@
         <item name="android:colorAccent">@color/colorPrimary</item>
         <item name="android:windowMinWidthMajor">@dimen/dialog_min_width</item>
         <item name="android:windowBackground">@drawable/round_rectangle</item>
+    </style>
 
+    <style name="editTextStyle" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/lightGray</item>
     </style>
 </resources>
 
