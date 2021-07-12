@@ -3,8 +3,8 @@ package com.kop.daegudot.Network;
 import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
-import com.kop.daegudot.Network.Schedule.MainSchedule;
 import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
+import com.kop.daegudot.Network.Schedule.MainScheduleResponseList;
 import com.kop.daegudot.Network.Schedule.SubSchedule;
 import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
 import com.kop.daegudot.Network.More.MyInfo.PasswordUpdate;
@@ -81,8 +81,8 @@ public interface RestApiService {
     Observable<Long> saveMainSchedule(@Body MainScheduleRegister mainSchedule);
     
     /* get all main schedules */
-    @GET("/schedule/main/{userId}")
-    Observable<List<MainSchedule>> getMainSchedule(@Path("userId") long userId);
+    @GET("/schedule/main")
+    Observable<MainScheduleResponseList> getMainSchedule();
     
     /* delete a main Schedule */
     @DELETE("/schedule/main/delete/{mainScheduleId}")

@@ -1,5 +1,7 @@
 package com.kop.daegudot.MySchedule;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -16,12 +18,12 @@ import android.widget.TextView;
 
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
-import com.kop.daegudot.Network.Schedule.MainSchedule;
+import com.kop.daegudot.Network.Schedule.MainScheduleResponseDto;
+import com.kop.daegudot.Network.Schedule.MainScheduleResponseList;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import com.kop.daegudot.MainActivity;
 
@@ -37,6 +39,8 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     private RecyclerView recyclerView;
     private MainScheduleAdapter adapter;
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+    private SharedPreferences pref;
+    private String mToken;
     
     public MyScheduleFragment() {
         // Required empty public constructor
@@ -45,8 +49,12 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    
+        pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
+        mToken = pref.getString("token", "");
         
         selectAllMainSchedule();
+    
     }
 
     @Override
@@ -54,7 +62,7 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_my_schedule, container, false);
-
+        
         TextView title = view.findViewById(R.id.title);
         title.setText("내 일정");
 
@@ -74,40 +82,47 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     }
     
     private void selectAllMainSchedule() {
-        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
-        Observable<List<MainSchedule>> observable = service.getMainSchedule(1);
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+        Observable<MainScheduleResponseList> observable = service.getMainSchedule();
     
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<List<MainSchedule>>() {
+                .subscribeWith(new DisposableObserver<MainScheduleResponseList>() {
                     @Override
-                    public void onNext(List<MainSchedule> response) {
-                        Log.d("RX", "Next");
+                    public void onNext(MainScheduleResponseList response) {
+                        Log.d("RX MySchedule", "Next");
                         if (response != null) {
-                            for (int i = 0; i < response.size(); i++) {
-                                MainSchedule m = response.get(i);
-                                MainScheduleInfo data = new MainScheduleInfo();
-                                data.setmStartDate(m.startDate);
-                                data.setmEndDate(m.endDate);
-                                data.setmDDate();
-                                // TODO: id 부분 받아오는거 해결되면 수정필요
-                                Log.d("RX myschedule", "id: " + m.mainId +
-                                        " start: " + m.startDate + " userid & email: " +
-                                        +m.user.id + m.user.email);
-                                data.setMainId(m.mainId);
-                                mList.add(data);
+                            if (response.status == 1L) {
+                                Log.d("RX MySchedule", "mainScheduleList " + response.mainScheduleResponseDtoList);
+                                Log.d("Rx MySchedule", "response " + response.toString());
+                                int n = response.mainScheduleResponseDtoList.size();
+                                for (int i = 0; i < n; i++) {
+                                    MainScheduleResponseDto m = response.mainScheduleResponseDtoList.get(i);
+                                    MainScheduleInfo data = new MainScheduleInfo();
+                                    data.setmStartDate(m.startDate);
+                                    data.setmEndDate(m.endDate);
+                                    data.setmDDate();
+                                    // TODO: id 부분 받아오는거 해결되면 수정필요
+                                    Log.d("RX myschedule", "id: " + m.id +
+                                            " start: " + m.startDate + " userid & email: " +
+                                            +m.user.id + m.user.email);
+                                    data.setMainId(m.id);
+                                    mList.add(data);
+                                }
+                            } else if (response.status == 0L) {
+                                Log.d("Rx MySchedule", "MainSchedule List is null");
                             }
                         }
                     }
                 
                     @Override
                     public void onError(Throwable e) {
-                        Log.d("RX", e.getMessage());
+                        Log.d("RX MySchedule", e.getMessage());
                     }
                 
                     @Override
                     public void onComplete() {
-                        Log.d("RX", "complete");
+                        Log.d("RX MySchedule", "complete");
     
                         Collections.sort(mList);
                         refresh();

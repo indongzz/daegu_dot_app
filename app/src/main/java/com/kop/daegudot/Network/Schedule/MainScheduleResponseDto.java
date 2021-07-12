@@ -4,9 +4,9 @@ import com.kop.daegudot.Network.User.UserResponse;
 
 import java.time.LocalDate;
 
-public class MainSchedule {
+public class MainScheduleResponseDto {
     public String startDate;
     public String endDate;
     public UserResponse user;
-    public long mainId;
+    public long id;
 }
