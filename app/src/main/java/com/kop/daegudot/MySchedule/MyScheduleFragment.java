@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
-import com.kop.daegudot.Network.Schedule.MainScheduleResponseDto;
+import com.kop.daegudot.Network.Schedule.MainScheduleResponse;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponseList;
 import com.kop.daegudot.R;
 
@@ -93,19 +93,15 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
                         Log.d("RX MySchedule", "Next");
                         if (response != null) {
                             if (response.status == 1L) {
-                                Log.d("RX MySchedule", "mainScheduleList " + response.mainScheduleResponseDtoList);
-                                Log.d("Rx MySchedule", "response " + response.toString());
-                                int n = response.mainScheduleResponseDtoList.size();
+                                int n = response.mainScheduleResponseDtoArrayList.size();
                                 for (int i = 0; i < n; i++) {
-                                    MainScheduleResponseDto m = response.mainScheduleResponseDtoList.get(i);
+                                    MainScheduleResponse m = response.mainScheduleResponseDtoArrayList.get(i);
                                     MainScheduleInfo data = new MainScheduleInfo();
                                     data.setmStartDate(m.startDate);
                                     data.setmEndDate(m.endDate);
                                     data.setmDDate();
-                                    // TODO: id 부분 받아오는거 해결되면 수정필요
                                     Log.d("RX myschedule", "id: " + m.id +
-                                            " start: " + m.startDate + " userid & email: " +
-                                            +m.user.id + m.user.email);
+                                            " start: " + m.startDate);
                                     data.setMainId(m.id);
                                     mList.add(data);
                                 }

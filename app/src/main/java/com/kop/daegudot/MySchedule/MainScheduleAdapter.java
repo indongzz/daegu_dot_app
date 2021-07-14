@@ -83,9 +83,7 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
                         public void onClick(DialogInterface dialog, int which) {
                             int n = getAdapterPosition();
                             
-                            // TODO: DB에서 데이터 삭제하기
                             Log.d("RX MAINSCHEDULE ADATER", "DELETE!!@@@@@ " + mMainScheduleList.get(n).getMainId());
-                            Log.d("RX MAINSCHEDULE ADATER", "DELETE!!@@@@@2 " + n);
                             deleteMainScheduleRx(mMainScheduleList.get(n).getMainId());
                             
                             mMainScheduleList.remove(n);
@@ -138,6 +136,12 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
                     @Override
                     public void onNext(Long response) {
                         Log.d("RX", "Next");
+                        // Todo : Check if Delete is Success
+//                        if (response == 0L) {
+//
+//                        } else if (response == 1L) {
+//
+//                        }
                     }
                     
                     @Override
