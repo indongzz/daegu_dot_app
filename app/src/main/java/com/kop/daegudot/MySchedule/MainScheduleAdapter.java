@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,14 +15,24 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
 public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapter.ViewHolder> {
     private static ArrayList<MainScheduleInfo> mMainScheduleList;
     private static Context mContext;
+    
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     
     public class ViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener, View.OnLongClickListener{
@@ -70,10 +81,13 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
             builder.setPositiveButton("예",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            mMainScheduleList.remove(getAdapterPosition());
-                            notifyItemRemoved(getAdapterPosition());
+                            int n = getAdapterPosition();
                             
-                            // TODO: DB에서 데이터 삭제하기
+                            Log.d("RX MAINSCHEDULE ADATER", "DELETE!!@@@@@ " + mMainScheduleList.get(n).getMainId());
+                            deleteMainScheduleRx(mMainScheduleList.get(n).getMainId());
+                            
+                            mMainScheduleList.remove(n);
+                            notifyItemRemoved(getAdapterPosition());
                         }
                     });
             builder.setNegativeButton("아니오",
@@ -112,6 +126,35 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
         return mMainScheduleList.size();
     }
     
-    
-    
+    private void deleteMainScheduleRx(long mainScheduleId) {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
+        Observable<Long> observable = service.deleteMainSchedule(mainScheduleId);
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Long>() {
+                    @Override
+                    public void onNext(Long response) {
+                        Log.d("RX", "Next");
+                        // Todo : Check if Delete is Success
+//                        if (response == 0L) {
+//
+//                        } else if (response == 1L) {
+//
+//                        }
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
+                        
+                    }
+                })
+        );
+    }
 }

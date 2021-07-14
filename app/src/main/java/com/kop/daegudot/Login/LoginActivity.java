@@ -67,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         editor = pref.edit();
 
         // TODO: 자동로그인 활성화
-            checkAlreadyLogin();
+        //    checkAlreadyLogin();
 
         /* Google Sign In */
         findViewById(R.id.signin_google).setOnClickListener(this);

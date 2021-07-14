@@ -5,6 +5,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.widget.NestedScrollView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,23 +19,43 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.SubScheduleInfo;
 import com.kop.daegudot.Network.Map.Place;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.Schedule.SubSchedule;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
+import java.io.IOException;
+import java.net.SocketException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.exceptions.UndeliverableException;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.plugins.RxJavaPlugins;
+import io.reactivex.schedulers.Schedulers;
 
 public class MapMainActivity extends AppCompatActivity implements MapView.MapViewEventListener,
         MapView.POIItemEventListener, View.OnClickListener {
     private static final String TAG = "MapMainActivity";
     private MapView mMapView;
+    private Context mContext;
     
     TextView mTitle;    // default = 장소 검색
     ImageButton mBackBtn;
+    
+    /* RX Schedule */
+    long mMainId;
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+    
     
     MapMarkerItems mMapMarkerItems;     // set map markerItems
     MapUIControl mMapUIControl;         // to control category and hash tag button
@@ -60,6 +81,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_main);
+        mContext = MapMainActivity.this;
         
         View view = getWindow().getDecorView();
         
@@ -95,19 +117,19 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         /* BottomSheet */
         placeBottomSheet =
                 new PlaceBottomSheet(this, mMainSchedule, mSubScheduleList);
-        
+
         CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
         mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
-        
+
         mViewPager = findViewById(R.id.viewPager);
         adapter = new ViewPagerAdapter(this, mSubScheduleList);
         mViewPager.setAdapter(adapter);
         mViewPager.setNestedScrollingEnabled(false);
-        
+
         NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
-        
+
         // move to n일차
         mViewPager.setCurrentItem(position);
         
@@ -131,8 +153,18 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         adapter.adapter.notifyItemChanged(position);
     }
     
+    // TODO: 수정 필요함
+    
+    /** 지금은 홈에서 누르는 메인이랑, 추가로 누르는 메인이 다른데.
+     * 홈에서 누르는 메인이랑 추가로 누르는 메인이 다른건 서브스케쥴 유무 차이인데.
+     * 데이터베이스가 추가되면 확인 필요가 없음. 어떤 id를 불러왔느냐가 중요한거같은데
+     * 그 main schedule id를 판별할 수 있는 방법을 알아내는게 중요함!
+     * 아마 intent로 넘어가는 id로 알 수 있을거같음
+     */
+    
     public void getSchedule() {
         Intent intent = getIntent();
+        
         // 홈에서 mainschedule 눌러서 접근 시
         mMainSchedule = intent.getParcelableExtra("MainSchedule");
         mSubScheduleList = intent.getParcelableArrayListExtra("SubScheduleList");
@@ -140,40 +172,114 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         // 일정 추가 할 때
         String addStartDay = intent.getStringExtra("startDay");
         String addEndDay = intent.getStringExtra("endDay");
-        
-        
+    
+    
         if (mMainSchedule != null) {
             Log.i(TAG, "mMainSchedule: " + mMainSchedule);
             mMainSchedule.getDateBetween();
         } else {
             Log.i(TAG, "mMainSchedule is null add new MainSchedule");
             mMainSchedule = new MainScheduleInfo();
-            mMainSchedule.setmFirstDate(addStartDay);
-            mMainSchedule.setmLastDate(addEndDay);
+            Log.d(TAG, "mainSchedule start day: " + addStartDay + " " + addEndDay);
+            mMainSchedule.setmStartDate(addStartDay);
+            mMainSchedule.setmEndDate(addEndDay);
             mMainSchedule.setmDDate();
-            
+        
             mSubScheduleList = new ArrayList<>();
             for (int i = 0; i < mMainSchedule.getDateBetween(); i++) {
                 SubScheduleInfo data = new SubScheduleInfo();
                 LocalDate[] dateArray = mMainSchedule.getDateArray();
                 String dateText = i + 1 + "일차 - "
-                        + dateArray[i].format(DateTimeFormatter.ofPattern("MM/dd"));
-                
+                        + dateArray[i].format(DateTimeFormatter.ofPattern("MM.dd"));
+            
                 data.setDate(dateText);
-                
+            
                 ArrayList<String> address = new ArrayList<>();
                 ArrayList<String> attract = new ArrayList<>();
-                
+            
                 data.setAddress(address);
                 data.setPlaceName(attract);
-                
+            
                 mSubScheduleList.add(data);
             }
         }
-        
+    
         String titleString = mMainSchedule.getDateString();
-        
+    
         mTitle.setText(titleString);
+//
+//        // TODO: main id 제대로 전달할 방법 찾기.
+//        mMainId = intent.getLongExtra("mainId", 0);
+//        Log.d("RX MAIN ID ", "mainID: " + mMainId);
+//
+//        if (mMainId == 0) {
+//            // 뭔가 예외 처리가 필요한가?
+//            Log.d("RX LOG GETSCHEDULE", "Cannot get main id");
+//        } else {
+//            // TODO: get subschedule by using main id
+//            Log.d("RX LOG GETSCHEDULE", "get Subschedule by main id");
+//
+//            getScheduleRx(mMainId);
+//
+//        }
+        
+    }
+    
+    private void getScheduleRx(long mainScheduleId) {
+        Log.d("RX getScheduleRx", "STart!!!!!!!!!!!!");
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
+        Observable<List<SubSchedule>> observable = service.getSubscheduleList(mainScheduleId);
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<List<SubSchedule>>() {
+                    @Override
+                    public void onNext(List<SubSchedule> response) {
+                        Log.d("RX " + TAG, "getsubschedule: " + "Next");
+                        if (response.size() == 0) {
+                            /* no subschedule maded need to make subschedule arraylist */
+                            
+                        } else {
+                            Log.d("RX!!!!!!@@@@@@", "response: " + response.get(0));
+                        }
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX " + TAG, "getsubschedule: " + e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX " + TAG, "getsubschedule: complete");
+                        
+                        /* update ui after get schedule lists */
+                        Log.d("RX " + TAG, "getsubschedule - " + mContext.toString());
+                        /* BottomSheet */
+                        placeBottomSheet =
+                                new PlaceBottomSheet(mContext, mMainSchedule, mSubScheduleList);
+    
+                        Log.d("RX " + TAG, "getsubschedule: " + placeBottomSheet.toString());
+                        
+                        CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
+                        mBSBPlace = BottomSheetBehavior.from(placeLayout);
+                        mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
+    
+                        mViewPager = findViewById(R.id.viewPager);
+                        adapter = new ViewPagerAdapter(mContext, mSubScheduleList);
+                        mViewPager.setAdapter(adapter);
+                        mViewPager.setNestedScrollingEnabled(false);
+    
+                        NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
+                        mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
+    
+    
+                        Log.d("RX " + TAG, "getsubschedule: position: " + position);
+                        // move to n일차
+                        mViewPager.setCurrentItem(position);
+                    }
+                })
+        );
     }
     
     public ArrayList<Place> updatePlaceList() {

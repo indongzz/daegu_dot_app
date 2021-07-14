@@ -55,6 +55,7 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
                 intent.putExtra("MainSchedule", mMainSchedule);
                 intent.putParcelableArrayListExtra("SubScheduleList", mSubScheduleList);
                 intent.putExtra("position", pos);
+                intent.putExtra("mainId", mMainSchedule.getMainId());
                 mContext.startActivity(intent);
             }
         }

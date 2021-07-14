@@ -1,6 +1,8 @@
 package com.kop.daegudot.AddSchedule;
 
 import android.content.Intent;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,15 +20,31 @@ import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
 //import com.applikeysolutions.cosmocalendar.utils.SelectionType;
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
 import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
-
-import com.kop.daegudot.MainActivity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
+
+/**
+ *  Second Fragment' 일정추가
+ *
+ *  select two dates to make main schedule
+ *  and add to database
+ */
 
 public class AddScheduleFragment extends Fragment implements View.OnClickListener {
     final static private String TAG = "AddScheduleFragment";
@@ -35,7 +53,13 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     Button mCalendarBtn;
     String mStartDate, mEndDate;
     String mBtnDay1, mBtnDay2;
-     int flag = 1;
+    LocalDate localStart, localEnd;
+    int flag = 1;
+    
+    private SharedPreferences pref;
+    private String mToken;
+    UserResponse user;
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     public AddScheduleFragment() {
         // Required empty public constructor
@@ -51,7 +75,13 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_schedule, container, false);
-
+    
+        pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
+        mToken = pref.getString("token", "");
+        
+        // 토큰으로 사용자 정보 가져오기
+        selectUserByToken();
+        
         // change top title
         TextView title = view.findViewById(R.id.title);
         title.setText("일정 추가");
@@ -69,19 +99,19 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                 List<Calendar> days = mCalendar.getSelectedDates();
 
                 Calendar startCal = days.get(0);
-                LocalDate localStart = LocalDateTime.ofInstant(
+                localStart = LocalDateTime.ofInstant(
                         startCal.toInstant(), startCal.getTimeZone().toZoneId()).toLocalDate();
                         
                 mBtnDay1 = localStart.format(DateTimeFormatter.ofPattern("M월d일"));
-                mStartDate = localStart.format(DateTimeFormatter.ofPattern("yy.MM.dd"));
+                mStartDate = localStart.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 Log.i(TAG, "mStartDate: " + mStartDate + "mbtnday1: " + mBtnDay1);
                 
                 Calendar endCal = days.get(days.size() - 1);
-                LocalDate localEnd = LocalDateTime.ofInstant(
+                localEnd = LocalDateTime.ofInstant(
                         endCal.toInstant(), endCal.getTimeZone().toZoneId()).toLocalDate();
 
                 mBtnDay2 = localEnd.format(DateTimeFormatter.ofPattern("M월d일"));
-                mEndDate = localEnd.format(DateTimeFormatter.ofPattern("yy.MM.dd"));
+                mEndDate = localEnd.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
                 String text = null;
                 if (mBtnDay1.equals(mBtnDay2)) {
@@ -97,23 +127,6 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     
              }
         }));
-        
-        mCalendarBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                
-                if (flag == 1) {
-                    // change to Kakao Map Activity
-                    Intent intent = new Intent(getContext(), MapMainActivity.class);
-                    intent.putExtra("startDay", mStartDate);
-                    intent.putExtra("endDay", mEndDate);
-                    startActivity(intent);
-                    flag = 0;
-                } else {
-                    Toast.makeText(getContext(), "날짜를 선택해주세요", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
 
          return view;
     }
@@ -123,8 +136,82 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.calendarBtn:
-                // TODO: DB에 MainSchedule 추가
-                ((MainActivity)getActivity()).changeFragment(1, 0);
+                if (flag == 1) {
+                    MainScheduleRegister mainScheduleRegister = new MainScheduleRegister();
+                    mainScheduleRegister.startDate = localStart.toString();
+                    mainScheduleRegister.endDate = localEnd.toString();
+                    mainScheduleRegister.userId = user.id;
+                    registerMainSchedule(mainScheduleRegister);
+                } else {
+                    Toast.makeText(getContext(), "날짜를 선택해주세요", Toast.LENGTH_SHORT).show();
+                }
+            //    ((MainActivity)getActivity()).changeFragment(1, 0);
         }
+    }
+    
+   private void registerMainSchedule(MainScheduleRegister mainSchedule) {
+       RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+       
+       Observable<Long> observable = service.saveMainSchedule(mainSchedule);
+    
+       final long[] mainId = new long[1];
+       
+       mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+               .observeOn(AndroidSchedulers.mainThread())
+               .subscribeWith(new DisposableObserver<Long>() {
+                   @Override
+                   public void onNext(Long response) {
+                       Log.d("RX AddScheduleFragment", "Next" + " Response id:: " + response);
+                       mainId[0] = response;
+                   }
+                
+                   @Override
+                   public void onError(Throwable e) {
+                       Log.d("RX AddScheduleFragment", e.getMessage());
+                       Toast.makeText(getContext(), "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+                   }
+                
+                   @Override
+                   public void onComplete() {
+                       Log.d("RX AddScheduleFragment", "complete");
+    
+                       Intent intent = new Intent(getContext(), MapMainActivity.class);
+                       intent.putExtra("startDay", mStartDate);
+                       intent.putExtra("endDay", mEndDate);
+                       intent.putExtra("mainId", mainId);
+                       startActivity(intent);
+                       flag = 0;
+                    
+                   }
+               })
+       );
+   }
+    
+    //토큰으로 회원 정보 가져오기
+    private void selectUserByToken() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(mToken);
+        Observable<UserResponse> observable = service.getUserFromToken();
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        user = response;
+                        Log.d("TOKEN", "TOKEN OK" + " " + response.email);
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("TOKEN", e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("TOKEN", "complete");
+                    }
+                })
+        );
     }
 }
