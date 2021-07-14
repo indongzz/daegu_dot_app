@@ -29,7 +29,7 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
     EditText email;
     EditText pw;
 
-    SharedPreferences mTokenPref;
+    SharedPreferences mPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +40,6 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
 
         email = findViewById(R.id.edit_email);
         pw = findViewById(R.id.edit_pw);
-
-        System.out.println("email: " + email.getText());
-        System.out.println("pw: " + pw.getText());
 
         Button loginBtn = findViewById(R.id.btn_login);
         Button signUpBtn = findViewById(R.id.email_signup);
@@ -72,8 +69,6 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
         userLogin.email = email.getText().toString();
         userLogin.password = pw.getText().toString();
 
-        Log.d("LOGIN", userLogin.email + " "+userLogin.password);
-        //로그인 네트워크
         selectEmailAndPassword(userLogin);
     }
 
@@ -88,6 +83,7 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
         finish();
     }
 
+    //로그인 함수
     private void selectEmailAndPassword(UserLogin userLogin) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
@@ -98,26 +94,25 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
                 .subscribeWith(new DisposableObserver<UserResponse>() {
                     @Override
                     public void onNext(UserResponse response) {
-                        Log.d("LOGIN", "LOGIN SUCCESS");
+                        Log.d("USER_EMAIL_LOGIN", "LOGIN SUCCESS");
 
-                        //토큰 저장하기
-                        mTokenPref = getSharedPreferences("data", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = mTokenPref.edit();
+                        //SharedPreference에 토큰 저장하기
+                        mPref = getSharedPreferences("data", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = mPref.edit();
                         editor.putString("token", response.token);
                         editor.apply();
-
-                        convertToMainActivity();
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.d("LOGIN", e.getMessage());
-
+                        Log.d("USER_EMAIL_LOGIN", e.getMessage());
                     }
 
                     @Override
                     public void onComplete() {
-                        Log.d("LOGIN", "complete");
+                        Log.d("USER_EMAIL_LOGIN", "complete");
+                        //메인 화면으로 이동
+                        convertToMainActivity();
                     }
                 })
         );
