@@ -10,11 +10,13 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
-import com.kop.daegudot.MySchedule.SubScheduleInfo;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.R;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class PlaceBottomSheet implements Button.OnClickListener {
@@ -22,17 +24,18 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     private Context mContext;
     private ArrayList<Place> mPlaceList = null;
     MainScheduleInfo mMainSchedule;
-    ArrayList<SubScheduleInfo> mSubScheduleList;
+//    ArrayList<SubScheduleInfo> mSubScheduleList;
+    ArrayList<DateSubSchedule> mDateSubScheduleList;
     
     private int mTag;
     private Button mHeartBtn;
     private Button mAddToSchBtn;
     
     PlaceBottomSheet(Context context,
-                     MainScheduleInfo mainSchedule, ArrayList<SubScheduleInfo> subScheduleList) {
+                     MainScheduleInfo mainSchedule, ArrayList<DateSubSchedule> subScheduleList) {
         mContext = context;
         mMainSchedule = mainSchedule;
-        mSubScheduleList = subScheduleList;
+        mDateSubScheduleList = subScheduleList;
     
         mHeartBtn = ((MapMainActivity)mContext).findViewById(R.id.heart_btn);
         mHeartBtn.setOnClickListener(this);
@@ -70,30 +73,34 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     
     public void addToSubscheduleList() {
         
-        int days = mMainSchedule.getDateBetween(); // mSubSchedule.size()
+        int days = mMainSchedule.getDateBetween();
         final String[] list = new String[days];
         
-        for(int i = 0; i < days; i++) {
-            list[i] = (i + 1) + "일차";
+        LocalDate[] dateArray = mMainSchedule.getDateArray();
+        
+        for (int i = 0; i < dateArray.length; i++) {
+            list[i] = dateArray[i].format(DateTimeFormatter.ofPattern("MM.dd"));
         }
     
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AlertDialogStyle);
     
         final int[] checkedItem = {-1};
-        builder.setTitle("날짜를 선택하세요")
-                .setSingleChoiceItems(list, checkedItem[0], (dialog, which) -> checkedItem[0] = which)
-                .setPositiveButton("선택", (dialog, which) -> {
-                    int position = checkedItem[0];
-    
-                    Log.i(TAG, "선택한 날짜 position: " + position);
-                    
-                    // position으로 선택한 날짜를, tag로 marker를 알 수 있게 함
-                    ((MapMainActivity)mContext).adapterChange(position, mTag);
-                    
-                    dialog.dismiss();
-                })
-                .setNegativeButton("취소", (dialog, which) -> dialog.dismiss())
-                .show();
+        builder.setTitle("날짜를 선택하세요");
+        builder.setSingleChoiceItems(list, checkedItem[0], (dialog, which) -> checkedItem[0] = which);
+        builder.setPositiveButton("선택", (dialog, which) -> {
+            int position = checkedItem[0];
+        
+            Log.i(TAG, "선택한 날짜 position: " + position);
+        
+            // position으로 선택한 날짜를, tag로 marker를 알 수 있게 함
+            // Todo: subschedule 추가...
+            
+            ((MapMainActivity) mContext).adapterChange(dateArray[position].toString(), mTag);
+        
+            dialog.dismiss();
+        });
+        builder.setNegativeButton("취소", (dialog, which) -> dialog.dismiss());
+        builder.show();
     }
     
     @Override

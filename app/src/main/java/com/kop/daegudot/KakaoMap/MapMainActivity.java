@@ -7,6 +7,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -16,31 +17,28 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
-import com.kop.daegudot.MySchedule.SubScheduleInfo;
+import com.kop.daegudot.MySchedule.SubScheduleDialog;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
-import com.kop.daegudot.Network.Schedule.SubSchedule;
+import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
+import com.kop.daegudot.Network.Schedule.SubScheduleResponse;
+import com.kop.daegudot.Network.Schedule.SubScheduleResponseList;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
-import java.io.IOException;
-import java.net.SocketException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.observers.DisposableObserver;
-import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 
 public class MapMainActivity extends AppCompatActivity implements MapView.MapViewEventListener,
@@ -53,9 +51,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     ImageButton mBackBtn;
     
     /* RX Schedule */
-    long mMainId;
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
-    
     
     MapMarkerItems mMapMarkerItems;     // set map markerItems
     MapUIControl mMapUIControl;         // to control category and hash tag button
@@ -63,7 +59,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     // get Main and sub schedule list from previous activity
     MainScheduleInfo mMainSchedule;
-    ArrayList<SubScheduleInfo> mSubScheduleList;
+    ArrayList<DateSubSchedule> mDateSubScheduleList;
     int position = 0; // default = first page
     
     // RX PoiItems
@@ -74,6 +70,8 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     ViewPager2 mViewPager;
     ViewPagerAdapter adapter;
     MapPOIItem prevPOIItem = null;
+    private SharedPreferences pref;
+    private String mToken;
     
     public ProgressBar progressBar;     // 로딩 중
     
@@ -82,6 +80,9 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_main);
         mContext = MapMainActivity.this;
+    
+        pref = getSharedPreferences("data", Context.MODE_PRIVATE);
+        mToken = pref.getString("token", "");
         
         View view = getWindow().getDecorView();
         
@@ -116,131 +117,68 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         /* BottomSheet */
         placeBottomSheet =
-                new PlaceBottomSheet(this, mMainSchedule, mSubScheduleList);
+                new PlaceBottomSheet(this, mMainSchedule, mDateSubScheduleList);
 
         CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
         mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         mViewPager = findViewById(R.id.viewPager);
-        adapter = new ViewPagerAdapter(this, mSubScheduleList);
-        mViewPager.setAdapter(adapter);
-        mViewPager.setNestedScrollingEnabled(false);
+//        adapter = new ViewPagerAdapter(this, mSubScheduleList);
+//        mViewPager.setAdapter(adapter);
+//        mViewPager.setNestedScrollingEnabled(false);
 
         NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
-
-        // move to n일차
-        mViewPager.setCurrentItem(position);
+//
+//        // move to n일차
+//        mViewPager.setCurrentItem(position);
         
     }
     
-    public void adapterChange(int position, int tag) {
-        /* update Place list */
-        mPlaceList = updatePlaceList();
-        ArrayList<String> placeName;
-        ArrayList<String> address;
-        
-        placeName = mSubScheduleList.get(position).getPlaceName();
-        address = mSubScheduleList.get(position).getAddress();
-        placeName.add(mPlaceList.get(tag).attractName);
-        address.add(mPlaceList.get(tag).address);
-        
-        mSubScheduleList.get(position).setAddress(address);
-        mSubScheduleList.get(position).setPlaceName(placeName);
-        
-        Log.i(TAG, "adapterchange: " + "position: " + position);
-        adapter.adapter.notifyItemChanged(position);
-    }
-    
-    // TODO: 수정 필요함
-    
-    /** 지금은 홈에서 누르는 메인이랑, 추가로 누르는 메인이 다른데.
-     * 홈에서 누르는 메인이랑 추가로 누르는 메인이 다른건 서브스케쥴 유무 차이인데.
-     * 데이터베이스가 추가되면 확인 필요가 없음. 어떤 id를 불러왔느냐가 중요한거같은데
-     * 그 main schedule id를 판별할 수 있는 방법을 알아내는게 중요함!
-     * 아마 intent로 넘어가는 id로 알 수 있을거같음
-     */
-    
+    /* MainSchedule 이용해서 SubSchedule List 서버로부터 받아오기 */
     public void getSchedule() {
         Intent intent = getIntent();
         
-        // 홈에서 mainschedule 눌러서 접근 시
-        mMainSchedule = intent.getParcelableExtra("MainSchedule");
-        mSubScheduleList = intent.getParcelableArrayListExtra("SubScheduleList");
+        // MyScheduleFragment, AddScheduleFragment 둘 다 MainSchedule 보내옴
+        // position은 MyScheduleFragment에서 SubSchedule 2일차를 누르면 2번째 BottomSheet을 띄움
+        mMainSchedule = intent.getParcelableExtra("mainSchedule");
         position = intent.getIntExtra("position", 0);
-        // 일정 추가 할 때
-        String addStartDay = intent.getStringExtra("startDay");
-        String addEndDay = intent.getStringExtra("endDay");
-    
-    
-        if (mMainSchedule != null) {
-            Log.i(TAG, "mMainSchedule: " + mMainSchedule);
-            mMainSchedule.getDateBetween();
-        } else {
-            Log.i(TAG, "mMainSchedule is null add new MainSchedule");
-            mMainSchedule = new MainScheduleInfo();
-            Log.d(TAG, "mainSchedule start day: " + addStartDay + " " + addEndDay);
-            mMainSchedule.setmStartDate(addStartDay);
-            mMainSchedule.setmEndDate(addEndDay);
-            mMainSchedule.setmDDate();
         
-            mSubScheduleList = new ArrayList<>();
-            for (int i = 0; i < mMainSchedule.getDateBetween(); i++) {
-                SubScheduleInfo data = new SubScheduleInfo();
-                LocalDate[] dateArray = mMainSchedule.getDateArray();
-                String dateText = i + 1 + "일차 - "
-                        + dateArray[i].format(DateTimeFormatter.ofPattern("MM.dd"));
-            
-                data.setDate(dateText);
-            
-                ArrayList<String> address = new ArrayList<>();
-                ArrayList<String> attract = new ArrayList<>();
-            
-                data.setAddress(address);
-                data.setPlaceName(attract);
-            
-                mSubScheduleList.add(data);
-            }
-        }
-    
+        mDateSubScheduleList = new ArrayList<>();
+        
         String titleString = mMainSchedule.getDateString();
-    
         mTitle.setText(titleString);
-//
-//        // TODO: main id 제대로 전달할 방법 찾기.
-//        mMainId = intent.getLongExtra("mainId", 0);
-//        Log.d("RX MAIN ID ", "mainID: " + mMainId);
-//
-//        if (mMainId == 0) {
-//            // 뭔가 예외 처리가 필요한가?
-//            Log.d("RX LOG GETSCHEDULE", "Cannot get main id");
-//        } else {
-//            // TODO: get subschedule by using main id
-//            Log.d("RX LOG GETSCHEDULE", "get Subschedule by main id");
-//
-//            getScheduleRx(mMainId);
-//
-//        }
         
+        selectAllSubScheduleListRx(mMainSchedule.getMainId());
     }
     
-    private void getScheduleRx(long mainScheduleId) {
-        Log.d("RX getScheduleRx", "STart!!!!!!!!!!!!");
-        RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
-        Observable<List<SubSchedule>> observable = service.getSubscheduleList(mainScheduleId);
+    private void selectAllSubScheduleListRx(long mainScheduleId) {
+        Log.d("RX getScheduleRx", "Start!!!!!!!!!!!!");
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+        Observable<SubScheduleResponseList> observable = service.getSubscheduleList(mainScheduleId);
         
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<List<SubSchedule>>() {
+                .subscribeWith(new DisposableObserver<SubScheduleResponseList>() {
                     @Override
-                    public void onNext(List<SubSchedule> response) {
+                    public void onNext(SubScheduleResponseList response) {
                         Log.d("RX " + TAG, "getsubschedule: " + "Next");
-                        if (response.size() == 0) {
+                        if (response.status == 0L) {
                             /* no subschedule maded need to make subschedule arraylist */
+                            Log.d("RX " + TAG, "subschedule is null");
+                        } else if (response.status == 1L){
+                            Log.d("RX " + TAG, "response: "
+                                    + response.subScheduleResponseDtoArrayList.get(0).date);
                             
-                        } else {
-                            Log.d("RX!!!!!!@@@@@@", "response: " + response.get(0));
+                            ArrayList<SubScheduleResponse> subScheduleResponse
+                                    = response.subScheduleResponseDtoArrayList;
+                            Collections.sort(subScheduleResponse);
+                            
+                            mDateSubScheduleList = SubScheduleDialog
+                                    .getDateSubSchedules(mMainSchedule, subScheduleResponse);
+                            
+                            updateBottomSheetUI();
                         }
                     }
                     
@@ -252,31 +190,77 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
                     @Override
                     public void onComplete() {
                         Log.d("RX " + TAG, "getsubschedule: complete");
-                        
+    
                         /* update ui after get schedule lists */
-                        Log.d("RX " + TAG, "getsubschedule - " + mContext.toString());
-                        /* BottomSheet */
-                        placeBottomSheet =
-                                new PlaceBottomSheet(mContext, mMainSchedule, mSubScheduleList);
+                        updateBottomSheetUI();
+                    }
+                })
+        );
+    }
     
-                        Log.d("RX " + TAG, "getsubschedule: " + placeBottomSheet.toString());
-                        
-                        CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
-                        mBSBPlace = BottomSheetBehavior.from(placeLayout);
-                        mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
+    public void updateBottomSheetUI() {
+        /* BottomSheet */
+        placeBottomSheet =
+                new PlaceBottomSheet(mContext, mMainSchedule, mDateSubScheduleList);
     
-                        mViewPager = findViewById(R.id.viewPager);
-                        adapter = new ViewPagerAdapter(mContext, mSubScheduleList);
-                        mViewPager.setAdapter(adapter);
-                        mViewPager.setNestedScrollingEnabled(false);
+        CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
+        mBSBPlace = BottomSheetBehavior.from(placeLayout);
+        mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
     
-                        NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
-                        mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
+        mViewPager = findViewById(R.id.viewPager);
+        adapter = new ViewPagerAdapter(mContext, mMainSchedule, mDateSubScheduleList);
+        mViewPager.setAdapter(adapter);
+        mViewPager.setNestedScrollingEnabled(false);
     
+        NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
+        mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
+        
+        // move to n일차
+        mViewPager.setCurrentItem(position);
+    }
     
-                        Log.d("RX " + TAG, "getsubschedule: position: " + position);
-                        // move to n일차
-                        mViewPager.setCurrentItem(position);
+    public void adapterChange(String date, int tag) {
+        /* update Place list */
+        mPlaceList = updatePlaceList();
+        
+        // Todo: SubSchedule register
+        Log.d("RX " + TAG, "adapter change: " + mPlaceList.get(tag).id + " " + tag);
+        SubScheduleRegister subScheduleRegister = new SubScheduleRegister();
+        subScheduleRegister.mainScheduleId = mMainSchedule.getMainId();
+        subScheduleRegister.date = date;
+        subScheduleRegister.placesId = mPlaceList.get(tag).id;
+        registerSubSchedule(subScheduleRegister);
+        
+//        adapter.adapter.notifyItemChanged(position);
+    }
+    
+    private void registerSubSchedule(SubScheduleRegister subScheduleRegister) {
+        Log.d("RX getScheduleRx", "register!!!!");
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+        Observable<Long> observable = service.registerSubschdule(subScheduleRegister);
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Long>() {
+                    @Override
+                    public void onNext(Long response) {
+                        Log.d("RX " + TAG, "register subschedule: " + "Next");
+                       if (response == 0L) {
+                           Log.d("RX " + TAG, "register Schedule failed");
+                       } else if (response == 1L) {
+                           Log.d("RX " + TAG, "register Schedule success");
+                       }
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX " + TAG, "register subschedule: " + e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX " + TAG, "register subschedule: complete");
+                        selectAllSubScheduleListRx(mMainSchedule.getMainId());
                     }
                 })
         );

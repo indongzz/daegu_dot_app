@@ -27,6 +27,7 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
         mFirstLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
         mLastLocalDate = (LocalDate) in.readValue(LocalDate.class.getClassLoader());
         mDDate = in.readInt();
+        mainId = in.readLong();
     }
 
     public static final Creator<MainScheduleInfo> CREATOR = new Creator<MainScheduleInfo>() {
@@ -97,7 +98,6 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
         LocalDate[] dateArray = new LocalDate[getDateBetween()];
         for (int i = 0; i < getDateBetween(); i++) {
             dateArray[i] = mFirstLocalDate.plusDays(i);
-            System.out.println(dateArray[i]);
         }
         
         return dateArray;
@@ -124,5 +124,6 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
         dest.writeValue(mFirstLocalDate);
         dest.writeValue(mLastLocalDate);
         dest.writeInt(mDDate);
+        dest.writeLong(mainId);
     }
 }

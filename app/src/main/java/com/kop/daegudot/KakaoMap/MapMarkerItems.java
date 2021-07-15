@@ -94,10 +94,10 @@ public class MapMarkerItems {
     }
     
     public ArrayList<Place> getPlaceList() {
-        Log.d(TAG, "Place n: " + mPlaceList.size());
-        for (Place o : mPlaceList) {
-            Log.d(TAG, "id: " + o.id + " tag: " + o.tag + " name: " + o.attractName);
-        }
+//        Log.d(TAG, "Place n: " + mPlaceList.size());
+//        for (Place o : mPlaceList) {
+//            Log.d(TAG, "id: " + o.id + " tag: " + o.tag + " name: " + o.attractName);
+//        }
         return mPlaceList;
     }
     
@@ -167,7 +167,6 @@ public class MapMarkerItems {
     //FD6	음식점
     //CE7	카페
     public void startRx2(double x, double y) {
-        Log.d(TAG, "x: " + x + "  y: " + y);
         
         RestApiService service = RestfulAdapter.getInstance().getKakaoServiceApi();
         
@@ -266,13 +265,10 @@ public class MapMarkerItems {
                 marker.setMapPoint(mapPoint);
                 marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
                 if (place.category.equals("AD5")) {
-//                    marker.setCustomImageResourceId(R.drawable.blue_pin);
                     marker.setCustomImageResourceId(R.drawable.hotel_pin);
                 } else if (place.category.equals("FD6")) {
-//                    marker.setCustomImageResourceId(R.drawable.pink_pin);
                     marker.setCustomImageResourceId(R.drawable.food_pin);
                 } else if (place.category.equals("CE7")) {
-//                    marker.setCustomImageResourceId(R.drawable.green_pin);
                     marker.setCustomImageResourceId(R.drawable.cafe_pin);
                 }
                 marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
@@ -286,9 +282,6 @@ public class MapMarkerItems {
             /* Progress Loading done */
             ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
         }
-//        for (Place place: mPlaceList) {
-//            Log.d(TAG, "id: " + place.id + " tag: " + place.tag + " Place: "+ place.attractName);
-//        }
     }
     
 

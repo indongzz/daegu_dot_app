@@ -23,8 +23,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
-import com.kop.daegudot.MySchedule.SubScheduleInfo;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -32,15 +32,16 @@ import java.util.ArrayList;
 public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.ViewHolder> {
     private static final String TAG = "ViewPagerAdapter";
     static Context mContext;
-    ArrayList<SubScheduleInfo> mSubScheduleList;
+    ArrayList<DateSubSchedule> mDateSubScheduleList;
     
     RecyclerView mRecyclerView;
-    MainScheduleInfo mMainSchedule;
+    static MainScheduleInfo mMainSchedule;
     ScheduleRecyclerViewAdapter adapter;
     
-    ViewPagerAdapter(Context context, ArrayList<SubScheduleInfo> subScheduleList) {
+    ViewPagerAdapter(Context context, MainScheduleInfo mainSchedule, ArrayList<DateSubSchedule> subScheduleList) {
         mContext = context;
-        mSubScheduleList = subScheduleList;
+        mDateSubScheduleList = subScheduleList;
+        mMainSchedule = mainSchedule;
     }
     
     static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -61,13 +62,16 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
         @Override
         public void onClick(View v) {
             int position = getAdapterPosition();
-            Log.i(TAG, "onClick: " + position+" 여기 포지션");
+            Log.d(TAG, "position: " + position);
             switch(v.getId()) {
                 case R.id.left_btn:
+                    Log.d(TAG, "left");
                     if (position > 0)
                         ((MapMainActivity) mContext).mViewPager.setCurrentItem(position - 1);
                     break;
                 case R.id.right_btn:
+                    Log.d(TAG, "right");
+                    if (position < mMainSchedule.getDateBetween())
                         ((MapMainActivity) mContext).mViewPager.setCurrentItem(position + 1);
                     break;
             }
@@ -82,8 +86,7 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     
         View view = inflater.inflate(R.layout.bottom_sheet_schedule, parent, false);
         ViewPagerAdapter.ViewHolder vh = new ViewPagerAdapter.ViewHolder(view);
-    
-    
+        
         mRecyclerView = view.findViewById(R.id.BSScheduleList);
         mRecyclerView.getLayoutParams().width = 830;
         
@@ -129,7 +132,10 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
         itemDecoration.setDrawable(insetDivider);
 
         mRecyclerView.addItemDecoration(itemDecoration);
-       
+        
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false);
+        mRecyclerView.setLayoutManager(layoutManager);
         
         return vh;
     }
@@ -138,26 +144,22 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String text = (position + 1) + " 일차";
         holder.nthday.setText(text);
-        
-        Log.i(TAG, "position: " + position + " / " + text + "대체 뭐가 문제야??");
     
         if (position == 0) {
-            holder.leftBtn.setBackgroundResource(R.drawable.blank_arrow_left);
-            holder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
-        } else if (position == mSubScheduleList.size() - 1) {
-            holder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
-            holder.rightBtn.setBackgroundResource(R.drawable.blank_arrow_right);
+            ViewHolder.leftBtn.setBackgroundResource(R.drawable.blank_arrow_left);
+            ViewHolder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
+        } else if (position == mMainSchedule.getDateBetween() - 1) {
+            ViewHolder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
+            ViewHolder.rightBtn.setBackgroundResource(R.drawable.blank_arrow_right);
         } else {
-            holder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
-            holder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
+            ViewHolder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
+            ViewHolder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
         }
         
-        LinearLayoutManager layoutManager =
-                new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false);
-        mRecyclerView.setLayoutManager(layoutManager);
-    
-    
-        adapter = new ScheduleRecyclerViewAdapter(mSubScheduleList.get(position).getPlaceName(), mContext);
+        Log.d(TAG, "position: " + position);
+        
+        adapter = new ScheduleRecyclerViewAdapter(
+                mDateSubScheduleList.get(position).subScheduleList, mContext);
     
         mRecyclerView.setAdapter(adapter);
     
@@ -167,7 +169,7 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     
     @Override
     public int getItemCount() {
-        return mSubScheduleList.size();
+        return mMainSchedule.getDateBetween();
     }
     
 //    public void setRecyclerViewDivider() {

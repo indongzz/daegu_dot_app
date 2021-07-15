@@ -54,12 +54,7 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
         
             
             SubScheduleDialog dialog = new SubScheduleDialog(mContext, mainScheduleInfo,
-                    new SubScheduleDialog.SubScheduleDialogListener() {
-                @Override
-                public void dialogEventListener() {
-                    deleteListItem();
-                }
-            });
+                    this::deleteListItem);
             Objects.requireNonNull(dialog.getWindow())
                     .setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.setCanceledOnTouchOutside(true);

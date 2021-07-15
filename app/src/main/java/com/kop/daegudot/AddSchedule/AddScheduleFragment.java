@@ -20,6 +20,7 @@ import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
 //import com.applikeysolutions.cosmocalendar.utils.SelectionType;
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
 import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
@@ -60,6 +61,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     private String mToken;
     UserResponse user;
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+    long mMainId;
 
     public AddScheduleFragment() {
         // Required empty public constructor
@@ -153,8 +155,6 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
        RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
        
        Observable<Long> observable = service.saveMainSchedule(mainSchedule);
-    
-       final long[] mainId = new long[1];
        
        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                .observeOn(AndroidSchedulers.mainThread())
@@ -162,7 +162,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                    @Override
                    public void onNext(Long response) {
                        Log.d("RX AddScheduleFragment", "Next" + " Response id:: " + response);
-                       mainId[0] = response;
+                       mMainId = response;
                    }
                 
                    @Override
@@ -174,14 +174,17 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                    @Override
                    public void onComplete() {
                        Log.d("RX AddScheduleFragment", "complete");
-    
+                       
+                       MainScheduleInfo mainScheduleInfo = new MainScheduleInfo();
+                       mainScheduleInfo.setmStartDate(mStartDate);
+                       mainScheduleInfo.setmEndDate(mEndDate);
+                       mainScheduleInfo.setMainId(mMainId);
+                       mainScheduleInfo.setmDDate();
+                       
                        Intent intent = new Intent(getContext(), MapMainActivity.class);
-                       intent.putExtra("startDay", mStartDate);
-                       intent.putExtra("endDay", mEndDate);
-                       intent.putExtra("mainId", mainId);
+                       intent.putExtra("mainSchedule", mainScheduleInfo);
                        startActivity(intent);
                        flag = 0;
-                    
                    }
                })
        );
