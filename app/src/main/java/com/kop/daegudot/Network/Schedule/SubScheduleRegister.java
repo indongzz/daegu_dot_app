@@ -1,8 +1,7 @@
 package com.kop.daegudot.Network.Schedule;
 
-public class SubSchedule {
+public class SubScheduleRegister {
     public String date;
-    public long placeId;
+    public long placesId;
     public long mainScheduleId;
-    public long subId;
 }

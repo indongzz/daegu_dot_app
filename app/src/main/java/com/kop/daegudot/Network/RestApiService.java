@@ -5,9 +5,10 @@ import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
 import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponseList;
-import com.kop.daegudot.Network.Schedule.SubSchedule;
+import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
 import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
 import com.kop.daegudot.Network.More.MyInfo.PasswordUpdate;
+import com.kop.daegudot.Network.Schedule.SubScheduleResponseList;
 import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.Network.User.UserLogin;
 import com.kop.daegudot.Network.User.UserResponse;
@@ -96,11 +97,11 @@ public interface RestApiService {
     
     /* insert sub Schedule*/
     @POST("/schedule/sub/register")
-    Observable<Long> saveSubSchedule(@Body SubSchedule subSchedule);
+    Observable<Long> registerSubschdule(@Body SubScheduleRegister subScheduleRegister);
     
     /* get sub Schedule by main schedule */
     @GET("/schedule/sub/{mainscheduleId}")
-    Observable<List<SubSchedule>> getSubscheduleList(@Path("mainscheduleId") long mainScheduleId);
+    Observable<SubScheduleResponseList> getSubscheduleList(@Path("mainscheduleId") long mainScheduleId);
     
     /* delete subschedule from main schedule */
     @DELETE("/schedule/sub/delete/{subscheduleId}")

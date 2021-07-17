@@ -1,7 +1,6 @@
 package com.kop.daegudot.MySchedule;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,20 +10,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 //import com.kop.daegudot.KakaoMap.ConvertToMapMainAcitivity;
 import com.kop.daegudot.KakaoMap.MapMainActivity;
-import com.kop.daegudot.KakaoMap.MarkerInfo;
-import com.kop.daegudot.Network.RestApiService;
-import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.Schedule.SubScheduleResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 
 public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.ViewHolder> {
-    private static ArrayList<SubScheduleInfo> mSubScheduleList;
+    private static ArrayList<DateSubSchedule> mDateSubScheduleList;
     private static MainScheduleInfo mMainSchedule;
     private static Context mContext;
     
@@ -48,23 +44,21 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
             
             if (pos != RecyclerView.NO_POSITION) {
                 // 세부 일정 클릭하여 MapMainActivity로 넘어가기
-                String whatDay = mSubScheduleList.get(pos).getDate();
+                String whatDay = mDateSubScheduleList.get(pos).date;
                 Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(mContext, MapMainActivity.class);
-                intent.putExtra("MainSchedule", mMainSchedule);
-                intent.putParcelableArrayListExtra("SubScheduleList", mSubScheduleList);
+                intent.putExtra("mainSchedule", mMainSchedule);
                 intent.putExtra("position", pos);
-                intent.putExtra("mainId", mMainSchedule.getMainId());
                 mContext.startActivity(intent);
             }
         }
         
     }
     
-    SubScheduleAdapter(Context context, ArrayList<SubScheduleInfo> subScheduleList, MainScheduleInfo mainScheduleInfo) {
+    SubScheduleAdapter(Context context, ArrayList<DateSubSchedule> dateSubSchedules, MainScheduleInfo mainScheduleInfo) {
         mContext = context;
-        mSubScheduleList = subScheduleList;
+        mDateSubScheduleList = dateSubSchedules;
         mMainSchedule = mainScheduleInfo;
     }
     
@@ -73,7 +67,7 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
     public SubScheduleAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
-        View view = inflater.inflate(R.layout.layout_itinerarylist_item, parent, false);
+        View view = inflater.inflate(R.layout.layout_subschedule_item, parent, false);
         SubScheduleAdapter.ViewHolder vh = new SubScheduleAdapter.ViewHolder(view);
         
         return vh;
@@ -81,14 +75,22 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
     
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        SubScheduleInfo info = mSubScheduleList.get(position);
-        holder.nthDay.setText(info.getDate());
-        holder.detailAddress.setText(info.getAddressString());
+        DateSubSchedule dateSubSchedule = mDateSubScheduleList.get(position);
+        
+        String str = (position + 1) + "일차 - " + dateSubSchedule.date.substring(5, 7) + "." +
+                    dateSubSchedule.date.substring(8, 10);
+        holder.nthDay.setText(str);
+        
+        String texts = "";
+        for (int i = 0; i < dateSubSchedule.subScheduleList.size(); i++) {
+            texts += dateSubSchedule.subScheduleList.get(i).placesResponseDto.attractName + "\n";
+        }
+        holder.detailAddress.setText(texts);
     }
     
     @Override
     public int getItemCount() {
-        return mSubScheduleList.size();
+        return mDateSubScheduleList.size();
     }
     
 
