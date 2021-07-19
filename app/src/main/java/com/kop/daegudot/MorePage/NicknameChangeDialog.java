@@ -96,6 +96,8 @@ public class NicknameChangeDialog {
                     public void onNext(Long response) {
                         Toast.makeText(mContext, "별명 변경이 완료되었습니다.", Toast.LENGTH_SHORT).show();
                         Log.d("UPDATE_NICKNAME", "UPDATED" + " " + response);
+                        
+                        ((MyInformationActivity)mContext).updateNickNameUI(nicknameUpdate.nickname);
                     }
 
                     @Override
