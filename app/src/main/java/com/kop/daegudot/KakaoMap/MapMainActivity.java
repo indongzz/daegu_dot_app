@@ -149,7 +149,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         String titleString = mMainSchedule.getDateString();
         mTitle.setText(titleString);
-        
+      
         selectAllSubScheduleListRx(mMainSchedule.getMainId());
     }
     
@@ -211,6 +211,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         adapter = new ViewPagerAdapter(mContext, mMainSchedule, mDateSubScheduleList);
         mViewPager.setAdapter(adapter);
         mViewPager.setNestedScrollingEnabled(false);
+        mViewPager.setOffscreenPageLimit(mMainSchedule.getDateBetween() * 2);
     
         NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
@@ -223,19 +224,19 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         /* update Place list */
         mPlaceList = updatePlaceList();
         
-        // Todo: SubSchedule register
         Log.d("RX " + TAG, "adapter change: " + mPlaceList.get(tag).id + " " + tag);
         SubScheduleRegister subScheduleRegister = new SubScheduleRegister();
         subScheduleRegister.mainScheduleId = mMainSchedule.getMainId();
         subScheduleRegister.date = date;
         subScheduleRegister.placesId = mPlaceList.get(tag).id;
-        registerSubSchedule(subScheduleRegister);
+        
+        registerSubSchedule(subScheduleRegister, tag);
         
 //        adapter.adapter.notifyItemChanged(position);
     }
     
-    private void registerSubSchedule(SubScheduleRegister subScheduleRegister) {
-        Log.d("RX getScheduleRx", "register!!!!");
+    private void registerSubSchedule(SubScheduleRegister subScheduleRegister, int tag) {
+        Log.d("RX getScheduleRx", "register!!!!" + mMainSchedule.getMainId());
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
         Observable<Long> observable = service.registerSubschdule(subScheduleRegister);
         
@@ -245,11 +246,21 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
                     @Override
                     public void onNext(Long response) {
                         Log.d("RX " + TAG, "register subschedule: " + "Next");
-                       if (response == 0L) {
-                           Log.d("RX " + TAG, "register Schedule failed");
-                       } else if (response == 1L) {
-                           Log.d("RX " + TAG, "register Schedule success");
-                       }
+    
+    
+                        SubScheduleResponse subScheduleResponse = new SubScheduleResponse();
+                        subScheduleResponse.id = response;
+                        subScheduleResponse.date = subScheduleRegister.date;
+                        subScheduleResponse.placesResponseDto = mPlaceList.get(tag);
+    
+                        for (int i = 0; i < mDateSubScheduleList.size(); i++) {
+                            if ((subScheduleResponse.date)
+                                    .equals(mDateSubScheduleList.get(i).date)) {
+                                mDateSubScheduleList.get(i)
+                                        .subScheduleList.add(subScheduleResponse);
+                            }
+                        }
+    
                     }
                     
                     @Override

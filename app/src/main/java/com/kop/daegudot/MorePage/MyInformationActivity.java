@@ -134,6 +134,10 @@ public class MyInformationActivity extends AppCompatActivity implements View.OnC
         }
         
     }
+    
+    public void updateNickNameUI(String name) {
+        mName.setText(name);
+    }
 
     //토큰으로 회원 정보 가져오기
     private void selectUserByToken() {

@@ -28,6 +28,7 @@ import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.ViewHolder> {
     private static final String TAG = "ViewPagerAdapter";
@@ -61,18 +62,19 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     
         @Override
         public void onClick(View v) {
-            int position = getAdapterPosition();
-            Log.d(TAG, "position: " + position);
+            int position = Integer.parseInt
+                    (nthday.getText().toString().replaceAll("[^0-9]", ""));
+            
             switch(v.getId()) {
                 case R.id.left_btn:
-                    Log.d(TAG, "left");
-                    if (position > 0)
-                        ((MapMainActivity) mContext).mViewPager.setCurrentItem(position - 1);
+                    if (position > 1) {
+                        ((MapMainActivity) mContext).mViewPager.setCurrentItem(position - 2);
+                    }
                     break;
                 case R.id.right_btn:
-                    Log.d(TAG, "right");
-                    if (position < mMainSchedule.getDateBetween())
-                        ((MapMainActivity) mContext).mViewPager.setCurrentItem(position + 1);
+                    if (position < mMainSchedule.getDateBetween()) {
+                        ((MapMainActivity) mContext).mViewPager.setCurrentItem(position);
+                    }
                     break;
             }
         }
@@ -103,15 +105,15 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
                 }
                 return false;
             }
-        
+
             @Override
             public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-            
+
             }
-        
+
             @Override
             public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-            
+
             }
         };
     
@@ -142,21 +144,24 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Log.d(TAG, position + 1 + "일차 " + " arrow !! " + position + " main " + mMainSchedule.getDateBetween());
         String text = (position + 1) + " 일차";
         holder.nthday.setText(text);
+        
     
         if (position == 0) {
+            Log.d(TAG, "position is 0. blank left");
             ViewHolder.leftBtn.setBackgroundResource(R.drawable.blank_arrow_left);
             ViewHolder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
         } else if (position == mMainSchedule.getDateBetween() - 1) {
+            Log.d(TAG, "position is last. blank right");
             ViewHolder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
             ViewHolder.rightBtn.setBackgroundResource(R.drawable.blank_arrow_right);
         } else {
+            Log.d(TAG, "full arrow");
             ViewHolder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
             ViewHolder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
         }
-        
-        Log.d(TAG, "position: " + position);
         
         adapter = new ScheduleRecyclerViewAdapter(
                 mDateSubScheduleList.get(position).subScheduleList, mContext);
@@ -166,6 +171,7 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     //    setRecyclerViewDivider();
        
     }
+    
     
     @Override
     public int getItemCount() {

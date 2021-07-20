@@ -136,6 +136,7 @@ public class ScheduleRecyclerViewAdapter
     @Override
     public void onBindViewHolder(@NonNull ScheduleRecyclerViewAdapter.ViewHolder holder, int position) {
         holder.text.setText(mSubScheduleList.get(position).placesResponseDto.attractName);
+        
     }
     
     @Override

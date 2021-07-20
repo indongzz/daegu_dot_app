@@ -158,11 +158,13 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
         
         int index = 0;
         for (int i = 0; i < sub.size(); i++) {
-            if (!dateSubSchedules.get(index).date.equals(sub.get(i).date)) {
-                index++;
+            if (dateSubSchedules.get(index).date.equals(sub.get(i).date)) {
+                dateSubSchedules.get(index).subScheduleList.add(sub.get(i));
             }
-            
-            dateSubSchedules.get(index).subScheduleList.add(sub.get(i));
+            else {
+                index++;
+                i--;
+            }
         }
         
         for (int i = 0; i < dateSubSchedules.size(); i++) {

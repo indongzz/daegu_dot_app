@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.applikeysolutions.cosmocalendar.utils.*;
 import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener;
@@ -21,6 +22,7 @@ import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
 import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
+import com.kop.daegudot.MySchedule.MyScheduleFragment;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
@@ -56,6 +58,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     String mBtnDay1, mBtnDay2;
     LocalDate localStart, localEnd;
     int flag = 1;
+    FragmentManager mFragmentManager;
     
     private SharedPreferences pref;
     private String mToken;
@@ -80,6 +83,8 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     
         pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
+        
+        mFragmentManager = getFragmentManager();
         
         // 토큰으로 사용자 정보 가져오기
         selectUserByToken();
@@ -163,6 +168,14 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                    public void onNext(Long response) {
                        Log.d("RX AddScheduleFragment", "Next" + " Response id:: " + response);
                        mMainId = response;
+                       
+                       MainScheduleInfo mainScheduleInfo = new MainScheduleInfo();
+                       mainScheduleInfo.setMainId(mMainId);
+                       mainScheduleInfo.setmStartDate(mainSchedule.startDate);
+                       mainScheduleInfo.setmEndDate(mainSchedule.endDate);
+                       mainScheduleInfo.setmDDate();
+                       
+                       MyScheduleFragment.addMainSchedule(mainScheduleInfo);
                    }
                 
                    @Override
