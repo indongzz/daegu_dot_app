@@ -93,8 +93,6 @@ public class PlaceBottomSheet implements Button.OnClickListener {
             Log.i(TAG, "선택한 날짜 position: " + position);
         
             // position으로 선택한 날짜를, tag로 marker를 알 수 있게 함
-            // Todo: subschedule 추가...
-            
             ((MapMainActivity) mContext).adapterChange(dateArray[position].toString(), mTag);
         
             dialog.dismiss();

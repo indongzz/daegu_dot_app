@@ -79,10 +79,10 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
                             int n = getAdapterPosition();
                             
                             Log.d("RX MAINSCHEDULE ADATER", "DELETE!!@@@@@ " + mMainScheduleList.get(n).getMainId());
-                            deleteMainScheduleRx(mMainScheduleList.get(n).getMainId());
+                            deleteMainScheduleRx(n);
                             
-                            mMainScheduleList.remove(n);
-                            notifyItemRemoved(getAdapterPosition());
+//                            mMainScheduleList.remove(n);
+//                            notifyItemRemoved(getAdapterPosition());
                         }
                     });
             builder.setNegativeButton("아니오",
@@ -121,7 +121,9 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
         return mMainScheduleList.size();
     }
     
-    private void deleteMainScheduleRx(long mainScheduleId) {
+    private void deleteMainScheduleRx(int n) {
+        long mainScheduleId = mMainScheduleList.get(n).getMainId();
+        
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
         Observable<Long> observable = service.deleteMainSchedule(mainScheduleId);
         
@@ -132,11 +134,11 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
                     public void onNext(Long response) {
                         Log.d("RX", "Next");
                         // Todo : Check if Delete is Success
-//                        if (response == 0L) {
-//
-//                        } else if (response == 1L) {
-//
-//                        }
+                        if (response == 0L) {
+                            Toast.makeText(mContext, "삭제 실패", Toast.LENGTH_SHORT).show();
+                        } else if (response == 1L) {
+                            Toast.makeText(mContext, "삭제되었습니다", Toast.LENGTH_SHORT).show();
+                        }
                     }
                     
                     @Override
@@ -148,6 +150,8 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
                     public void onComplete() {
                         Log.d("RX", "complete");
                         
+                            mMainScheduleList.remove(n);
+                            notifyDataSetChanged();
                     }
                 })
         );

@@ -34,8 +34,9 @@ import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class MyScheduleFragment extends Fragment implements View.OnClickListener {
+    static String TAG = "MyScheduleFragment";
     View view;
-    private ArrayList<MainScheduleInfo> mList = new ArrayList<>();
+    private static ArrayList<MainScheduleInfo> mList = new ArrayList<>();
     private RecyclerView recyclerView;
     private MainScheduleAdapter adapter;
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
@@ -53,9 +54,10 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
         
+        // TODO: 지우기
         selectAllMainSchedule();
-    
     }
+    
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -127,6 +129,9 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         );
     }
     
+    public static void addMainSchedule(MainScheduleInfo mainScheduleInfo) {
+        mList.add(mainScheduleInfo);
+    }
     
     public void refresh() {
         // 데이터 추가 시 갱신
