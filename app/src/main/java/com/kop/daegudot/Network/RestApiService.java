@@ -3,6 +3,10 @@ package com.kop.daegudot.Network;
 import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
+import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
+import com.kop.daegudot.Network.Recommend.RecommendRegister;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
+import com.kop.daegudot.Network.Recommend.RecommendResponseList;
 import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponseList;
 import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
@@ -120,4 +124,20 @@ public interface RestApiService {
     @PUT("/user/update/password")
     Observable<Long> updateUserPassword(@Body PasswordUpdate passwordUpdate);
 
+    /* Recommandation */
+    @POST("/recommend/register")
+    Observable<Long> registerRecommendSchedule(@Body RecommendRegister recommendRegister);
+    
+    @GET("/recommend")
+    Observable<RecommendResponseList> getRecommendScheduleList();
+    
+    @PUT("/recommend/update/{recommendScheduleId}")
+    Observable<Long> updateRecommendSchedule(@Path("recommendScheduleId") long recommendScheduleId);
+    
+    @DELETE("/recommend/delete/{recommendScheduleId}")
+    Observable<Long> deleteRecommendSchedule(@Path("recommendScheduleId") long recommendScheduleId);
+    
+    /* Hashtag */
+    @GET("/hashtag")
+    Observable<HashtagResponseList> selectHashtagList();
 }

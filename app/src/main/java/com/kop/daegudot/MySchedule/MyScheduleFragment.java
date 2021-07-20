@@ -133,6 +133,10 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         mList.add(mainScheduleInfo);
     }
     
+    public static ArrayList<MainScheduleInfo> getMainSchedules() {
+        return mList;
+    }
+    
     public void refresh() {
         // 데이터 추가 시 갱신
          adapter.notifyDataSetChanged();
