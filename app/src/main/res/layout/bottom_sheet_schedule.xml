@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/schedule_bottomSheet_layout"
+    android:background="@drawable/round_rectangle">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <TextView
+            android:id="@+id/tv_days"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="n일차"
+            android:textSize="17sp"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toTopOf="@id/left_btn"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_margin="10dp"
+            android:layout_marginVertical="10dp"
+            />
+
+        <Button
+            android:id="@+id/left_btn"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blank_arrow_left"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            />
+
+        <Button
+            android:id="@+id/right_btn"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/arrow_right"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            />
+
+        <View
+            android:id="@+id/line"
+            android:layout_width="0dp"
+            android:layout_height="2dp"
+            android:background="@color/dimmedBlue"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/left_btn"
+            app:layout_constraintRight_toLeftOf="@id/right_btn"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/BSScheduleList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:translationY="-7.5dp"
+            app:layout_constraintTop_toTopOf="@+id/line"
+            app:layout_constraintLeft_toRightOf="@id/left_btn"
+            app:layout_constraintRight_toLeftOf="@id/right_btn"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

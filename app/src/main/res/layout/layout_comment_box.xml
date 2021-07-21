@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="10dp"
+    android:background="@drawable/round_rectangle"
+    android:backgroundTint="@color/lighterGray"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditText
+        android:id="@+id/comment_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="50dp"
+        android:hint="댓글을 달아주세요 :)"
+        android:background="@color/transparent"
+        android:layout_centerVertical="true"
+        />
+
+    <Button
+        android:id="@+id/apply_comment_btn"
+        android:layout_width="50dp"
+        android:layout_height="40dp"
+        android:text="등록"
+        android:background="@color/transparent"
+        android:layout_alignParentEnd="true"
+        />
+
+</RelativeLayout>

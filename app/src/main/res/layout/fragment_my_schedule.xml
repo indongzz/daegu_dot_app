@@ -63,6 +63,7 @@
 
 
         <Button
+            android:id="@+id/addOtherSBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="다른 일정 추가하기"

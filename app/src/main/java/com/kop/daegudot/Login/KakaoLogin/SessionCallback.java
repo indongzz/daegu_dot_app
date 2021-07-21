@@ -56,6 +56,7 @@ public class SessionCallback implements ISessionCallback {
                             if (email != null) {
                                 Log.i("KAKAO_API", "email: " + email);
                                 LoginActivity.editor.putString("email", email);
+                                //LoginActivity.setRegisterInfo(email, "kakao", 'k');
                             } else if (kakaoAccount.emailNeedsAgreement() == OptionalBoolean.TRUE) {
                                 // get email after get agreement
                                 Log.e("KAKAO_API", "need agreeemnt");

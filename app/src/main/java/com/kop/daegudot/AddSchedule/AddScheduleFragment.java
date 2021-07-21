@@ -1,29 +1,70 @@
 package com.kop.daegudot.AddSchedule;
 
+import android.content.Intent;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.applikeysolutions.cosmocalendar.utils.*;
 import com.applikeysolutions.cosmocalendar.selection.OnDaySelectedListener;
 import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
 //import com.applikeysolutions.cosmocalendar.utils.SelectionType;
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
+import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.MySchedule.MainScheduleInfo;
+import com.kop.daegudot.MySchedule.MyScheduleFragment;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.List;
 
-public class AddScheduleFragment extends Fragment {
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
+
+/**
+ *  Second Fragment' 일정추가
+ *
+ *  select two dates to make main schedule
+ *  and add to database
+ */
+
+public class AddScheduleFragment extends Fragment implements View.OnClickListener {
+    final static private String TAG = "AddScheduleFragment";
     View view;
     CalendarView mCalendar;
     Button mCalendarBtn;
-
+    String mStartDate, mEndDate;
+    String mBtnDay1, mBtnDay2;
+    LocalDate localStart, localEnd;
+    int flag = 1;
+    FragmentManager mFragmentManager;
+    
+    private SharedPreferences pref;
+    private String mToken;
+    UserResponse user;
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+    long mMainId;
 
     public AddScheduleFragment() {
         // Required empty public constructor
@@ -39,13 +80,23 @@ public class AddScheduleFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_schedule, container, false);
-
+    
+        pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
+        mToken = pref.getString("token", "");
+        
+        mFragmentManager = getFragmentManager();
+        
+        // 토큰으로 사용자 정보 가져오기
+        selectUserByToken();
+        
         // change top title
         TextView title = view.findViewById(R.id.title);
         title.setText("일정 추가");
 
         mCalendar = view.findViewById(R.id.calendar);
         mCalendarBtn = view.findViewById(R.id.calendarBtn);
+
+        mCalendarBtn.setOnClickListener(this);
 
         mCalendar.setSelectionType(SelectionType.RANGE);
 
@@ -55,29 +106,128 @@ public class AddScheduleFragment extends Fragment {
                 List<Calendar> days = mCalendar.getSelectedDates();
 
                 Calendar startCal = days.get(0);
-                int startDay = startCal.get(Calendar.DAY_OF_MONTH);
-                int startMonth = startCal.get(Calendar.MONTH);
-                int startYear = startCal.get(Calendar.YEAR);
-                String startDate = (startMonth + 1) + "월" + startDay + "일";
-
+                localStart = LocalDateTime.ofInstant(
+                        startCal.toInstant(), startCal.getTimeZone().toZoneId()).toLocalDate();
+                        
+                mBtnDay1 = localStart.format(DateTimeFormatter.ofPattern("M월d일"));
+                mStartDate = localStart.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                Log.i(TAG, "mStartDate: " + mStartDate + "mbtnday1: " + mBtnDay1);
+                
                 Calendar endCal = days.get(days.size() - 1);
-                int endDay = endCal.get(Calendar.DAY_OF_MONTH);
-                int endMonth = endCal.get(Calendar.MONTH);
-                int endYear = endCal.get(Calendar.YEAR);
-                String endDate = (endMonth + 1) + "월" + endDay + "일";
+                localEnd = LocalDateTime.ofInstant(
+                        endCal.toInstant(), endCal.getTimeZone().toZoneId()).toLocalDate();
+
+                mBtnDay2 = localEnd.format(DateTimeFormatter.ofPattern("M월d일"));
+                mEndDate = localEnd.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
                 String text = null;
-                if (startDate.equals(endDate)) {
-                    text = startDate + " - ";
+                if (mBtnDay1.equals(mBtnDay2)) {
+                    text = mBtnDay1 + " - ";
                 } else {
-                    text = startDate + " - " + endDate;
+                    text = mBtnDay1 + " - " + mBtnDay2;
                 }
                 mCalendarBtn.setText(text);
+                
+                if (text.length() > 10)
+                    flag = 1;
+                else flag = 0;
+    
              }
         }));
 
-
-
          return view;
+    }
+
+    
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.calendarBtn:
+                if (flag == 1) {
+                    MainScheduleRegister mainScheduleRegister = new MainScheduleRegister();
+                    mainScheduleRegister.startDate = localStart.toString();
+                    mainScheduleRegister.endDate = localEnd.toString();
+                    mainScheduleRegister.userId = user.id;
+                    registerMainSchedule(mainScheduleRegister);
+                } else {
+                    Toast.makeText(getContext(), "날짜를 선택해주세요", Toast.LENGTH_SHORT).show();
+                }
+            //    ((MainActivity)getActivity()).changeFragment(1, 0);
+        }
+    }
+    
+   private void registerMainSchedule(MainScheduleRegister mainSchedule) {
+       RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+       
+       Observable<Long> observable = service.saveMainSchedule(mainSchedule);
+       
+       mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+               .observeOn(AndroidSchedulers.mainThread())
+               .subscribeWith(new DisposableObserver<Long>() {
+                   @Override
+                   public void onNext(Long response) {
+                       Log.d("RX AddScheduleFragment", "Next" + " Response id:: " + response);
+                       mMainId = response;
+                       
+                       MainScheduleInfo mainScheduleInfo = new MainScheduleInfo();
+                       mainScheduleInfo.setMainId(mMainId);
+                       mainScheduleInfo.setmStartDate(mainSchedule.startDate);
+                       mainScheduleInfo.setmEndDate(mainSchedule.endDate);
+                       mainScheduleInfo.setmDDate();
+                       
+                       MyScheduleFragment.addMainSchedule(mainScheduleInfo);
+                   }
+                
+                   @Override
+                   public void onError(Throwable e) {
+                       Log.d("RX AddScheduleFragment", e.getMessage());
+                       Toast.makeText(getContext(), "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+                   }
+                
+                   @Override
+                   public void onComplete() {
+                       Log.d("RX AddScheduleFragment", "complete");
+                       
+                       MainScheduleInfo mainScheduleInfo = new MainScheduleInfo();
+                       mainScheduleInfo.setmStartDate(mStartDate);
+                       mainScheduleInfo.setmEndDate(mEndDate);
+                       mainScheduleInfo.setMainId(mMainId);
+                       mainScheduleInfo.setmDDate();
+                       
+                       Intent intent = new Intent(getContext(), MapMainActivity.class);
+                       intent.putExtra("mainSchedule", mainScheduleInfo);
+                       startActivity(intent);
+                       flag = 0;
+                   }
+               })
+       );
+   }
+    
+    //토큰으로 회원 정보 가져오기
+    private void selectUserByToken() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(mToken);
+        Observable<UserResponse> observable = service.getUserFromToken();
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        user = response;
+                        Log.d("TOKEN", "TOKEN OK" + " " + response.email);
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("TOKEN", e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("TOKEN", "complete");
+                    }
+                })
+        );
     }
 }
