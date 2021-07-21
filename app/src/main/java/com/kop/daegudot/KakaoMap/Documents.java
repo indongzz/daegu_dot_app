@@ -23,7 +23,7 @@ public class Documents {
         @SerializedName("place_name")
         @Expose
         public String placeName;
-        @SerializedName("address_name")
+        @SerializedName("road_address_name")
         @Expose
         public String address;
         @SerializedName("x")
@@ -32,9 +32,9 @@ public class Documents {
         @SerializedName("y")
         @Expose
         public double y;
-        @SerializedName("category_group_code")
+        @SerializedName("phone")
         @Expose
-        public String category;
+        public String phone;
     
         @Override
         public boolean equals(Object object) {

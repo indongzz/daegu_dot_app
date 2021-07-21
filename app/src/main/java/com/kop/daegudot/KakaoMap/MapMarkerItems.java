@@ -1,12 +1,16 @@
 package com.kop.daegudot.KakaoMap;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.View;
 
 import com.kop.daegudot.Network.Map.Place;
+import com.kop.daegudot.Network.Map.PlaceRegister;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserLogin;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -140,7 +144,7 @@ public class MapMarkerItems {
      * set Markers on map
      */
     private void setServerMarker() {
-        
+
         for (Place place: mPlaceList) {
             if (place.category == null) {
                 mPlaceList.get(tagNum).tag = tagNum;
@@ -167,7 +171,7 @@ public class MapMarkerItems {
     //FD6	음식점
     //CE7	카페
     public void startRx2(double x, double y) {
-        
+
         RestApiService service = RestfulAdapter.getInstance().getKakaoServiceApi();
         
         for (int i = 1; i <= 5; i++) {
@@ -179,12 +183,13 @@ public class MapMarkerItems {
                 public void onResponse(Call<Documents> call, Response<Documents> response) {
                     if (response.isSuccessful()) {
                         assert response.body() != null;
-                        Log.d(TAG, response.body().getDocuments().toString());
+                        Log.d("AD5", response.body().getDocuments().toString());
                         ArrayList<Documents.Address> documents =
                                 (ArrayList<Documents.Address>) response.body().getDocuments();
                         mAccomdList.removeAll(documents); // 중복제거
                         mAccomdList.addAll(documents);
-                        setPlaceMarker(mAccomdList);
+                        makeRegisterAC();
+                        //setPlaceMarker(mAccomdList);
 
                     call = service.getPlacebyCategory(
                             key, "FD6", x + "", y + "", 20000, finalI);
@@ -197,7 +202,8 @@ public class MapMarkerItems {
                                 mFoodList.removeAll(food); // 중복 제거
                                 mFoodList.addAll(food);
 
-                                setPlaceMarker(mFoodList);
+                                //setPlaceMarker(mFoodList);
+                                makeRegisterFD();
                             } // FD if문 종료
                         }
 
@@ -231,7 +237,8 @@ public class MapMarkerItems {
                         mCafeList.removeAll(cafe);
                         mCafeList.addAll(cafe);
 
-                        setPlaceMarker(mCafeList);
+                        //setPlaceMarker(mCafeList);
+                        makeRegisterCF();
                     } else {
                         Log.d(TAG, "Cafe response error code: " + response.code());
                     }
@@ -246,7 +253,7 @@ public class MapMarkerItems {
     }
    
     // set Markers from kakao
-    public void setPlaceMarker(ArrayList<Documents.Address> arrayList) {
+    /*public void setPlaceMarker(ArrayList<Documents.Address> arrayList) {
         Log.d(TAG, "n: " + arrayList.size());
         for (Documents.Address address : arrayList) {
             // 추가 안한 경우 추가하기
@@ -279,11 +286,77 @@ public class MapMarkerItems {
                 mMarkerList.add(marker);
             }
         
-            /* Progress Loading done */
+            //Progress Loading done
             ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
         }
-    }
+    }*/
     
 
-    
+    private void makeRegisterAC(){
+        ArrayList<PlaceRegister> new_places = new ArrayList<>();
+        for(int i=0; i<mAccomdList.size();i++){
+            PlaceRegister placeRegister = new PlaceRegister();
+            placeRegister.address = mAccomdList.get(i).address;
+            placeRegister.attractName = mAccomdList.get(i).placeName;
+            placeRegister.longitude = Double.toString(mAccomdList.get(i).x);
+            placeRegister.latitude = Double.toString(mAccomdList.get(i).y);
+            placeRegister.category = "AC";
+            new_places.add(placeRegister);
+        }
+        insertPlace(new_places);
+    }
+
+    private void makeRegisterFD(){
+        ArrayList<PlaceRegister> new_places = new ArrayList<>();
+        for(int i=0; i<mFoodList.size();i++){
+            PlaceRegister placeRegister = new PlaceRegister();
+            placeRegister.attractName = mFoodList.get(i).placeName;
+            placeRegister.longitude = Double.toString(mFoodList.get(i).x);
+            placeRegister.latitude = Double.toString(mFoodList.get(i).y);
+            placeRegister.address = mFoodList.get(i).address;
+            placeRegister.category = "FD";
+            new_places.add(placeRegister);
+        }
+        insertPlace(new_places);
+    }
+
+    private void makeRegisterCF(){
+        ArrayList<PlaceRegister> new_places = new ArrayList<>();
+        for(int i=0; i<mCafeList.size();i++){
+            PlaceRegister placeRegister = new PlaceRegister();
+            placeRegister.attractName = mCafeList.get(i).placeName;
+            placeRegister.longitude = Double.toString(mCafeList.get(i).x);
+            placeRegister.latitude = Double.toString(mCafeList.get(i).y);
+            placeRegister.address = mCafeList.get(i).address;
+            placeRegister.category = "CF";
+            new_places.add(placeRegister);
+        }
+        insertPlace(new_places);
+    }
+
+    private void insertPlace(List<PlaceRegister> placeRegister) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<Long> observable = service.insertPlaces(placeRegister);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Long>() {
+                    @Override
+                    public void onNext(Long response) {
+                        Log.d("INSERT PLACES", "LOGIN SUCCESS");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("INSERT PLACES", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("INSERT PLACES", "complete");
+                    }
+                })
+        );
+    }
 }

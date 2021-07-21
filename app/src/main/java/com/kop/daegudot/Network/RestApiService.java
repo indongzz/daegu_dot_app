@@ -3,6 +3,7 @@ package com.kop.daegudot.Network;
 import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
+import com.kop.daegudot.Network.Map.PlaceRegister;
 import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponseList;
 import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
@@ -119,5 +120,8 @@ public interface RestApiService {
 
     @PUT("/user/update/password")
     Observable<Long> updateUserPassword(@Body PasswordUpdate passwordUpdate);
+
+    @POST("/places/location")
+    Observable<Long> insertPlaces(@Body List<PlaceRegister> placeRegister);
 
 }
