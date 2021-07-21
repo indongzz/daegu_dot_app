@@ -1,4 +1,4 @@
-package com.kop.daegudot.MorePage;
+package com.kop.daegudot.MorePage.MyReview;
 
 import android.content.Context;
 import android.util.Log;
@@ -11,17 +11,21 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kop.daegudot.MorePage.MyCommentActivity;
 import com.kop.daegudot.R;
 import com.kop.daegudot.Recommend.PostItem;
 
 import java.util.ArrayList;
 
+/**
+ * 더보기 - 내가 쓴 글, 내가 쓴 댓글의 리스트를 띄우기 위한 RecyclerView Adapter
+ */
 public class MyReviewAndCommentAdapter extends RecyclerView.Adapter<MyReviewAndCommentAdapter.ViewHolder> {
     private static final String TAG = "MyReViewAndCommentAdapter";
     private static Context mContext;
     private ArrayList<PostItem> mPostList;
     
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView title;
         private RatingBar ratingBar;
         private TextView writer;
@@ -40,17 +44,18 @@ public class MyReviewAndCommentAdapter extends RecyclerView.Adapter<MyReviewAndC
         
         @Override
         public void onClick(View v) {
-            Log.i(TAG, "id: " + itemView.getId());
-            Log.i(TAG, "context:" + mContext);
+            if (mContext instanceof MyReviewStoryActivity) {
+                ((MyReviewStoryActivity) mContext).mDrawerViewControl.openDrawer(itemView.getId());
+            } else if (mContext instanceof MyCommentActivity) {
+                ((MyCommentActivity) mContext).mDrawerViewControl.openDrawer(itemView.getId());
+            }
         }
         
     }
     
-    MyReviewAndCommentAdapter(Context context, ArrayList<PostItem> postList) {
-        Log.i(TAG, "init");
+    public MyReviewAndCommentAdapter(Context context, ArrayList<PostItem> postList) {
         mContext = context;
         mPostList = postList;
-        Log.i(TAG, "Adapter context: " + mContext);
     }
     
     @NonNull
@@ -73,7 +78,6 @@ public class MyReviewAndCommentAdapter extends RecyclerView.Adapter<MyReviewAndC
         holder.writer.setText(mPostList.get(position).getWriter());
         holder.comment.setText(mPostList.get(position).getCommentString());
         holder.itemView.setId(mPostList.get(position).getId());
-        
     }
     
     

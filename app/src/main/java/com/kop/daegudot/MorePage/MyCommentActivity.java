@@ -1,17 +1,25 @@
 package com.kop.daegudot.MorePage;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.kop.daegudot.MorePage.MyReview.MyReviewAndCommentAdapter;
 import com.kop.daegudot.R;
+import com.kop.daegudot.Recommend.DrawerViewControl;
 import com.kop.daegudot.Recommend.PostItem;
 
 import java.util.ArrayList;
@@ -19,28 +27,37 @@ import java.util.ArrayList;
 public class MyCommentActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MyCommentActivity";
     private Context mContext;
+    View mView;
     private ArrayList<PostItem> mPostList;
     private RecyclerView mRecyclerView;
     private MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
+    public DrawerViewControl mDrawerViewControl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_comment);
-        this.mContext = getApplicationContext();
-
+        this.mContext = this;
+        mView = findViewById(R.id.my_comment_layout);
+        
         prepareMenu();
 
-        // TODO: 뒤로가기 버튼 구현 필요
         TextView title = findViewById(R.id.title);
         title.setText("내가 쓴 댓글");
         ImageButton backbtn = findViewById(R.id.backBtn);
         backbtn.setOnClickListener(this);
 
-        mRecyclerView = findViewById(R.id.mycomment_list);
+        mRecyclerView = findViewById(R.id.my_comment_list);
         mMyReviewAndCommentAdapter = new MyReviewAndCommentAdapter(mContext, mPostList);
         mRecyclerView.setAdapter(mMyReviewAndCommentAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+    
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
+                mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        mRecyclerView.addItemDecoration(dividerItemDecoration);
+    
+        mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mPostList);
+        mDrawerViewControl.setDrawerLayoutView();
     }
     
     private void prepareMenu(){
@@ -72,10 +89,9 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
     
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.backBtn:
-                finish();
-                break;
+        if (v.getId() == R.id.backBtn) {
+            finish();
         }
     }
+    
 }
