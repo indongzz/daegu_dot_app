@@ -1,6 +1,8 @@
 package com.kop.daegudot.Network.Recommend;
 
+import java.util.ArrayList;
+
 public class RecommendResponseList {
-    RecommendResponse recommendScheduleResponseListDto;
-    long status;
+    public ArrayList<RecommendResponse> recommendScheduleResponseDtoArrayList;
+    public long status;
 }

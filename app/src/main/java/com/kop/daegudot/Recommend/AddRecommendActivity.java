@@ -22,8 +22,10 @@ import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.MyScheduleFragment;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponse;
 import com.kop.daegudot.Network.Recommend.RecommendRegister;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.Schedule.MainScheduleResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -35,6 +37,9 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
+/**
+ *  추천 글 작성. 및 수정
+ */
 public class AddRecommendActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "AddRecommendActivity";
     
@@ -50,11 +55,13 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
     private ArrayList<MainScheduleInfo> mMainScheduleList = new ArrayList<>();
     int position = -1;
     List<Integer> mCheckedChipGroup;
+    UpdateRecommendSchedule updateRecommendSchedule;
     
     /* Rx java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     SharedPreferences pref;
     private String mToken;
+    int flag = 0; // 0 - add recommendschedule, 1 - update recommend schedule
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,14 +85,10 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         mConfirmBtn = findViewById(R.id.confirm_btn);
         mConfirmBtn.setOnClickListener(this);
         
-        Intent intent = getIntent();
-        mHashtags = (ArrayList<HashtagResponse>) intent.getSerializableExtra("hashtags");
+        mHashtags = RecommendFragment.getHashtags();
+        setChipGroup();
         
-        if (mHashtags == null) {
-            Log.d("TAG", "HASH TAG IS NULL");
-        } else {
-            setChipGroup();
-        }
+        updateRecommendSchedule = new UpdateRecommendSchedule(this, mToken);
     }
     
     public void setChipGroup() {    // 여러 개 선택할 수 있는 chip group
@@ -101,6 +104,27 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
             
             mChipGroup.addView(chips[i]);
         }
+    }
+    
+    public void setViewUI(String date, ArrayList<HashtagResponse> hashtags, float star,
+                          String title, String content) {
+        mMainScheduleList = MyScheduleFragment.getMainSchedules();
+        for (int i = 0; i < mMainScheduleList.size(); i++) {
+            Log.d("Rx " + TAG, "date: " + "!" + mMainScheduleList.get(i).getDateString() + "!");
+            Log.d("RX " + TAG, "date date: " + "!" + date + "!");
+            if (mMainScheduleList.get(i).getDateString().equals(date)) {
+                position = i;
+                break;
+            }
+        }
+        mAddMyScheduleBtn.setText(date);
+        for (int i = 0; i < hashtags.size(); i++) {
+            mChipGroup.check((int) hashtags.get(i).id - 1);
+        }
+        mRatingBar.setRating(star);
+        mRecommendTitle.setText(title);
+        mRecommendContent.setText(content);
+        flag = 1;
     }
     
     @Override
@@ -126,7 +150,13 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
                 
                 recommendRegister.hashtagId = hashtagIds;
                 
-                registerRecommendSchedule(recommendRegister);
+                if (flag == 0) {
+                    registerRecommendScheduleRx(recommendRegister);
+                }
+                else {
+                    updateRecommendSchedule.updateRecommendScheduleRx(recommendRegister);
+                    flag = 0;
+                }
                 finish();
             }
             else {
@@ -172,7 +202,7 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         return bool;
     }
     
-    private void registerRecommendSchedule(RecommendRegister recommendRegister) {
+    private void registerRecommendScheduleRx(RecommendRegister recommendRegister) {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
         Observable<Long> observable = service.registerRecommendSchedule(recommendRegister);
         
@@ -181,20 +211,21 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
                 .subscribeWith(new DisposableObserver<Long>() {
                     @Override
                     public void onNext(Long response) {
-                        Log.d("RX", "Next");
+                        Log.d("RX " + TAG, "Next");
                     }
                     
                     @Override
                     public void onError(Throwable e) {
-                        Log.d("RX", e.getMessage());
+                        Log.d("RX " + TAG, e.getMessage());
                     }
                     
                     @Override
                     public void onComplete() {
-                        Log.d("RX", "complete");
+                        Log.d("RX " + TAG, "complete");
                         
                     }
                 })
         );
     }
+    
 }

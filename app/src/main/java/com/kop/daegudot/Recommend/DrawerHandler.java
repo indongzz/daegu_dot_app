@@ -2,6 +2,7 @@ package com.kop.daegudot.Recommend;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.MenuInflater;
@@ -14,6 +15,7 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,6 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.MorePage.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.R;
 import com.kop.daegudot.Recommend.PostComment.CommentItem;
 import com.kop.daegudot.Recommend.PostComment.CommentListAdapter;
@@ -28,11 +33,22 @@ import com.kop.daegudot.Recommend.PostComment.CommentListAdapter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
+/**
+ * 글 목록에서 글 선택 시 나오는 DrawerLayout
+ * 추천글, 내가 쓴 글, 내가 쓴 댓글 볼 때 사용됨
+ */
 public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     private final static String TAG = "DrawerHandler";
-    PostItem mPost;
+    RecommendResponse mRecommendPost;
     Context mContext;
     View mView;
+    int position;   // to delete arraylist
     
     ImageButton drawerBackbtn;
     ImageButton menuBtn;
@@ -47,11 +63,16 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     
     InputMethodManager keyboard;
     
-    public DrawerHandler(Context context, View view, PostItem post) {
+    /* Rx java */
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+    private String mToken;
+    
+    public DrawerHandler(Context context, View view, RecommendResponse post, int position) {
         mContext = context;
-        mPost = post;
+        mRecommendPost = post;
         mView = view;
-        
+        this.position = position;
+    
         bindView();
         prepareComment();
         handleComment();
@@ -74,10 +95,14 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     }
     
     public void setDrawer() {
-        postTitle.setText(mPost.getTitle());
-        postRating.setRating(mPost.getRating());
-        postWriter.setText(mPost.getWriter());
-        postContent.setText(mPost.getContent());
+        SharedPreferences pref = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
+        mToken = pref.getString("token", "");
+        
+        postTitle.setText(mRecommendPost.title);
+        postRating.setRating((float) mRecommendPost.star);
+        // Todo: add writer
+//        postWriter.setText(mRecommendPost.getWriter());
+        postContent.setText(mRecommendPost.content);
         
         mAdapter = new CommentListAdapter(mContext, mCommentList);
         mCommentRecyclerview.setAdapter(mAdapter);
@@ -160,25 +185,70 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     public boolean onMenuItemClick(MenuItem item) {
         if (item.getItemId() == R.id.menu_delete) {
             Log.d("Menu: ", "delete clicked");
-            // Todo: delete Post from db
+            deleteRecommendScheduleRx();
             return true;
         }
         if (item.getItemId() == R.id.menu_update) {
             Log.d("Menu: ", "update clicked");
-            callCloseDrawer();
             Intent intent = new Intent(mContext, AddRecommendActivity.class);
-            intent.putExtra("content", mPost);
+            intent.putExtra("recommendPost", mRecommendPost);
             mContext.startActivity(intent);
             return true;
         }
         return false;
     }
     
+    
+    private void deleteRecommendScheduleRx() {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+        Observable<Long> observable = service.deleteRecommendSchedule(mRecommendPost.id);
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Long>() {
+                    @Override
+                    public void onNext(Long response) {
+                        Log.d("RX", "Next");
+                        
+                        Toast.makeText(mContext, "삭제되었습니다", Toast.LENGTH_SHORT).show();
+                        callCloseDrawer();
+                        notifyDeleted();
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
+                        
+                    }
+                })
+        );
+    }
+    
+    public void notifyDeleted() {
+        // Todo: make delete function on MyReviewStoryActivity and MyCommentActivity
+        if (mContext instanceof MyReviewStoryActivity) {
+            ((MyReviewStoryActivity)mContext).mMyReviewAndCommentAdapter.notifyDataSetChanged();
+        } else if (mContext instanceof MyCommentActivity) {
+            ((MyCommentActivity)mContext).mMyReviewAndCommentAdapter.notifyDataSetChanged();
+        } else if (mContext instanceof RecommendListActivity) {
+            ((RecommendListActivity)mContext).deleteRecommendSchedule(position);
+        }
+    }
+    
     public void callCloseDrawer() {
         if (mContext instanceof MyReviewStoryActivity) {
             ((MyReviewStoryActivity)mContext).mDrawerViewControl.closeDrawer();
-        } else if (mContext instanceof MyCommentActivity) {
+        }
+        else if (mContext instanceof MyCommentActivity) {
             ((MyCommentActivity)mContext).mDrawerViewControl.closeDrawer();
+        }
+        else if (mContext instanceof RecommendListActivity) {
+            ((RecommendListActivity)mContext).mDrawerViewControl.closeDrawer();
         }
     }
 }

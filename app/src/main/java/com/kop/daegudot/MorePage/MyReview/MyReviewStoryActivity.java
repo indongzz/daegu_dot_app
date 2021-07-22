@@ -1,26 +1,20 @@
 package com.kop.daegudot.MorePage.MyReview;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.R;
-import com.kop.daegudot.Recommend.DrawerHandler;
 import com.kop.daegudot.Recommend.DrawerViewControl;
-import com.kop.daegudot.Recommend.PostItem;
 
 import java.util.ArrayList;
 
@@ -32,9 +26,9 @@ import java.util.ArrayList;
 public class MyReviewStoryActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MyReviewStoryActivity";
     private Context mContext;
-    private ArrayList<PostItem> mPostList;
+    private ArrayList<RecommendResponse> mRecommendList;
     private RecyclerView mRecyclerView;
-    private MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
+    public MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
     View mView;
     
     public DrawerViewControl mDrawerViewControl;
@@ -55,7 +49,7 @@ public class MyReviewStoryActivity extends AppCompatActivity implements View.OnC
         prepareMenu();
         
         mRecyclerView = findViewById(R.id.my_review_list);
-        mMyReviewAndCommentAdapter = new MyReviewAndCommentAdapter(mContext, mPostList);
+        mMyReviewAndCommentAdapter = new MyReviewAndCommentAdapter(mContext, mRecommendList);
         mRecyclerView.setAdapter(mMyReviewAndCommentAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         
@@ -63,13 +57,13 @@ public class MyReviewStoryActivity extends AppCompatActivity implements View.OnC
                 mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
         
-        mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mPostList);
+        mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mRecommendList);
         mDrawerViewControl.setDrawerLayoutView();
     }
 
     // TODO: 지우기
     private void prepareMenu(){
-        mPostList = new ArrayList<>();
+        mRecommendList = new ArrayList<>();
         
         // TODO: DB에서 작성자의 글 가져오기
     
@@ -80,18 +74,15 @@ public class MyReviewStoryActivity extends AppCompatActivity implements View.OnC
         String[] content = {"내용1", "내용2", "내용3", "내용4"};
     
         for (int i = 0; i < 4; i++) {
-            PostItem data = new PostItem();
-            data.setTitle(title[i]);
-            data.setRating(rating[i]);
-            data.setWriter(writer[i]);
-            data.setCommentNum(commentN[i]);
-            data.setContent(content[i]);
-            //TODO : id 할당
-            data.setId(i);
+            RecommendResponse data = new RecommendResponse();
+            data.title = title[i];
+            data.star = rating[i];
+            data.content = content[i];
+            data.id = i;
+//            data.setWriter(writer[i]);
+//            data.setCommentNum(commentN[i]);
     
-            Log.i(TAG, "comment: " + data.getCommentString());
-    
-            mPostList.add(data);
+            mRecommendList.add(data);
         }
     }
     

@@ -2,7 +2,6 @@ package com.kop.daegudot.Recommend.PostComment;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.R;
-import com.kop.daegudot.Recommend.DrawerHandler;
-import com.kop.daegudot.Recommend.PostItem;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.ViewHolder> {

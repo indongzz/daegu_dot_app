@@ -128,11 +128,13 @@ public interface RestApiService {
     @POST("/recommend/register")
     Observable<Long> registerRecommendSchedule(@Body RecommendRegister recommendRegister);
     
-    @GET("/recommend")
-    Observable<RecommendResponseList> getRecommendScheduleList();
+    @GET("/recommend/{hashtagId}")
+    Observable<RecommendResponseList> selectAllRecommendList(@Path("hashtagId") long hashtagId);
     
     @PUT("/recommend/update/{recommendScheduleId}")
-    Observable<Long> updateRecommendSchedule(@Path("recommendScheduleId") long recommendScheduleId);
+    Observable<Long> updateRecommendSchedule(
+            @Path("recommendScheduleId") long recommendScheduleId,
+            @Body RecommendRegister recommendRegister);
     
     @DELETE("/recommend/delete/{recommendScheduleId}")
     Observable<Long> deleteRecommendSchedule(@Path("recommendScheduleId") long recommendScheduleId);
