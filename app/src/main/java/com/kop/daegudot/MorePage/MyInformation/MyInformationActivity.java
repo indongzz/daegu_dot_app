@@ -1,4 +1,4 @@
-package com.kop.daegudot.MorePage;
+package com.kop.daegudot.MorePage.MyInformation;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -17,16 +17,13 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.kop.daegudot.IntroPageActivity;
-import com.kop.daegudot.MainActivity;
-import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
+import com.kop.daegudot.MorePage.MoreAdapter;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
-import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;

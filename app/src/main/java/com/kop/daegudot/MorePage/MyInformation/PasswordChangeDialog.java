@@ -1,4 +1,4 @@
-package com.kop.daegudot.MorePage;
+package com.kop.daegudot.MorePage.MyInformation;
 
 import android.app.Dialog;
 import android.content.Context;

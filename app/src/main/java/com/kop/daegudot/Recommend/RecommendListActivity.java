@@ -105,8 +105,6 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         
         ImageButton backbtn2 = findViewById(R.id.drawer_backBtn);
         backbtn2.setOnClickListener(this);
-        TextView drawerTitle = findViewById(R.id.drawer_title);
-        drawerTitle.setText("");
         
     }
     

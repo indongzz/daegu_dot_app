@@ -16,10 +16,10 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <activity android:name=".Network.Map.PlaceGeoUpdateActivity" />
-        <activity android:name=".MorePage.MyReviewStoryActivity" />
+        <activity android:name=".MorePage.MyReview.MyReviewStoryActivity" />
         <activity android:name=".MorePage.MyCommentActivity" />
         <activity android:name=".MorePage.MyWishlistActivity" />
-        <activity android:name=".MorePage.MyInformationActivity" />
+        <activity android:name=".MorePage.MyInformation.MyInformationActivity" />
 	<activity android:name=".Recommend.RecommendListActivity" 
 		android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".KakaoMap.MapMainActivity" />
