@@ -2,26 +2,26 @@ package com.kop.daegudot.MorePage;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.MorePage.MyInformation.MyInformationActivity;
+import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 
-public class MoreFragment<onItemClickListener> extends Fragment{
+public class MoreFragment extends Fragment implements View.OnClickListener{
     View view;
     private Context mContext;
     private ArrayList<String> mArrayList;
@@ -50,8 +50,11 @@ public class MoreFragment<onItemClickListener> extends Fragment{
         // TODO: 뒤로가기 버튼 구현 필요
         TextView title = view.findViewById(R.id.title);
         title.setText("더보기");
+        
+        ImageButton backBtn = view.findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(this);
 
-        mListView = (ListView) view.findViewById(R.id.more_list);
+        mListView = view.findViewById(R.id.more_list);
 
         mMoreAdpater = new MoreAdapter(mContext, mArrayList, mIconList);
         mListView.setAdapter(mMoreAdpater);
@@ -101,5 +104,12 @@ public class MoreFragment<onItemClickListener> extends Fragment{
             }
         }
     };
-
+    
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.backBtn) {
+            // Move to Recommend Fragment
+            ((MainActivity)mContext).changeFragment(3, 2);
+        }
+    }
 }
