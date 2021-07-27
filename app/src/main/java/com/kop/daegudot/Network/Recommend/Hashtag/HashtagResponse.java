@@ -11,7 +11,11 @@ public class HashtagResponse implements Parcelable {
     public long id;
     public String content;
     
-    protected HashtagResponse(Parcel in) {
+    public HashtagResponse() {
+    
+    }
+    
+    public HashtagResponse(Parcel in) {
         id = in.readLong();
         content = in.readString();
     }

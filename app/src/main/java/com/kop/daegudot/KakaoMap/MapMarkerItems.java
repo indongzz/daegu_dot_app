@@ -94,10 +94,6 @@ public class MapMarkerItems {
     }
     
     public ArrayList<Place> getPlaceList() {
-//        Log.d(TAG, "Place n: " + mPlaceList.size());
-//        for (Place o : mPlaceList) {
-//            Log.d(TAG, "id: " + o.id + " tag: " + o.tag + " name: " + o.attractName);
-//        }
         return mPlaceList;
     }
     
@@ -143,10 +139,10 @@ public class MapMarkerItems {
         
         for (Place place: mPlaceList) {
             if (place.category == null) {
-                mPlaceList.get(tagNum).tag = tagNum;
+                mPlaceList.get(tagNum).tag = (int) mPlaceList.get(tagNum).id;
                 MapPOIItem marker = new MapPOIItem();
                 marker.setItemName(place.attractName);
-                marker.setTag(tagNum++);
+                marker.setTag(mPlaceList.get(tagNum).tag);
                 MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
                         Double.parseDouble(place.latitude), Double.parseDouble(place.longitude));
                 marker.setMapPoint(mapPoint);
@@ -157,6 +153,7 @@ public class MapMarkerItems {
                 marker.setShowCalloutBalloonOnTouch(false);
                 mMapView.addPOIItem(marker);
                 mMarkerList.add(marker);
+                tagNum++;
             }
         }
     }

@@ -52,7 +52,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     /* RX java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private String mToken;
-    ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
+    static ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
     
     
     @Override
@@ -80,7 +80,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         
         mRecyclerView = findViewById(R.id.recommend_list_view);
         
-        selectAllRecommendListRx();
+        selectAllRecommendListRx(mHashtag);
         
         mAdapter = new PostAdapter(mContext, mRecommendList);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -94,17 +94,18 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         
     }
     
-    public void selectAllRecommendListRx() {
+    public void selectAllRecommendListRx(HashtagResponse hashtag) {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
-        Observable<RecommendResponseList> observable = service.selectAllRecommendList(mHashtag.id);
+        Observable<RecommendResponseList> observable = service.selectAllRecommendList(hashtag.id);
     
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableObserver<RecommendResponseList>() {
                     @Override
                     public void onNext(RecommendResponseList response) {
-                        Log.d("RX", "Next");
+                        Log.d("RX " + TAG, "Next");
                         if (response.status == 1L) {
+                            mRecommendList.clear();
                             mRecommendList.addAll(response.recommendScheduleResponseDtoArrayList);
                         } else if (response.status == 0L) {
                             Toast.makeText(mContext, "cannot get recommendList", Toast.LENGTH_SHORT).show();
@@ -113,12 +114,12 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 
                     @Override
                     public void onError(Throwable e) {
-                        Log.d("RX", e.getMessage());
+                        Log.d("RX " + TAG, e.getMessage());
                     }
                 
                     @Override
                     public void onComplete() {
-                        Log.d("RX", "complete");
+                        Log.d("RX " + TAG, "complete");
                         
                         updateUI();
                     }
@@ -130,6 +131,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         mRecyclerView.setAdapter(mAdapter);
         mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mRecommendList);
         mDrawerViewControl.setDrawerLayoutView();
+        refresh();
     }
     
     public void deleteRecommendSchedule(int position) {
@@ -144,6 +146,16 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     
     public FragmentManager getFM() {
         return getSupportFragmentManager();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mAdapter = new PostAdapter(mContext, mRecommendList);
+        mRecyclerView.setAdapter(mAdapter);
+    
+        mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mRecommendList);
+        mDrawerViewControl.setDrawerLayoutView();
     }
     
     @Override

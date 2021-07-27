@@ -70,6 +70,10 @@ public class DrawerViewControl {
         });
     }
     
+    public boolean isOpened() {
+        return mDrawer.isDrawerOpen(GravityCompat.END);
+    }
+    
     public void openDrawer(RecommendResponse recommendResponse, int position) {
         mDrawer.openDrawer(GravityCompat.END);
         mDrawerHandler = new DrawerHandler(mContext, mView, recommendResponse, position);
