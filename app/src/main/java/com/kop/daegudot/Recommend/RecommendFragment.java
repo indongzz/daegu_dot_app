@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.material.chip.Chip;
@@ -46,6 +47,8 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
     ListView mListView;
     RecommendHashtagListAdapter adapter;
     
+    public ProgressBar progressBar;     // 로딩 중
+    
     /* Rx java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     static ArrayList<HashtagResponse> mHashtags;
@@ -73,6 +76,8 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
         
         TextView title = mView.findViewById(R.id.title);
         title.setText("추천");
+    
+        progressBar = mView.findViewById(R.id.progress_bar);
     
         // hashtag buttons setting
         mChipGroup = mView.findViewById(R.id.btns_group);
@@ -164,6 +169,7 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
     
                         setHashtagBtns();
                         setRecommendImageList();
+                        progressBar.setVisibility(View.GONE);
                     }
                 })
         );

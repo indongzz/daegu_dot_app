@@ -142,6 +142,10 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         menuBtn.setOnClickListener(this::showMenu);
     }
     
+    public void updateDrawerContent(RecommendResponse recommendResponse) {
+        mRecommendPost = recommendResponse;
+    }
+    
     public LayoutInflater getLayoutInflaterByActivity() {
         if (mContext instanceof RecommendListActivity) {
             return ((RecommendListActivity) mContext).getLayoutInflater();
@@ -213,7 +217,8 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
             Intent intent = new Intent(mContext, UpdateRecommendActivity.class);
             intent.putExtra("recommendPost", mRecommendPost);
             intent.putExtra("listIndex", position);
-            mContext.startActivity(intent);
+//            mContext.startActivity(intent);
+            ((RecommendListActivity)mContext).startActivityForResult(intent, 100);
             return true;
         }
         return false;
