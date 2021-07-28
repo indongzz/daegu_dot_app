@@ -12,8 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.MorePage.MyCommentActivity;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.R;
-import com.kop.daegudot.Recommend.PostItem;
 
 import java.util.ArrayList;
 
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 public class MyReviewAndCommentAdapter extends RecyclerView.Adapter<MyReviewAndCommentAdapter.ViewHolder> {
     private static final String TAG = "MyReViewAndCommentAdapter";
     private static Context mContext;
-    private ArrayList<PostItem> mPostList;
+    private ArrayList<RecommendResponse> mRecommendList;
     
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView title;
@@ -45,17 +45,20 @@ public class MyReviewAndCommentAdapter extends RecyclerView.Adapter<MyReviewAndC
         @Override
         public void onClick(View v) {
             if (mContext instanceof MyReviewStoryActivity) {
-                ((MyReviewStoryActivity) mContext).mDrawerViewControl.openDrawer(itemView.getId());
-            } else if (mContext instanceof MyCommentActivity) {
-                ((MyCommentActivity) mContext).mDrawerViewControl.openDrawer(itemView.getId());
+                ((MyReviewStoryActivity) mContext).mDrawerViewControl
+                        .openDrawer(mRecommendList.get(getAdapterPosition()), getAdapterPosition());
+            }
+            else if (mContext instanceof MyCommentActivity) {
+                ((MyCommentActivity) mContext).mDrawerViewControl
+                        .openDrawer(mRecommendList.get(getAdapterPosition()), getAdapterPosition());
             }
         }
         
     }
     
-    public MyReviewAndCommentAdapter(Context context, ArrayList<PostItem> postList) {
+    public MyReviewAndCommentAdapter(Context context, ArrayList<RecommendResponse> recommendList) {
         mContext = context;
-        mPostList = postList;
+        mRecommendList = recommendList;
     }
     
     @NonNull
@@ -73,16 +76,16 @@ public class MyReviewAndCommentAdapter extends RecyclerView.Adapter<MyReviewAndC
     public void onBindViewHolder(@NonNull MyReviewAndCommentAdapter.ViewHolder holder, int position) {
         Log.i(TAG, "position: " + position);
         
-        holder.title.setText(mPostList.get(position).getTitle());
-        holder.ratingBar.setRating(mPostList.get(position).getRating());
-        holder.writer.setText(mPostList.get(position).getWriter());
-        holder.comment.setText(mPostList.get(position).getCommentString());
-        holder.itemView.setId(mPostList.get(position).getId());
+        holder.title.setText(mRecommendList.get(position).title);
+        holder.ratingBar.setRating((float) mRecommendList.get(position).star);
+//        holder.writer.setText(mRecommendList.get(position).getWriter());
+//        holder.comment.setText(mRecommendList.get(position).getCommentString());
+//        holder.itemView.setId(mRecommendList.get(position).getId());
     }
     
     
     @Override
     public int getItemCount() {
-        return mPostList.size();
+        return mRecommendList.size();
     }
 }

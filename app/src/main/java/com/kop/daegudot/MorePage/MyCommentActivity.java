@@ -1,26 +1,20 @@
 package com.kop.daegudot.MorePage;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.kop.daegudot.MorePage.MyReview.MyReviewAndCommentAdapter;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.R;
 import com.kop.daegudot.Recommend.DrawerViewControl;
-import com.kop.daegudot.Recommend.PostItem;
 
 import java.util.ArrayList;
 
@@ -28,9 +22,9 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
     private static final String TAG = "MyCommentActivity";
     private Context mContext;
     View mView;
-    private ArrayList<PostItem> mPostList;
+    private ArrayList<RecommendResponse> mRecommendList;
     private RecyclerView mRecyclerView;
-    private MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
+    public MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
     public DrawerViewControl mDrawerViewControl;
 
     @Override
@@ -48,7 +42,7 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
         backbtn.setOnClickListener(this);
 
         mRecyclerView = findViewById(R.id.my_comment_list);
-        mMyReviewAndCommentAdapter = new MyReviewAndCommentAdapter(mContext, mPostList);
+        mMyReviewAndCommentAdapter = new MyReviewAndCommentAdapter(mContext, mRecommendList);
         mRecyclerView.setAdapter(mMyReviewAndCommentAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
     
@@ -56,12 +50,12 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
                 mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
     
-        mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mPostList);
+        mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mRecommendList);
         mDrawerViewControl.setDrawerLayoutView();
     }
     
     private void prepareMenu(){
-        mPostList = new ArrayList<>();
+        mRecommendList = new ArrayList<>();
         
         // TODO: 작성자의 글 가져오기
         
@@ -72,18 +66,16 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
         String[] content = {"내용1", "내용2", "내용3", "내용4"};
         
         for (int i = 0; i < 4; i++) {
-            PostItem data = new PostItem();
-            data.setTitle(title[i]);
-            data.setRating(rating[i]);
-            data.setWriter(writer[i]);
-            data.setCommentNum(commentN[i]);
-            data.setContent(content[i]);
+            RecommendResponse data = new RecommendResponse();
+            data.title = title[i];
+            data.star = rating[i];
+//            data.setWriter(writer[i]);
+//            data.setCommentNum(commentN[i]);
+            data.content = content[i];
             //TODO : id 할당
-            data.setId(i);
+            data.id = i;
             
-            Log.i(TAG, "comment: " + data.getCommentString());
-            
-            mPostList.add(data);
+            mRecommendList.add(data);
         }
     }
     

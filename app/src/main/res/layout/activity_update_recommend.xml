@@ -12,7 +12,7 @@
         />
 
     <TextView
-        android:id="@+id/add_mysch_tv"
+        android:id="@+id/update_mysch_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="내 일정"
@@ -23,13 +23,13 @@
         />
 
     <Button
-        android:id="@+id/add_mysch_btn"
+        android:id="@+id/update_mysch_btn"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:text="일정 등록 +"
         android:background="@drawable/colorable_btn"
         android:backgroundTint="@color/transparentAccent"
-        app:layout_constraintTop_toBottomOf="@id/add_mysch_tv"
+        app:layout_constraintTop_toBottomOf="@id/update_mysch_tv"
         app:layout_constraintLeft_toLeftOf="@id/et_title"
         android:layout_marginTop="10dp"
         android:layout_marginStart="5dp"
@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:text="해시태그"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/add_mysch_btn"
+        app:layout_constraintTop_toBottomOf="@id/update_mysch_btn"
         app:layout_constraintLeft_toLeftOf="@id/et_title"
         android:layout_marginStart="5dp"
         android:layout_marginTop="15dp"

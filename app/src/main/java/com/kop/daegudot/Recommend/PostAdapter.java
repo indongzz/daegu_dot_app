@@ -1,7 +1,6 @@
 package com.kop.daegudot.Recommend;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,15 +10,21 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
 
+/**
+ * 추천글 List를 띄우는 RecyclerView의 Adapter
+ * 추천글 목록에 제목, 별점, 작성자, 댓글 View를 설정
+ * 목록 중 하나 선택 시 Drawer를 펼침
+ */
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     private static final String TAG = "PostAdapter";
     
     private static Context mContext;
-    private ArrayList<PostItem> mPostList;
+    private static ArrayList<RecommendResponse> mRecommendList;
     
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView title;
@@ -40,14 +45,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         
         @Override
         public void onClick(View v) {
-            ((RecommendListActivity) mContext).openDrawer(itemView.getId());
+            ((RecommendListActivity) mContext).mDrawerViewControl
+                    .openDrawer(mRecommendList.get(getAdapterPosition()), getAdapterPosition());
         }
         
     }
     
-    PostAdapter(Context context, ArrayList<PostItem> postList) {
+    PostAdapter(Context context, ArrayList<RecommendResponse> recommendList) {
         mContext = context;
-        mPostList = postList;
+        mRecommendList = recommendList;
     }
     
     @NonNull
@@ -62,16 +68,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull PostAdapter.ViewHolder holder, int position) {
         
-        holder.title.setText(mPostList.get(position).getTitle());
-        holder.ratingBar.setRating(mPostList.get(position).getRating());
-        holder.writer.setText(mPostList.get(position).getWriter());
-        holder.comment.setText(mPostList.get(position).getCommentString());
-        holder.itemView.setId(mPostList.get(position).getId());
-        
+        holder.title.setText(mRecommendList.get(position).title);
+        holder.ratingBar.setRating((float) mRecommendList.get(position).star);
+//        holder.writer.setText(mRecommendList.get(position));
+//        holder.comment.setText(mRecommendList.get(position).getCommentString());
     }
     
     @Override
     public int getItemCount() {
-        return mPostList.size();
+        return mRecommendList.size();
     }
 }

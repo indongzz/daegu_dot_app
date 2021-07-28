@@ -10,7 +10,7 @@
     <androidx.drawerlayout.widget.DrawerLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/my_review_drawer"
+        android:id="@+id/drawer"
         android:clickable="true"
         >
 

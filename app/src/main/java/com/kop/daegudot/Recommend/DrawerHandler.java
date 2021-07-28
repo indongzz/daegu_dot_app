@@ -2,8 +2,8 @@ package com.kop.daegudot.Recommend;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Parcelable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,8 +19,11 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.kop.daegudot.MorePage.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.R;
 import com.kop.daegudot.Recommend.PostComment.CommentItem;
 import com.kop.daegudot.Recommend.PostComment.CommentListAdapter;
@@ -28,11 +31,16 @@ import com.kop.daegudot.Recommend.PostComment.CommentListAdapter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+/**
+ * 글 목록에서 글 선택 시 나오는 DrawerLayout
+ * 추천글, 내가 쓴 글, 내가 쓴 댓글 볼 때 사용됨
+ */
 public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     private final static String TAG = "DrawerHandler";
-    PostItem mPost;
+    RecommendResponse mRecommendPost;
     Context mContext;
     View mView;
+    int position;   // to delete arraylist
     
     ImageButton drawerBackbtn;
     ImageButton menuBtn;
@@ -40,6 +48,7 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     RatingBar postRating;
     EditText editComment;
     Button applyCommentBtn, watchScheduleBtn;
+    ChipGroup mChipGroup;
     
     RecyclerView mCommentRecyclerview;
     CommentListAdapter mAdapter;
@@ -47,11 +56,13 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     
     InputMethodManager keyboard;
     
-    public DrawerHandler(Context context, View view, PostItem post) {
+    
+    public DrawerHandler(Context context, View view, RecommendResponse post, int position) {
         mContext = context;
-        mPost = post;
+        mRecommendPost = post;
         mView = view;
-        
+        this.position = position;
+    
         bindView();
         prepareComment();
         handleComment();
@@ -67,6 +78,7 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         editComment = mView.findViewById(R.id.comment_edit);
         applyCommentBtn = mView.findViewById(R.id.apply_comment_btn);
         mCommentRecyclerview = mView.findViewById(R.id.comment_list);
+        mChipGroup = mView.findViewById(R.id.hashtag_groups);
         
         watchScheduleBtn = mView.findViewById(R.id.btn_schedule);
         
@@ -74,10 +86,31 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     }
     
     public void setDrawer() {
-        postTitle.setText(mPost.getTitle());
-        postRating.setRating(mPost.getRating());
-        postWriter.setText(mPost.getWriter());
-        postContent.setText(mPost.getContent());
+        postTitle.setText(mRecommendPost.title);
+        postRating.setRating((float) mRecommendPost.star);
+        // Todo: add writer
+//        postWriter.setText(mRecommendPost.getWriter());
+        postContent.setText(mRecommendPost.content);
+        
+        mChipGroup.removeAllViews();
+        
+        int n = mRecommendPost.hashtags.size();
+        final Chip[] chips = new Chip[n];
+        
+        for(int i = 0; i < n; i++) {
+            LayoutInflater layoutInflater = getLayoutInflaterByActivity();
+            
+            chips[i] = (Chip) layoutInflater
+                    .inflate(R.layout.layout_chip_choice, mChipGroup, false);
+            String hashName = "#" + mRecommendPost.hashtags.get(i).content;
+            
+            chips[i].setText(hashName);
+            chips[i].setTag(mRecommendPost.hashtags.get(i).content);
+            chips[i].setId((int)mRecommendPost.hashtags.get(i).id);
+            chips[i].setCheckable(false);
+            chips[i].setChecked(true);
+            mChipGroup.addView(chips[i]);
+        }
         
         mAdapter = new CommentListAdapter(mContext, mCommentList);
         mCommentRecyclerview.setAdapter(mAdapter);
@@ -91,7 +124,8 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
             @Override
             public void onClick(View v) {
                 // 일정 보기
-                PostScheduleBottomSheetDialog postScheduleBottomSheetDialog = new PostScheduleBottomSheetDialog();
+                PostScheduleBottomSheetDialog postScheduleBottomSheetDialog
+                        = new PostScheduleBottomSheetDialog(mRecommendPost.mainScheduleResponseDto);
                 postScheduleBottomSheetDialog
                         .show(((RecommendListActivity)mContext).getFM(),
                                 PostScheduleBottomSheetDialog.TAG);
@@ -106,6 +140,14 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         // TODO: 작성자가 나인 경우에만 버튼이 보이게 함
         menuBtn.setVisibility(View.VISIBLE);
         menuBtn.setOnClickListener(this::showMenu);
+    }
+    
+    public LayoutInflater getLayoutInflaterByActivity() {
+        if (mContext instanceof RecommendListActivity) {
+            return ((RecommendListActivity) mContext).getLayoutInflater();
+        }
+        // Todo: add MorePage context
+        return null;
     }
     
     public void handleComment() {
@@ -160,14 +202,17 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     public boolean onMenuItemClick(MenuItem item) {
         if (item.getItemId() == R.id.menu_delete) {
             Log.d("Menu: ", "delete clicked");
-            // Todo: delete Post from db
+            DeleteRecommendSchedule deleteRecommendSchedule
+                    = new DeleteRecommendSchedule(mContext, mRecommendPost, position);
+            callCloseDrawer();
+            
             return true;
         }
         if (item.getItemId() == R.id.menu_update) {
             Log.d("Menu: ", "update clicked");
-            callCloseDrawer();
-            Intent intent = new Intent(mContext, AddRecommendActivity.class);
-            intent.putExtra("content", mPost);
+            Intent intent = new Intent(mContext, UpdateRecommendActivity.class);
+            intent.putExtra("recommendPost", mRecommendPost);
+            intent.putExtra("listIndex", position);
             mContext.startActivity(intent);
             return true;
         }
@@ -177,8 +222,12 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     public void callCloseDrawer() {
         if (mContext instanceof MyReviewStoryActivity) {
             ((MyReviewStoryActivity)mContext).mDrawerViewControl.closeDrawer();
-        } else if (mContext instanceof MyCommentActivity) {
+        }
+        else if (mContext instanceof MyCommentActivity) {
             ((MyCommentActivity)mContext).mDrawerViewControl.closeDrawer();
+        }
+        else if (mContext instanceof RecommendListActivity) {
+            ((RecommendListActivity)mContext).mDrawerViewControl.closeDrawer();
         }
     }
 }

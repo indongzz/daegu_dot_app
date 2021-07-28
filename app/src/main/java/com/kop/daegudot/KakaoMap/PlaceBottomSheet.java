@@ -52,7 +52,13 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         RatingBar rating = ((MapMainActivity)mContext).findViewById(R.id.rating_bar);
         
         updatePlaceList();
-        Place item = mPlaceList.get(tag);
+        
+        Place item = new Place();
+        for (Place o: mPlaceList) {
+            if (o.id == tag) {
+                item = o;
+            }
+        }
         
         title.setText(item.attractName);
         address.setText(item.address);

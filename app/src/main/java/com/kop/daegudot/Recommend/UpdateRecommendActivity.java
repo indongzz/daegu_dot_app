@@ -37,14 +37,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
-/**
- *  추천 글 작성. 및 수정
- */
-public class AddRecommendActivity extends AppCompatActivity implements View.OnClickListener {
-    private static final String TAG = "AddRecommendActivity";
-    
+public class UpdateRecommendActivity extends AppCompatActivity implements View.OnClickListener {
+    private final static String TAG = "UpdateRecommendActivity";
     ImageButton backBtn;
-    Button mAddMyScheduleBtn;
+    Button mUpdateScheduleBtn;
     EditText mRecommendTitle;
     EditText mRecommendContent;
     ChipGroup mChipGroup;
@@ -53,42 +49,72 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
     
     ArrayList<HashtagResponse> mHashtags;
     private ArrayList<MainScheduleInfo> mMainScheduleList = new ArrayList<>();
-    int position = -1;
+    int mainPosition = -1;
     List<Integer> mCheckedChipGroup;
+    int listIndex = 0;
     
     /* Rx java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     SharedPreferences pref;
     private String mToken;
+    RecommendResponse mRecommendPost;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_recommend);
+        setContentView(R.layout.activity_update_recommend);
     
         pref = getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
-        
+    
         TextView title = findViewById(R.id.title);
         title.setText("추천 작성");
         backBtn = findViewById(R.id.backBtn);
         backBtn.setOnClickListener(this);
-        
+    
         // View 설정
-        mAddMyScheduleBtn = findViewById(R.id.add_mysch_btn);
-        mAddMyScheduleBtn.setOnClickListener(this);
+        mUpdateScheduleBtn = findViewById(R.id.update_mysch_btn);
+        mUpdateScheduleBtn.setOnClickListener(this);
         mRecommendTitle = findViewById(R.id.et_title);
         mRecommendContent = findViewById(R.id.et_content);
         mRatingBar = findViewById(R.id.rating_bar);
+        mChipGroup = findViewById(R.id.chip_group);
         mConfirmBtn = findViewById(R.id.confirm_btn);
         mConfirmBtn.setOnClickListener(this);
         
         mHashtags = RecommendFragment.getHashtags();
         setChipGroup();
+        getPreviousContent();
+    }
+    
+    public void getPreviousContent() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            mRecommendPost = intent.getParcelableExtra("recommendPost");
+            if (mRecommendPost != null) {
+                MainScheduleResponse main = mRecommendPost.mainScheduleResponseDto;
+                String date = main.startDate.substring(5, 7) + "." + main.startDate.substring(8, 10)+ " ~ " +
+                        main.endDate.substring(5, 7) + "." +  main.endDate.substring(8, 10);
+                
+                mMainScheduleList = MyScheduleFragment.getMainSchedules();
+                for (int i = 0; i < mMainScheduleList.size(); i++) {
+                    if (mMainScheduleList.get(i).getDateString().equals(date)) {
+                        mainPosition = i;
+                        break;
+                    }
+                }
+                mUpdateScheduleBtn.setText(date);
+                for (int i = 0; i < mHashtags.size(); i++) {
+                    mChipGroup.check((int) mHashtags.get(i).id - 1);
+                }
+                mRatingBar.setRating(mRecommendPost.getStar());
+                mRecommendTitle.setText(mRecommendPost.title);
+                mRecommendContent.setText(mRecommendPost.content);
+            }
+        }
     }
     
     public void setChipGroup() {    // 여러 개 선택할 수 있는 chip group
-        mChipGroup = findViewById(R.id.chip_group);
         
         Chip[] chips = new Chip[mHashtags.size()];
         
@@ -102,6 +128,7 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         }
     }
     
+    
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.backBtn) {
@@ -113,7 +140,7 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         } else if (v.getId() == R.id.confirm_btn) {
             if (checkIfSelectedAll()) {
                 RecommendRegister recommendRegister = new RecommendRegister();
-                recommendRegister.mainScheduleId =  mMainScheduleList.get(position).getMainId();
+                recommendRegister.mainScheduleId =  mMainScheduleList.get(mainPosition).getMainId();
                 recommendRegister.star = mRatingBar.getRating();
                 recommendRegister.title = mRecommendTitle.getText().toString();
                 recommendRegister.content = mRecommendContent.getText().toString();
@@ -124,8 +151,8 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
                 }
                 
                 recommendRegister.hashtagId = hashtagIds;
-                
-                registerRecommendScheduleRx(recommendRegister);
+              
+                updateRecommendScheduleRx(recommendRegister);
                 
                 finish();
             }
@@ -137,8 +164,8 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
     
     public void selectMainScheduleDialog() {
         AlertDialog.Builder builder =
-                new AlertDialog.Builder(AddRecommendActivity.this, R.style.AlertDialogStyle);
-    
+                new AlertDialog.Builder(UpdateRecommendActivity.this, R.style.AlertDialogStyle);
+        
         final int[] checkedItem = {-1};
         String[] list = new String[mMainScheduleList.size()];
         
@@ -150,9 +177,9 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         builder.setTitle("날짜를 선택하세요");
         builder.setSingleChoiceItems(list, checkedItem[0], (dialog, which) -> checkedItem[0] = which);
         builder.setPositiveButton("선택", (dialog, which) -> {
-            position = checkedItem[0];
-        
-            mAddMyScheduleBtn.setText(mMainScheduleList.get(position).getDateString());
+            mainPosition = checkedItem[0];
+            
+            mUpdateScheduleBtn.setText(mMainScheduleList.get(mainPosition).getDateString());
             dialog.dismiss();
         });
         builder.setNegativeButton("취소", (dialog, which) -> dialog.dismiss());
@@ -164,7 +191,7 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         
         mCheckedChipGroup = mChipGroup.getCheckedChipIds();
         
-        if (!mAddMyScheduleBtn.getText().equals("일정 등록 +")
+        if (!mUpdateScheduleBtn.getText().equals("일정 등록 +")
                 && mCheckedChipGroup.size() != 0 && mRatingBar.getRating() != 0) {
             bool = true;
         }
@@ -172,9 +199,9 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         return bool;
     }
     
-    private void registerRecommendScheduleRx(RecommendRegister recommendRegister) {
+    void updateRecommendScheduleRx(RecommendRegister recommendRegister) {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
-        Observable<Long> observable = service.registerRecommendSchedule(recommendRegister);
+        Observable<Long> observable = service.updateRecommendSchedule(mRecommendPost.id, recommendRegister);
         
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -192,10 +219,34 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
                     @Override
                     public void onComplete() {
                         Log.d("RX " + TAG, "complete");
-                        
+                        RecommendResponse recommendResponse = makeRecommendObject(recommendRegister);
+                        RecommendListActivity.mRecommendList.set(listIndex, recommendResponse);
+                        RecommendListActivity.refresh();
                     }
                 })
         );
     }
     
+    public RecommendResponse makeRecommendObject(RecommendRegister recommendRegister) {
+        RecommendResponse recommendResponse = new RecommendResponse();
+        
+        recommendResponse.id = mRecommendPost.id;
+        recommendResponse.title = recommendRegister.title;
+        recommendResponse.content = recommendRegister.content;
+        ArrayList<HashtagResponse> hashtags = new ArrayList<>();
+        for (int i = 0; i < mCheckedChipGroup.size(); i++) {
+            hashtags.add(mHashtags.get(mCheckedChipGroup.get(i)));
+        }
+        recommendResponse.hashtags = hashtags;
+        recommendResponse.star = recommendRegister.star;
+        recommendResponse.localDateTime = mRecommendPost.localDateTime;
+        
+        MainScheduleResponse mainScheduleResponse = new MainScheduleResponse();
+        mainScheduleResponse.startDate = mMainScheduleList.get(mainPosition).getmStartDate();
+        mainScheduleResponse.endDate = mMainScheduleList.get(mainPosition).getmEndDate();
+        mainScheduleResponse.id = mMainScheduleList.get(mainPosition).getMainId();
+        recommendResponse.mainScheduleResponseDto = mainScheduleResponse;
+        
+        return recommendResponse;
+    }
 }

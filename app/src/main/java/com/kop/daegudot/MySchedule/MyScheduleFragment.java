@@ -55,7 +55,7 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         mToken = pref.getString("token", "");
         
         // TODO: 지우기
-        selectAllMainSchedule();
+        selectAllMainScheduleRx();
     }
     
 
@@ -83,7 +83,7 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         return view;
     }
     
-    private void selectAllMainSchedule() {
+    private void selectAllMainScheduleRx() {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
         Observable<MainScheduleResponseList> observable = service.getMainSchedule();
     
@@ -123,7 +123,9 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
                         Log.d("RX MySchedule", "complete");
     
                         Collections.sort(mList);
-                        refresh();
+                        if (adapter != null) {
+                            refresh();
+                        }
                     }
                 })
         );
@@ -131,6 +133,10 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     
     public static void addMainSchedule(MainScheduleInfo mainScheduleInfo) {
         mList.add(mainScheduleInfo);
+    }
+    
+    public static ArrayList<MainScheduleInfo> getMainSchedules() {
+        return mList;
     }
     
     public void refresh() {

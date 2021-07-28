@@ -61,6 +61,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     MainScheduleInfo mMainSchedule;
     ArrayList<DateSubSchedule> mDateSubScheduleList;
     int position = 0; // default = first page
+    Place mPlace;
     
     // RX PoiItems
     ArrayList<Place> mPlaceList;
@@ -130,10 +131,6 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
 
         NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
-//
-//        // move to n일차
-//        mViewPager.setCurrentItem(position);
-        
     }
     
     /* MainSchedule 이용해서 SubSchedule List 서버로부터 받아오기 */
@@ -144,13 +141,17 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         // position은 MyScheduleFragment에서 SubSchedule 2일차를 누르면 2번째 BottomSheet을 띄움
         mMainSchedule = intent.getParcelableExtra("mainSchedule");
         position = intent.getIntExtra("position", 0);
+        // 추천글에서 일정 Chip 클릭 시
+        mPlace = intent.getParcelableExtra("markerPlace");
         
         mDateSubScheduleList = new ArrayList<>();
-        
-        String titleString = mMainSchedule.getDateString();
-        mTitle.setText(titleString);
-      
-        selectAllSubScheduleListRx(mMainSchedule.getMainId());
+    
+        if (mMainSchedule != null) {
+            String titleString = mMainSchedule.getDateString();
+            mTitle.setText(titleString);
+    
+            selectAllSubScheduleListRx(mMainSchedule.getMainId());
+        }
     }
     
     private void selectAllSubScheduleListRx(long mainScheduleId) {
@@ -218,6 +219,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         // move to n일차
         mViewPager.setCurrentItem(position);
+    
     }
     
     public void adapterChange(String date, int tag) {
@@ -319,7 +321,10 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     // MapView Click event
     @Override
     public void onMapViewInitialized(MapView mapView) {
-    
+        if (mPlace != null) {
+            placeBottomSheet.changePlaceBottomSheet((int) mPlace.id);
+            mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
     }
     
     @Override

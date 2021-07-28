@@ -1,7 +1,9 @@
 package com.kop.daegudot.Recommend;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,17 +13,43 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.kop.daegudot.MySchedule.DateSubSchedule;
+import com.kop.daegudot.MySchedule.MainScheduleInfo;
+import com.kop.daegudot.MySchedule.SubScheduleDialog;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.Schedule.MainScheduleResponse;
+import com.kop.daegudot.Network.Schedule.SubScheduleResponse;
+import com.kop.daegudot.Network.Schedule.SubScheduleResponseList;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class PostScheduleBottomSheetDialog extends BottomSheetDialogFragment {
     public final static String TAG = "PostScheduleBottomSheetDialog";
     private Context mContext;
     private RecyclerView mRecyclerView;
-    private ArrayList<PostScheduleItem> mScheduleList;
+    PostScheduleAdapter mAdapter;
+    private MainScheduleResponse mMainScheduleResponse;
+    private ArrayList<SubScheduleResponse> mSubScheduleList;
+    private ArrayList<DateSubSchedule> mDateSubScheduleList;
+    
+    /* Rx java */
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+    private String mToken;
+    SharedPreferences pref;
+    
+    public PostScheduleBottomSheetDialog(MainScheduleResponse mainSchedule) {
+        mMainScheduleResponse = mainSchedule;
+    }
     
     @Nullable
     @Override
@@ -29,52 +57,70 @@ public class PostScheduleBottomSheetDialog extends BottomSheetDialogFragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_post_schedule, container,false);
         mContext = getActivity();
-    
-        prepare();
+        
+        pref = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
+        mToken = pref.getString("token", "");
+        
+        selectAllSubScheduleList(mMainScheduleResponse.id);
         
         mRecyclerView = view.findViewById(R.id.schedule_recyclerview);
-        PostScheduleAdapter adapter = new PostScheduleAdapter(mContext, mScheduleList);
-        mRecyclerView.setAdapter(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         
         return view;
     }
     
-    public void prepare() {
-        mScheduleList = new ArrayList<>();
+    // get subschedules by main schedule id
+    private void selectAllSubScheduleList(long mainScheduleId) {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+        Observable<SubScheduleResponseList> observable = service.getSubscheduleList(mainScheduleId);
         
-        ArrayList<String> test = new ArrayList<>();
-        test.add("더락");
-        test.add("동성로");
-        test.add("명소명소");
-        test.add("카페");
-        test.add("ㅁ여소명소");
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<SubScheduleResponseList>() {
+                    @Override
+                    public void onNext(SubScheduleResponseList response) {
+                        Log.d("RX " + TAG, "getsubschedule: " + "Next");
+                        if (response.status == 0L) {
+                            /* no subschedule just pass MapMainSchedule */
+                            
+                        } else if (response.status == 1L){
+                            // subschedule exists
+                            mSubScheduleList = new ArrayList<>();
+                            mSubScheduleList.addAll(response.subScheduleResponseDtoArrayList);
+                        }
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX " + TAG, "getsubschedule: " + e.getMessage());
+                        // TODO: select SubSchedule 수정
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX " + TAG, "getsubschedule: complete");
+    
+                        Collections.sort(mSubScheduleList);
+                        getDateSubSchedule();
+                        
+                        updateUI();
+                    }
+                })
+        );
+    }
+    
+    public void getDateSubSchedule() {
+        MainScheduleInfo mainScheduleInfo = new MainScheduleInfo();
+        mainScheduleInfo.setMainId(mMainScheduleResponse.id);
+        mainScheduleInfo.setmStartDate(mMainScheduleResponse.startDate);
+        mainScheduleInfo.setmEndDate(mMainScheduleResponse.endDate);
+        mainScheduleInfo.setmDDate();
         
-        ArrayList<String> test2 = new ArrayList<>();
-        test2.add("명소명소");
-        test2.add("카페");
-        test2.add("ㅁ여소명소");
-        
-        ArrayList<String> test3 = new ArrayList<>();
-        test3.add("명소명소");
-        test3.add("카페");
-        
-        PostScheduleItem data = new PostScheduleItem();
-        data.setDay(1);
-        data.setPlaceName(test);
-        
-        mScheduleList.add(data);
-        
-        PostScheduleItem data2 = new PostScheduleItem();
-        data2.setDay(2);
-        data2.setPlaceName(test2);
-        
-        mScheduleList.add(data2);
-        
-        PostScheduleItem data3 = new PostScheduleItem();
-        data3.setDay(3);
-        data3.setPlaceName(test3);
-        
-        mScheduleList.add(data3);
+        mDateSubScheduleList = SubScheduleDialog.getDateSubSchedules(mainScheduleInfo, mSubScheduleList);
+    }
+    
+    public void updateUI() {
+        mAdapter = new PostScheduleAdapter(mContext, mDateSubScheduleList);
+        mRecyclerView.setAdapter(mAdapter);
     }
 }
