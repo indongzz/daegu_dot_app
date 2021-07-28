@@ -11,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.kop.daegudot.MorePage.MyCommentActivity;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.R;
 

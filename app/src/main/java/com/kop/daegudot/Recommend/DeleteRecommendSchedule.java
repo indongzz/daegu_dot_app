@@ -5,9 +5,8 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.kop.daegudot.MorePage.MyCommentActivity;
+import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
-import com.kop.daegudot.Network.Recommend.RecommendRegister;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;

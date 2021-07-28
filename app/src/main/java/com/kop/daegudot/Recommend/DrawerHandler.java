@@ -21,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.kop.daegudot.MorePage.MyCommentActivity;
+import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.R;
@@ -126,9 +126,15 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
                 // 일정 보기
                 PostScheduleBottomSheetDialog postScheduleBottomSheetDialog
                         = new PostScheduleBottomSheetDialog(mRecommendPost.mainScheduleResponseDto);
-                postScheduleBottomSheetDialog
-                        .show(((RecommendListActivity)mContext).getFM(),
-                                PostScheduleBottomSheetDialog.TAG);
+                if (mContext instanceof RecommendListActivity) {
+                    postScheduleBottomSheetDialog
+                            .show(((RecommendListActivity) mContext).getFM(),
+                                    PostScheduleBottomSheetDialog.TAG);
+                } else if (mContext instanceof MyReviewStoryActivity) {
+                    postScheduleBottomSheetDialog
+                            .show(((MyReviewStoryActivity) mContext).getFM(),
+                                    PostScheduleBottomSheetDialog.TAG);
+                }
             }
         });
         
@@ -146,7 +152,9 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         if (mContext instanceof RecommendListActivity) {
             return ((RecommendListActivity) mContext).getLayoutInflater();
         }
-        // Todo: add MorePage context
+        else if (mContext instanceof MyReviewStoryActivity) {
+            return ((MyReviewStoryActivity) mContext).getLayoutInflater();
+        }
         return null;
     }
     
