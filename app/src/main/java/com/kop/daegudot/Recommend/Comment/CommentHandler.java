@@ -1,4 +1,4 @@
-package com.kop.daegudot.Recommend;
+package com.kop.daegudot.Recommend.Comment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,7 +12,9 @@ import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Recommend.RecommendListActivity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import io.reactivex.Observable;
@@ -20,6 +22,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+
+/**
+ * 추천글 댓글 추가, 조회, 삭제, 수정
+ */
 
 public class CommentHandler {
     private static final String TAG = "CommentHandler";
@@ -36,15 +42,15 @@ public class CommentHandler {
         mContext = context;
         mView = view;
         mRecommendPost = recommendResponse;
-
+        
         SharedPreferences pref = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
-
+        
+        mCommentList = new ArrayList<>();
         selectAllCommentListRx();
     }
 
     /* Register Comment */
-
     public void registerComment(CommentRegister commentRegister) {
         registerCommentRx(commentRegister);
     }
@@ -58,18 +64,18 @@ public class CommentHandler {
                 .subscribeWith(new DisposableObserver<Long>() {
                     @Override
                     public void onNext(Long response) {
-                        Log.d("RX " + TAG, "Next");
-
-                        if (response == 1L) {
-                            CommentResponse commentResponse = new CommentResponse();
-                            commentResponse.id = response;
-                            commentResponse.comments = commentRegister.comment;
-                            commentResponse.recommendScheduleResponseDto = mRecommendPost;
-                            // 시간 ? 어쩌지
-//                            commentResponse.dateTime = ;
-                            commentResponse.userResponseDto = ((RecommendListActivity)mContext).getUser();
-                            mCommentList.add(commentResponse);
-                        }
+                        Log.d("RX " + TAG, "comment register Next");
+    
+                        CommentResponse commentResponse = new CommentResponse();
+                        commentResponse.id = response;
+                        commentResponse.comments = commentRegister.comments;
+                        commentResponse.recommendScheduleResponseDto = mRecommendPost;
+                        // Todo: 시간 ? 어쩌지
+                        commentResponse.dateTime = LocalDateTime.now().toString();
+                        commentResponse.userResponseDto = ((RecommendListActivity) mContext).getUser();
+                        
+                        ((RecommendListActivity) mContext).mDrawerViewControl
+                                .mDrawerHandler.addComment(commentResponse);
                     }
 
                     @Override
@@ -105,20 +111,22 @@ public class CommentHandler {
                         if (response.status == 1L) {
                             mCommentList = response.commentResponseDtoArrayList;
                         } else if (response.status == 0L) {
-                            Toast.makeText(mContext,
-                                    "댓글을 읽어올 수 없습니다", Toast.LENGTH_SHORT).show();
+                            // 댓글 없음
                         }
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Log.d("RX " + TAG, e.getMessage());
+                        Toast.makeText(mContext,
+                                "댓글을 읽어올 수 없습니다", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onComplete() {
                         Log.d("RX " + TAG, "complete");
-
+                        ((RecommendListActivity) mContext).mDrawerViewControl
+                                .mDrawerHandler.updateCommentUI();
                     }
                 })
         );

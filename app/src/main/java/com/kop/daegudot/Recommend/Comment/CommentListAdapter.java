@@ -1,4 +1,4 @@
-package com.kop.daegudot.Recommend.PostComment;
+package com.kop.daegudot.Recommend.Comment;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,7 +13,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
+import com.kop.daegudot.Recommend.RecommendListActivity;
 
 import java.util.ArrayList;
 
@@ -22,6 +25,7 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
     
     private Context mContext;
     private ArrayList<CommentResponse> mCommentList;
+    private UserResponse mUser;
     
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView writer;
@@ -41,9 +45,7 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
         }
         
         public void setButtonVisibility() {
-            // TODO: 내 정보 가져오기
-            //  (닉네임 같으면 삭제 버튼 보이게 함)
-            if ("샤스".equals(writer.getText().toString())) {
+            if ((mUser.nickname).equals(writer.getText().toString())) {
                 deleteBtn.setVisibility(View.VISIBLE);
             }
         }
@@ -57,22 +59,19 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
                     builder.setTitle("삭제");
                     builder.setMessage("댓글을 삭제하시겠습니까?");
                     builder.setPositiveButton("예",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    mCommentList.remove(getAdapterPosition());
-                                    notifyItemRemoved(getAdapterPosition());
-                    
-                                    // TODO: DB에서 데이터 삭제하기
-                    
-                                    itemView.invalidate();
-                                }
+                            (dialog, which) -> {
+                                int position = getAdapterPosition();
+
+                                ((RecommendListActivity)mContext)
+                                        .mDrawerViewControl.mDrawerHandler.mCommentHandler
+                                        .deleteComment(mCommentList.get(position));
+    
+                                mCommentList.remove(position);
+                                notifyItemRemoved(position);
+                                itemView.invalidate();
                             });
                     builder.setNegativeButton("아니오",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            });
+                            (dialog, which) -> dialog.cancel());
                     builder.show();
             }
         }
@@ -81,6 +80,7 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
     public CommentListAdapter(Context context, ArrayList<CommentResponse> commentList) {
         mContext = context;
         mCommentList = commentList;
+        mUser = ((RecommendListActivity) mContext).getUser();
     }
     
     @NonNull
@@ -96,10 +96,9 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
     public void onBindViewHolder(@NonNull CommentListAdapter.ViewHolder holder, int position) {
         CommentResponse item = mCommentList.get(position);
         
-        // TODO: 유저 정보로 닉네임 View추가
-//        holder.writer.setText(item.userResponseDto.nickname);
+        holder.writer.setText(item.userResponseDto.nickname);
         holder.content.setText(item.comments);
-        holder.time.setText(item.dateTime);
+        holder.time.setText(item.getDateTime());
         
         holder.setButtonVisibility();
     }

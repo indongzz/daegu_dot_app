@@ -237,6 +237,7 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
         recommendResponse.id = mRecommendPost.id;
         recommendResponse.title = recommendRegister.title;
         recommendResponse.content = recommendRegister.content;
+        recommendResponse.userResponseDto = mRecommendPost.userResponseDto;
         ArrayList<HashtagResponse> hashtags = new ArrayList<>();
         for (int i = 0; i < mCheckedChipGroup.size(); i++) {
             hashtags.add(mHashtags.get(mCheckedChipGroup.get(i)));

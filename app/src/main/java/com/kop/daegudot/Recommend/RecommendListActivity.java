@@ -53,13 +53,13 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     View mView;
     HashtagResponse mHashtag;
     ProgressBar progressBar;
-    DrawerViewControl mDrawerViewControl;
+    public DrawerViewControl mDrawerViewControl;
     
     /* RX java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private String mToken;
     ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
-    UserResponse userResponse;
+    private UserResponse mUser;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -218,7 +218,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     }
     
     public UserResponse getUser() {
-        return userResponse;
+        return mUser;
     }
     
     //토큰으로 회원 정보 가져오기
@@ -232,7 +232,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 .subscribeWith(new DisposableObserver<UserResponse>() {
                     @Override
                     public void onNext(UserResponse response) {
-                        userResponse = response;
+                        mUser = response;
                     }
                     
                     @Override

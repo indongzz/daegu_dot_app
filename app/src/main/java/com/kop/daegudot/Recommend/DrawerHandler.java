@@ -26,8 +26,10 @@ import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
 import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
-import com.kop.daegudot.Recommend.PostComment.CommentListAdapter;
+import com.kop.daegudot.Recommend.Comment.CommentHandler;
+import com.kop.daegudot.Recommend.Comment.CommentListAdapter;
 
 import java.util.ArrayList;
 
@@ -50,11 +52,12 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     Button applyCommentBtn, watchScheduleBtn;
     ChipGroup mChipGroup;
     
-    CommentHandler mCommentHandler;
+    public CommentHandler mCommentHandler;
     RecyclerView mCommentRecyclerview;
-    CommentListAdapter mCommentAdapter;
+    public CommentListAdapter mCommentAdapter;
     ArrayList<CommentResponse> mCommentList;
     
+    private UserResponse mUser;
     InputMethodManager keyboard;
     
     public DrawerHandler(Context context, View view, RecommendResponse post, int position) {
@@ -64,7 +67,6 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         this.position = position;
     
         bindView();
-        prepareComment();
         handleComment();
     }
     
@@ -88,8 +90,7 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     public void setDrawer() {
         postTitle.setText(mRecommendPost.title);
         postRating.setRating((float) mRecommendPost.star);
-        // Todo: add writer
-//        postWriter.setText(mRecommendPost.getWriter());
+        postWriter.setText(mRecommendPost.userResponseDto.nickname);
         postContent.setText(mRecommendPost.content);
         
         mChipGroup.removeAllViews();
@@ -114,24 +115,19 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         
         /* 댓글 */
         mCommentHandler = new CommentHandler(mContext, mView, mRecommendPost);
-        mCommentAdapter = new CommentListAdapter(mContext, mCommentList);
-        mCommentRecyclerview.setAdapter(mCommentAdapter);
         mCommentRecyclerview.setLayoutManager(new LinearLayoutManager(mContext));
     
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 mCommentRecyclerview.getContext(), DividerItemDecoration.VERTICAL);
         mCommentRecyclerview.addItemDecoration(dividerItemDecoration);
     
-        watchScheduleBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 일정 보기
-                PostScheduleBottomSheetDialog postScheduleBottomSheetDialog
-                        = new PostScheduleBottomSheetDialog(mRecommendPost.mainScheduleResponseDto);
-                postScheduleBottomSheetDialog
-                        .show(((RecommendListActivity)mContext).getFM(),
-                                PostScheduleBottomSheetDialog.TAG);
-            }
+        watchScheduleBtn.setOnClickListener(v -> {
+            // 일정 보기
+            PostScheduleBottomSheetDialog postScheduleBottomSheetDialog
+                    = new PostScheduleBottomSheetDialog(mRecommendPost.mainScheduleResponseDto);
+            postScheduleBottomSheetDialog
+                    .show(((RecommendListActivity)mContext).getFM(),
+                            PostScheduleBottomSheetDialog.TAG);
         });
         
         drawerBackbtn.setOnClickListener(v -> {
@@ -140,8 +136,13 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         });
         
         // TODO: 작성자가 나인 경우에만 버튼이 보이게 함
-        menuBtn.setVisibility(View.VISIBLE);
-        menuBtn.setOnClickListener(this::showMenu);
+        //       add getUser on MoreFragment
+        
+        mUser = ((RecommendListActivity) mContext).getUser();
+        if (mUser.token.equals(mRecommendPost.userResponseDto.token)) {
+            menuBtn.setVisibility(View.VISIBLE);
+            menuBtn.setOnClickListener(this::showMenu);
+        }
     }
     
     public void updateDrawerContent(RecommendResponse recommendResponse) {
@@ -156,29 +157,31 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         return null;
     }
     
+    /* Comment */
+    public void updateCommentUI() {
+        mCommentList = mCommentHandler.getCommentList();
+        mCommentAdapter = new CommentListAdapter(mContext, mCommentList);
+        mCommentRecyclerview.setAdapter(mCommentAdapter);
+    }
+    
     public void handleComment() {
         // 댓글 등록 버튼 클릭 이벤트
-        applyCommentBtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                CommentRegister newComment = new CommentRegister();
-                newComment.comment = editComment.getText().toString();
-                newComment.recommendScheduleId = mRecommendPost.id;
-                
-                mCommentHandler.registerComment(newComment);
-                
-                editComment.setText("");
-                editComment.clearFocus();
-                keyboard.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
-            }
+        applyCommentBtn.setOnClickListener(v -> {
+            CommentRegister newComment = new CommentRegister();
+            newComment.comments = editComment.getText().toString();
+            newComment.recommendScheduleId = mRecommendPost.id;
+            
+            mCommentHandler.registerComment(newComment);
+            
+            editComment.setText("");
+            editComment.clearFocus();
+            keyboard.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
         });
     }
     
-    // TODO: get comments from DB
-    public void prepareComment() {
-//        mCommentList = mCommentHandler.getCommentList();
-        mCommentList = new ArrayList<>();
-        
+    public void addComment(CommentResponse newComment) {
+        mCommentList.add(newComment);
+        mCommentAdapter.notifyDataSetChanged();
     }
     
     // menu option
