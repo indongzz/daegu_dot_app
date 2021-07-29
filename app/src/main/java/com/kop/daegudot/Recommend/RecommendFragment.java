@@ -13,12 +13,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponse;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
 import com.kop.daegudot.Network.RestApiService;
@@ -73,6 +75,9 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
         
         TextView title = mView.findViewById(R.id.title);
         title.setText("추천");
+        
+        ImageButton backBtn = mView.findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(this);
     
         // hashtag buttons setting
         mChipGroup = mView.findViewById(R.id.btns_group);
@@ -136,6 +141,9 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
         if (v.getId() == R.id.fab) {
             Intent intent = new Intent(getContext(), AddRecommendActivity.class);
             startActivity(intent);
+        }
+        if (v.getId() == R.id.backBtn) {
+            ((MainActivity) getActivity()).changeFragment(2, 1);
         }
     }
     
