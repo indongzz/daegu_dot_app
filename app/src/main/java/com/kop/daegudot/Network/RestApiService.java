@@ -37,7 +37,7 @@ public interface RestApiService {
 
     /* Login */
     @POST("/user/register")
-    Observable<Long> registerUser(@Body UserRegister userRegisterRequest);
+    Observable<String> registerUser(@Body UserRegister userRegisterRequest);
 
     @GET("/user/register/email/{email}")
     Observable<UserResponse> checkEmailDup(@Path("email") String email);
