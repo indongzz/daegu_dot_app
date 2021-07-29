@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,11 +37,8 @@ import com.kop.daegudot.R;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -65,6 +63,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     Button mCalendarBtn;
     String mStartDate, mEndDate;
     String mBtnDay1, mBtnDay2;
+    ProgressBar mProgressBar;
     LocalDate localStart, localEnd;
     int flag = 1;
     FragmentManager mFragmentManager;
@@ -90,6 +89,8 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_schedule, container, false);
     
+        mProgressBar = view.findViewById(R.id.progress_bar);
+    
         pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
         
@@ -103,7 +104,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         title.setText("일정 추가");
         ImageButton backBtn = view.findViewById(R.id.backBtn);
         backBtn.setOnClickListener(this);
-
+        
         mCalendar = view.findViewById(R.id.calendar);
         mCalendarBtn = view.findViewById(R.id.calendarBtn);
 
@@ -111,18 +112,20 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
 
         mCalendar.setSelectionType(SelectionType.RANGE);
     
-//        Set<Long> disabledDaysSet = new HashSet<>();
-//
-//        long n = System.currentTimeMillis();
-//
-//        for (int i = 1; i <= 10; i++) {
-//
-//            disabledDaysSet.add(n - (86400000 * i));
-//
-//            Log.d("calender", "initViews: " + n);
-//
-//        }
-//        mCalendar.setDisabledDays(disabledDaysSet);
+        Set<Long> disabledDaysSet = new HashSet<>();
+    
+        long date = System.currentTimeMillis();
+        long mul = 0;
+        
+        // 100일 전까지 선택 불가
+        for (int i = 1; i <= 100; i++) {
+            mul += 86400000;
+            disabledDaysSet.add(date - mul);
+        }
+        
+        mCalendar.setDisabledDays(disabledDaysSet);
+        
+        mProgressBar.setVisibility(View.GONE);
 
         mCalendar.setSelectionManager(new RangeSelectionManager(new OnDaySelectedListener() {
             @Override
@@ -167,6 +170,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     public void onClick(View v) {
         if (v.getId() == R.id.calendarBtn) {
             if (flag == 1) {
+                mProgressBar.setVisibility(View.VISIBLE);
                 MainScheduleRegister mainScheduleRegister = new MainScheduleRegister();
                 mainScheduleRegister.startDate = localStart.toString();
                 mainScheduleRegister.endDate = localEnd.toString();
@@ -218,11 +222,14 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                        mainScheduleInfo.setmEndDate(mEndDate);
                        mainScheduleInfo.setMainId(mMainId);
                        mainScheduleInfo.setmDDate();
+    
+                       mProgressBar.setVisibility(View.GONE);
                        
                        Intent intent = new Intent(getContext(), MapMainActivity.class);
                        intent.putExtra("mainSchedule", mainScheduleInfo);
                        startActivity(intent);
                        flag = 0;
+                       
                    }
                })
        );
