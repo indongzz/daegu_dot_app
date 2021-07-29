@@ -25,6 +25,7 @@ import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.Recommend.RecommendResponseList;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private String mToken;
     static ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
-    
+    UserResponse userResponse;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +72,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     
         SharedPreferences pref = getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
+        selectUserByToken();
         
         Intent intent = getIntent();
         
@@ -210,5 +212,36 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
             RecommendResponse recommendResponse = data.getParcelableExtra("updatedRecommendPost");
             mDrawerViewControl.updateDrawerUI(recommendResponse);
         }
+    }
+    
+    public UserResponse getUser() {
+        return userResponse;
+    }
+    
+    //토큰으로 회원 정보 가져오기
+    private void selectUserByToken() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(mToken);
+        Observable<UserResponse> observable = service.getUserFromToken();
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        userResponse = response;
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("TOKEN", e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("TOKEN", "complete");
+                    }
+                })
+        );
     }
 }

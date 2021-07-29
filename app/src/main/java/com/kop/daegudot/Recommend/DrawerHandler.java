@@ -23,12 +23,12 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.kop.daegudot.MorePage.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
+import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
+import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.R;
-import com.kop.daegudot.Recommend.PostComment.CommentItem;
 import com.kop.daegudot.Recommend.PostComment.CommentListAdapter;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 /**
@@ -50,12 +50,12 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     Button applyCommentBtn, watchScheduleBtn;
     ChipGroup mChipGroup;
     
+    CommentHandler mCommentHandler;
     RecyclerView mCommentRecyclerview;
-    CommentListAdapter mAdapter;
-    ArrayList<CommentItem> mCommentList;
+    CommentListAdapter mCommentAdapter;
+    ArrayList<CommentResponse> mCommentList;
     
     InputMethodManager keyboard;
-    
     
     public DrawerHandler(Context context, View view, RecommendResponse post, int position) {
         mContext = context;
@@ -112,8 +112,10 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
             mChipGroup.addView(chips[i]);
         }
         
-        mAdapter = new CommentListAdapter(mContext, mCommentList);
-        mCommentRecyclerview.setAdapter(mAdapter);
+        /* 댓글 */
+        mCommentHandler = new CommentHandler(mContext, mView, mRecommendPost);
+        mCommentAdapter = new CommentListAdapter(mContext, mCommentList);
+        mCommentRecyclerview.setAdapter(mCommentAdapter);
         mCommentRecyclerview.setLayoutManager(new LinearLayoutManager(mContext));
     
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
@@ -159,14 +161,11 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         applyCommentBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                // TODO: DB에 댓글 추가
-                CommentItem newComment = new CommentItem();
-                // TODO: 나의 정보에서 닉네임 가져오기
-                newComment.setWriter("샤스");
-                newComment.setContent(editComment.getText().toString());
-                newComment.setTime(LocalDateTime.now());
+                CommentRegister newComment = new CommentRegister();
+                newComment.comment = editComment.getText().toString();
+                newComment.recommendScheduleId = mRecommendPost.id;
                 
-                mCommentList.add(newComment);
+                mCommentHandler.registerComment(newComment);
                 
                 editComment.setText("");
                 editComment.clearFocus();
@@ -177,20 +176,7 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     
     // TODO: get comments from DB
     public void prepareComment() {
-        mCommentList = new ArrayList<>();
-        
-        String[] writers = {"작성자1", "작성자2"};
-        String[] contents = {"내용내용내용1", "내용내욘애뇽3"};
-        LocalDateTime[] times = {LocalDateTime.parse("2021-02-25T19:30:00"), LocalDateTime.parse("2021-02-25T19:37:00")};
-        
-        for (int i = 0; i < 2; i++) {
-            CommentItem item = new CommentItem();
-            item.setWriter(writers[i]);
-            item.setContent(contents[i]);
-            item.setTime(times[i]);
-            
-            mCommentList.add(item);
-        }
+        mCommentList = mCommentHandler.getCommentList();
     }
     
     // menu option

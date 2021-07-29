@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
     private static final String TAG = "CommentListAdapter";
     
     private Context mContext;
-    private ArrayList<CommentItem> mCommentList;
+    private ArrayList<CommentResponse> mCommentList;
     
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView writer;
@@ -77,7 +78,7 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
         }
     }
     
-    public CommentListAdapter(Context context, ArrayList<CommentItem> commentList) {
+    public CommentListAdapter(Context context, ArrayList<CommentResponse> commentList) {
         mContext = context;
         mCommentList = commentList;
     }
@@ -93,11 +94,12 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
     
     @Override
     public void onBindViewHolder(@NonNull CommentListAdapter.ViewHolder holder, int position) {
-        CommentItem item = mCommentList.get(position);
+        CommentResponse item = mCommentList.get(position);
         
-        holder.writer.setText(item.getWriter());
-        holder.content.setText(item.getContent());
-        holder.time.setText(item.getStringTime());
+        // TODO: 유저 정보로 닉네임 View추가
+//        holder.writer.setText(item.userResponseDto.nickname);
+        holder.content.setText(item.comments);
+        holder.time.setText(item.dateTime);
         
         holder.setButtonVisibility();
     }
