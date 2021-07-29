@@ -58,7 +58,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     /* RX java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private String mToken;
-    static ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
+    ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
     UserResponse userResponse;
     
     @Override
@@ -210,6 +210,9 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                 return;
             }
             RecommendResponse recommendResponse = data.getParcelableExtra("updatedRecommendPost");
+            int position = data.getIntExtra("position", 0);
+            mRecommendList.set(position, recommendResponse);
+            mAdapter.notifyDataSetChanged();
             mDrawerViewControl.updateDrawerUI(recommendResponse);
         }
     }

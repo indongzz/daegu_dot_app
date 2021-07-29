@@ -176,7 +176,9 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     
     // TODO: get comments from DB
     public void prepareComment() {
-        mCommentList = mCommentHandler.getCommentList();
+//        mCommentList = mCommentHandler.getCommentList();
+        mCommentList = new ArrayList<>();
+        
     }
     
     // menu option
@@ -203,7 +205,6 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
             Intent intent = new Intent(mContext, UpdateRecommendActivity.class);
             intent.putExtra("recommendPost", mRecommendPost);
             intent.putExtra("listIndex", position);
-//            mContext.startActivity(intent);
             ((RecommendListActivity)mContext).startActivityForResult(intent, 100);
             return true;
         }

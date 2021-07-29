@@ -92,6 +92,7 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
         if (intent != null) {
             mRecommendPost = intent.getParcelableExtra("recommendPost");
             if (mRecommendPost != null) {
+                listIndex = intent.getIntExtra("position", 0);
                 MainScheduleResponse main = mRecommendPost.mainScheduleResponseDto;
                 String date = main.startDate.substring(5, 7) + "." + main.startDate.substring(8, 10)+ " ~ " +
                         main.endDate.substring(5, 7) + "." +  main.endDate.substring(8, 10);
@@ -219,11 +220,11 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
                     public void onComplete() {
                         Log.d("RX " + TAG, "complete");
                         RecommendResponse recommendResponse = makeRecommendObject(recommendRegister);
-                        RecommendListActivity.mRecommendList.set(listIndex, recommendResponse);
-                        RecommendListActivity.refresh();
+                        
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra("updatedRecommendPost", recommendResponse);
-                        setResult(100, resultIntent);
+                        resultIntent.putExtra("position", listIndex);
+                        setResult(RESULT_OK, resultIntent);
                         finish();
                     }
                 })
