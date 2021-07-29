@@ -48,8 +48,13 @@ public class MapMarkerItems {
     ArrayList<Place> mPlaceList;
     ArrayList<MapPOIItem> mMarkerList;
     ArrayList<Documents.Address> mAccomdList, mFoodList, mCafeList;
+    ArrayList<Documents.Address> mAccomdRegisterList, mFoodRegisterList, mCafeRegisterList;
     ArrayList<MapPOIItem> mMarkerCategoryList;
     int tagNum = 0;
+
+    int foodCnt = 0;
+    int AccomdCnt = 0;
+    int CafeCnt = 0;
     
     private String key = "KakaoAK " + "fede27d02cb9592216a0a526b8683677";
     
@@ -171,7 +176,7 @@ public class MapMarkerItems {
     //FD6	음식점
     //CE7	카페
     public void startRx2(double x, double y) {
-
+        ArrayList<Documents.Address> temp = new ArrayList<>();
         RestApiService service = RestfulAdapter.getInstance().getKakaoServiceApi();
         
         for (int i = 1; i <= 5; i++) {
@@ -188,7 +193,7 @@ public class MapMarkerItems {
                                 (ArrayList<Documents.Address>) response.body().getDocuments();
                         mAccomdList.removeAll(documents); // 중복제거
                         mAccomdList.addAll(documents);
-                        makeRegisterAC();
+                        //서버 전송
                         //setPlaceMarker(mAccomdList);
 
                     call = service.getPlacebyCategory(
@@ -201,9 +206,8 @@ public class MapMarkerItems {
                                         (ArrayList<Documents.Address>) response.body().getDocuments();
                                 mFoodList.removeAll(food); // 중복 제거
                                 mFoodList.addAll(food);
-
                                 //setPlaceMarker(mFoodList);
-                                makeRegisterFD();
+                                //makeFD(mFoodList);
                             } // FD if문 종료
                         }
 
@@ -224,7 +228,6 @@ public class MapMarkerItems {
                 }
             });
         }
-    
         for (int i = 0; i < 5; i++) {
             Call<Documents> cafeCall = service.getPlacebyCategory(
                     key, "CE7", x + "", y + "", 20000, i + 1);
@@ -236,9 +239,8 @@ public class MapMarkerItems {
                                 (ArrayList<Documents.Address>) response.body().getDocuments();
                         mCafeList.removeAll(cafe);
                         mCafeList.addAll(cafe);
-
                         //setPlaceMarker(mCafeList);
-                        makeRegisterCF();
+                        makeFD(mCafeList);
                     } else {
                         Log.d(TAG, "Cafe response error code: " + response.code());
                     }
@@ -273,10 +275,13 @@ public class MapMarkerItems {
                 marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
                 if (place.category.equals("AD5")) {
                     marker.setCustomImageResourceId(R.drawable.hotel_pin);
+
                 } else if (place.category.equals("FD6")) {
                     marker.setCustomImageResourceId(R.drawable.food_pin);
+                    makeRegisterFD();
                 } else if (place.category.equals("CE7")) {
                     marker.setCustomImageResourceId(R.drawable.cafe_pin);
+                    makeRegisterCF();
                 }
                 marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
                 marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
@@ -292,32 +297,46 @@ public class MapMarkerItems {
     }*/
     
 
-    private void makeRegisterAC(){
+    private void makeRegisterAC(ArrayList<Documents.Address> temp){
         ArrayList<PlaceRegister> new_places = new ArrayList<>();
-        for(int i=0; i<mAccomdList.size();i++){
+        System.out.println("-----------------------------------------");
+        for(int i=0; i<temp.size();i++){
             PlaceRegister placeRegister = new PlaceRegister();
-            placeRegister.address = mAccomdList.get(i).address;
-            placeRegister.attractName = mAccomdList.get(i).placeName;
-            placeRegister.longitude = Double.toString(mAccomdList.get(i).x);
-            placeRegister.latitude = Double.toString(mAccomdList.get(i).y);
+            placeRegister.address = temp.get(i).address;
+            placeRegister.attractName = temp.get(i).placeName;
+            placeRegister.longitude = Double.toString(temp.get(i).x);
+            placeRegister.latitude = Double.toString(temp.get(i).y);
             placeRegister.category = "AC";
             new_places.add(placeRegister);
+            System.out.println(placeRegister.attractName);
         }
-        insertPlace(new_places);
     }
 
+    private void makeFD(ArrayList<Documents.Address> temp){
+        mFoodRegisterList = new ArrayList<>();
+        foodCnt++;
+        System.out.println("--------------------"+foodCnt+"---------------------");
+        for(int i=0; i<temp.size();i++){
+            mFoodRegisterList.add(temp.get(i));
+            System.out.println(mFoodRegisterList.get(i).placeName);
+        }
+        System.out.println("-----------------------------------------");
+        if(foodCnt == 5) makeRegisterFD();
+    }
     private void makeRegisterFD(){
         ArrayList<PlaceRegister> new_places = new ArrayList<>();
-        for(int i=0; i<mFoodList.size();i++){
+        //System.out.println("-----------------------------------------");
+        for(int i=0; i<mFoodRegisterList.size();i++){
             PlaceRegister placeRegister = new PlaceRegister();
-            placeRegister.attractName = mFoodList.get(i).placeName;
-            placeRegister.longitude = Double.toString(mFoodList.get(i).x);
-            placeRegister.latitude = Double.toString(mFoodList.get(i).y);
-            placeRegister.address = mFoodList.get(i).address;
+            placeRegister.attractName = mFoodRegisterList.get(i).placeName;
+            placeRegister.longitude = Double.toString(mFoodRegisterList.get(i).x);
+            placeRegister.latitude = Double.toString(mFoodRegisterList.get(i).y);
+            placeRegister.address = mFoodRegisterList.get(i).address;
             placeRegister.category = "FD";
             new_places.add(placeRegister);
+            //System.out.println(placeRegister.attractName);
         }
-        insertPlace(new_places);
+        //System.out.println("-------------------"+mFoodRegisterList.size()+"----------------------");
     }
 
     private void makeRegisterCF(){
@@ -330,8 +349,8 @@ public class MapMarkerItems {
             placeRegister.address = mCafeList.get(i).address;
             placeRegister.category = "CF";
             new_places.add(placeRegister);
+
         }
-        insertPlace(new_places);
     }
 
     private void insertPlace(List<PlaceRegister> placeRegister) {

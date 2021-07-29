@@ -35,7 +35,7 @@ public class Documents {
         @SerializedName("phone")
         @Expose
         public String phone;
-    
+
         @Override
         public boolean equals(Object object) {
             boolean equalName = false;

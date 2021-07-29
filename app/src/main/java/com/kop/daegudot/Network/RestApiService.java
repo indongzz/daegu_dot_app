@@ -121,7 +121,7 @@ public interface RestApiService {
     @PUT("/user/update/password")
     Observable<Long> updateUserPassword(@Body PasswordUpdate passwordUpdate);
 
-    @POST("/places/location")
+    @POST("/places/register/location")
     Observable<Long> insertPlaces(@Body List<PlaceRegister> placeRegister);
 
 }
