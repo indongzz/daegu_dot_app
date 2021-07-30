@@ -3,6 +3,8 @@ package com.kop.daegudot.Network;
 import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
+import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
+import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendRegister;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
@@ -142,4 +144,19 @@ public interface RestApiService {
     /* Hashtag */
     @GET("/hashtag")
     Observable<HashtagResponseList> selectHashtagList();
+    
+    /* Comment */
+    @POST("/comment/register")
+    Observable<Long> registerComment(@Body CommentRegister commentRegister);
+    
+    @GET("/comment/{recommendScheduleId}")
+    Observable<CommentResponseList> selectAllCommentList(@Path("recommendScheduleId") long recommendScheduleId);
+    
+    @PUT("/comment/update/{commentId}")
+    Observable<Long> updateComment(
+            @Path("commentId") long commentId,
+            @Body String comments);
+    
+    @DELETE("/comment/delete/{commentId}")
+    Observable<Long> deleteComment(@Path("commentId") long commentId);
 }

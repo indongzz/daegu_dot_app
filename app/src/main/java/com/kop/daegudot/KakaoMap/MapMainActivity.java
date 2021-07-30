@@ -133,6 +133,14 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
     }
     
+    public void notifyPlaceListDone(ArrayList<Place> placeList) {
+        mPlaceList = placeList;
+        if (mPlace != null) {
+            placeBottomSheet.changePlaceBottomSheet((int) mPlace.id);
+            mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
+    }
+    
     /* MainSchedule 이용해서 SubSchedule List 서버로부터 받아오기 */
     public void getSchedule() {
         Intent intent = getIntent();
@@ -321,10 +329,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     // MapView Click event
     @Override
     public void onMapViewInitialized(MapView mapView) {
-        if (mPlace != null) {
-            placeBottomSheet.changePlaceBottomSheet((int) mPlace.id);
-            mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
-        }
+    
     }
     
     @Override

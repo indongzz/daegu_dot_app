@@ -67,10 +67,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     
     @Override
     public void onBindViewHolder(@NonNull PostAdapter.ViewHolder holder, int position) {
-        
-        holder.title.setText(mRecommendList.get(position).title);
-        holder.ratingBar.setRating((float) mRecommendList.get(position).star);
-//        holder.writer.setText(mRecommendList.get(position));
+        RecommendResponse recommendResponse = mRecommendList.get(position);
+        holder.title.setText(recommendResponse.title);
+        holder.ratingBar.setRating((float) recommendResponse.star);
+        holder.writer.setText(recommendResponse.userResponseDto.nickname);
 //        holder.comment.setText(mRecommendList.get(position).getCommentString());
     }
     

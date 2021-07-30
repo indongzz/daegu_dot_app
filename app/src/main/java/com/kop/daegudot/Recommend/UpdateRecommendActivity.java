@@ -92,6 +92,7 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
         if (intent != null) {
             mRecommendPost = intent.getParcelableExtra("recommendPost");
             if (mRecommendPost != null) {
+                listIndex = intent.getIntExtra("position", 0);
                 MainScheduleResponse main = mRecommendPost.mainScheduleResponseDto;
                 String date = main.startDate.substring(5, 7) + "." + main.startDate.substring(8, 10)+ " ~ " +
                         main.endDate.substring(5, 7) + "." +  main.endDate.substring(8, 10);
@@ -104,8 +105,8 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
                     }
                 }
                 mUpdateScheduleBtn.setText(date);
-                for (int i = 0; i < mHashtags.size(); i++) {
-                    mChipGroup.check((int) mHashtags.get(i).id - 1);
+                for (int i = 0; i < mRecommendPost.hashtags.size(); i++) {
+                    mChipGroup.check((int) mRecommendPost.hashtags.get(i).id - 1);
                 }
                 mRatingBar.setRating(mRecommendPost.getStar());
                 mRecommendTitle.setText(mRecommendPost.title);
@@ -154,7 +155,6 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
               
                 updateRecommendScheduleRx(recommendRegister);
                 
-                finish();
             }
             else {
                 Toast.makeText(getApplicationContext(), "값을 입력해주세요", Toast.LENGTH_SHORT).show();
@@ -220,8 +220,12 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
                     public void onComplete() {
                         Log.d("RX " + TAG, "complete");
                         RecommendResponse recommendResponse = makeRecommendObject(recommendRegister);
-                        RecommendListActivity.mRecommendList.set(listIndex, recommendResponse);
-                        RecommendListActivity.refresh();
+                        
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("updatedRecommendPost", recommendResponse);
+                        resultIntent.putExtra("position", listIndex);
+                        setResult(RESULT_OK, resultIntent);
+                        finish();
                     }
                 })
         );
@@ -229,10 +233,11 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
     
     public RecommendResponse makeRecommendObject(RecommendRegister recommendRegister) {
         RecommendResponse recommendResponse = new RecommendResponse();
-        
+    
         recommendResponse.id = mRecommendPost.id;
         recommendResponse.title = recommendRegister.title;
         recommendResponse.content = recommendRegister.content;
+        recommendResponse.userResponseDto = mRecommendPost.userResponseDto;
         ArrayList<HashtagResponse> hashtags = new ArrayList<>();
         for (int i = 0; i < mCheckedChipGroup.size(); i++) {
             hashtags.add(mHashtags.get(mCheckedChipGroup.get(i)));
@@ -240,13 +245,13 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
         recommendResponse.hashtags = hashtags;
         recommendResponse.star = recommendRegister.star;
         recommendResponse.localDateTime = mRecommendPost.localDateTime;
-        
+    
         MainScheduleResponse mainScheduleResponse = new MainScheduleResponse();
         mainScheduleResponse.startDate = mMainScheduleList.get(mainPosition).getmStartDate();
         mainScheduleResponse.endDate = mMainScheduleList.get(mainPosition).getmEndDate();
         mainScheduleResponse.id = mMainScheduleList.get(mainPosition).getMainId();
         recommendResponse.mainScheduleResponseDto = mainScheduleResponse;
-        
+    
         return recommendResponse;
     }
 }

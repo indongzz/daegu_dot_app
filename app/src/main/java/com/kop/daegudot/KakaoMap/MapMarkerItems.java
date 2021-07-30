@@ -104,31 +104,31 @@ public class MapMarkerItems {
     private void startRx() {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
         Observable<List<Place>> observable = service.getPlaceList();
-        
+    
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(new DisposableObserver<List<Place>>() {
-                            @Override
-                            public void onNext(List<Place> response) {
-                                Log.d("RX", "Next");
-                                mPlaceList.addAll(response);
-                            }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<List<Place>>() {
+                    @Override
+                    public void onNext(List<Place> response) {
+                        Log.d("RX", "Next");
+                        mPlaceList.addAll(response);
+                    }
+                
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                    }
+                
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
                     
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.d("RX", e.getMessage());
-                            }
+                        setServerMarker();
                     
-                            @Override
-                            public void onComplete() {
-                                Log.d("RX", "complete");
-                                
-                                setServerMarker();
-                                
-                                /* Progress Loading done */
-                                ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
-                            }
-                        })
+                        /* Progress Loading done */
+                        ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
+                    }
+                })
         );
     }
     
@@ -278,6 +278,7 @@ public class MapMarkerItems {
         
             /* Progress Loading done */
             ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
+            ((MapMainActivity) mContext).notifyPlaceListDone(mPlaceList);
         }
     }
     
