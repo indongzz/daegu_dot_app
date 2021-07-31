@@ -3,8 +3,10 @@ package com.kop.daegudot.Network;
 import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
+import com.kop.daegudot.Network.More.MyInfo.MyCommentList;
 import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
+import com.kop.daegudot.Network.More.MyInfo.MyRecommendList;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendRegister;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
@@ -159,4 +161,11 @@ public interface RestApiService {
     
     @DELETE("/comment/delete/{commentId}")
     Observable<Long> deleteComment(@Path("commentId") long commentId);
+    
+    /* More - My Recommend Schedule & My Comment */
+    @GET("/more/recommend")
+    Observable<MyRecommendList> selectMyRecommendSchedules();
+    
+    @GET("/more/comment")
+    Observable<MyCommentList> selectMyComments();
 }

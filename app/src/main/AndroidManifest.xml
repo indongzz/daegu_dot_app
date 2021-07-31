@@ -17,7 +17,7 @@
         <activity android:name=".Recommend.UpdateRecommendActivity"></activity>
         <activity android:name=".Network.Map.PlaceGeoUpdateActivity" />
         <activity android:name=".MorePage.MyReview.MyReviewStoryActivity" />
-        <activity android:name=".MorePage.MyCommentActivity" />
+        <activity android:name=".MorePage.MyReview.MyCommentActivity" />
         <activity android:name=".MorePage.MyWishlistActivity" />
         <activity android:name=".MorePage.MyInformation.MyInformationActivity" />
         <activity

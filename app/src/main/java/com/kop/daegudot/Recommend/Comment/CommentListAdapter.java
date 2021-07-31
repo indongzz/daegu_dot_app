@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
+import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.User.UserResponse;
@@ -45,7 +47,13 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
         }
         
         public void setButtonVisibility() {
-            if ((mUser.nickname).equals(writer.getText().toString())) {
+            if (mContext instanceof RecommendListActivity) {
+                if ((mUser.token).equals(mCommentList.get(getAdapterPosition()).userResponseDto.token)) {
+                    deleteBtn.setVisibility(View.VISIBLE);
+                }
+            }
+            else if (mContext instanceof MyReviewStoryActivity ||
+                    mContext instanceof MyCommentActivity) {
                 deleteBtn.setVisibility(View.VISIBLE);
             }
         }
@@ -61,26 +69,43 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
                     builder.setPositiveButton("예",
                             (dialog, which) -> {
                                 int position = getAdapterPosition();
-
-                                ((RecommendListActivity)mContext)
-                                        .mDrawerViewControl.mDrawerHandler.mCommentHandler
-                                        .deleteComment(mCommentList.get(position));
-    
-                                mCommentList.remove(position);
-                                notifyItemRemoved(position);
-                                itemView.invalidate();
+                                
+                                deleteAndNotifyComment(position);
                             });
                     builder.setNegativeButton("아니오",
                             (dialog, which) -> dialog.cancel());
                     builder.show();
             }
         }
+        
+        public void deleteAndNotifyComment(int position) {
+            if (mContext instanceof RecommendListActivity) {
+                ((RecommendListActivity) mContext)
+                        .mDrawerViewControl.mDrawerHandler.mCommentHandler
+                        .deleteComment(mCommentList.get(position));
+            }
+            else if (mContext instanceof MyReviewStoryActivity) {
+                ((MyReviewStoryActivity) mContext)
+                        .mDrawerViewControl.mDrawerHandler.mCommentHandler
+                        .deleteComment(mCommentList.get(position));
+            }
+            else if (mContext instanceof MyCommentActivity) {
+                ((MyCommentActivity) mContext)
+                        .mDrawerViewControl.mDrawerHandler.mCommentHandler
+                        .deleteComment(mCommentList.get(position));
+            }
+            mCommentList.remove(position);
+            notifyItemRemoved(position);
+            itemView.invalidate();
+        }
     }
     
     public CommentListAdapter(Context context, ArrayList<CommentResponse> commentList) {
         mContext = context;
         mCommentList = commentList;
-        mUser = ((RecommendListActivity) mContext).getUser();
+        if (mContext instanceof RecommendListActivity) {
+            mUser = ((RecommendListActivity) mContext).getUser();
+        }
     }
     
     @NonNull

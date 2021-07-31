@@ -6,12 +6,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
+import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
 import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.Recommend.RecommendListActivity;
 
 import java.time.LocalDateTime;
@@ -72,10 +75,9 @@ public class CommentHandler {
                         commentResponse.recommendScheduleResponseDto = mRecommendPost;
                         // Todo: 시간 ? 어쩌지
                         commentResponse.dateTime = LocalDateTime.now().toString();
-                        commentResponse.userResponseDto = ((RecommendListActivity) mContext).getUser();
+                        commentResponse.userResponseDto = getUserByActivity();
                         
-                        ((RecommendListActivity) mContext).mDrawerViewControl
-                                .mDrawerHandler.addComment(commentResponse);
+                        addCommentOnActivity(commentResponse);
                     }
 
                     @Override
@@ -90,6 +92,34 @@ public class CommentHandler {
                     }
                 })
         );
+    }
+    
+    private UserResponse getUserByActivity() {
+        if (mContext instanceof RecommendListActivity) {
+            return ((RecommendListActivity) mContext).getUser();
+        }
+        else if (mContext instanceof MyReviewStoryActivity) {
+            return ((MyReviewStoryActivity) mContext).getUser();
+        }
+        else if (mContext instanceof MyCommentActivity) {
+            return ((MyCommentActivity) mContext).getUser();
+        }
+        return null;
+    }
+    
+    private void addCommentOnActivity(CommentResponse commentResponse) {
+        if (mContext instanceof RecommendListActivity) {
+            ((RecommendListActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.addComment(commentResponse);
+        }
+        else if (mContext instanceof MyReviewStoryActivity) {
+            ((MyReviewStoryActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.addComment(commentResponse);
+        }
+        else if (mContext instanceof MyCommentActivity) {
+            ((MyCommentActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.addComment(commentResponse);
+        }
     }
 
     /* Select All Comment List */
@@ -125,11 +155,25 @@ public class CommentHandler {
                     @Override
                     public void onComplete() {
                         Log.d("RX " + TAG, "complete");
-                        ((RecommendListActivity) mContext).mDrawerViewControl
-                                .mDrawerHandler.updateCommentUI();
+                        callUpdateCommentUI();
                     }
                 })
         );
+    }
+    
+    private void callUpdateCommentUI() {
+        if (mContext instanceof RecommendListActivity) {
+            ((RecommendListActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.updateCommentUI();
+        }
+        else if (mContext instanceof MyReviewStoryActivity) {
+            ((MyReviewStoryActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.updateCommentUI();
+        }
+        else if (mContext instanceof MyCommentActivity) {
+            ((MyCommentActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.updateCommentUI();
+        }
     }
 
     /* Delete Comment */
