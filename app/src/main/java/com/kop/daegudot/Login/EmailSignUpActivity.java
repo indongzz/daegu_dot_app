@@ -175,6 +175,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
                         mTokenPref = getSharedPreferences("data", MODE_PRIVATE);
                         SharedPreferences.Editor editor = mTokenPref.edit();
                         editor.putString("token", response);
+                        editor.putString("type", String.valueOf(userRegister.type));
                         editor.apply();
                     }
 

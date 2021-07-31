@@ -92,18 +92,18 @@ public class MyInformationActivity extends AppCompatActivity implements View.OnC
     
     private void logout() {
         // TODO: 로그아웃!!
-        String passwd = pref.getString("passwd", "");
-        if (passwd.equals("google")) {
+        String type = pref.getString("type", "");
+        
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.apply();
+        
+        // 구글 로그아웃
+        if (type.equals("G")) {
             FirebaseAuth.getInstance().signOut();
-            SharedPreferences.Editor editor = pref.edit();
-            editor.clear();
-            editor.apply();
-        } else if (passwd.equals("kakao")) {
-            Toast.makeText(mContext, "카카오", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(mContext, "이메일", Toast.LENGTH_SHORT).show();
         }
 
+        
         ActivityCompat.finishAffinity(this);
         Intent intent = new Intent(this, IntroPageActivity.class);
         startActivity(intent);

@@ -100,6 +100,7 @@ public class EmailLoginActivity extends AppCompatActivity implements View.OnClic
                         mPref = getSharedPreferences("data", MODE_PRIVATE);
                         SharedPreferences.Editor editor = mPref.edit();
                         editor.putString("token", response.token);
+                        editor.putString("type", "N");
                         editor.apply();
                     }
 
