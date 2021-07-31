@@ -133,8 +133,13 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     }
     
     public void updateUI() {
-        adapter = new MainScheduleAdapter(getContext(), mList);
-        recyclerView.setAdapter(adapter);
+        try {
+            adapter = new MainScheduleAdapter(getContext(), mList);
+            recyclerView.setAdapter(adapter);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     public static void addMainSchedule(MainScheduleInfo mainScheduleInfo) {

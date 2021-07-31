@@ -71,11 +71,10 @@ public class DeleteRecommendSchedule {
     }
     
     public void notifyDeleted() {
-        // Todo: make delete function on MyReviewStoryActivity and MyCommentActivity
         if (mContext instanceof MyReviewStoryActivity) {
-            ((MyReviewStoryActivity)mContext).mMyReviewAndCommentAdapter.notifyDataSetChanged();
+            ((MyReviewStoryActivity)mContext).deleteRecommendSchedule(position);
         } else if (mContext instanceof MyCommentActivity) {
-            ((MyCommentActivity)mContext).mMyReviewAndCommentAdapter.notifyDataSetChanged();
+            ((MyCommentActivity)mContext).deleteRecommendSchedule(position);
         } else if (mContext instanceof RecommendListActivity) {
             ((RecommendListActivity)mContext).deleteRecommendSchedule(position);
         }

@@ -74,10 +74,10 @@ public class CommentHandler {
                         commentResponse.recommendScheduleResponseDto = mRecommendPost;
                         // Todo: 시간 ? 어쩌지
                         commentResponse.dateTime = LocalDateTime.now().toString();
+                        // Todo: User 정보.
                         commentResponse.userResponseDto = ((RecommendListActivity) mContext).getUser();
                         
-                        ((RecommendListActivity) mContext).mDrawerViewControl
-                                .mDrawerHandler.addComment(commentResponse);
+                        addCommentOnActivity(commentResponse);
                     }
 
                     @Override
@@ -92,6 +92,21 @@ public class CommentHandler {
                     }
                 })
         );
+    }
+    
+    private void addCommentOnActivity(CommentResponse commentResponse) {
+        if (mContext instanceof RecommendListActivity) {
+            ((RecommendListActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.addComment(commentResponse);
+        }
+        else if (mContext instanceof MyReviewStoryActivity) {
+            ((MyReviewStoryActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.addComment(commentResponse);
+        }
+        else if (mContext instanceof MyCommentActivity) {
+            ((MyCommentActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.addComment(commentResponse);
+        }
     }
 
     /* Select All Comment List */

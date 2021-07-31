@@ -69,19 +69,34 @@ public class CommentListAdapter extends RecyclerView.Adapter<CommentListAdapter.
                     builder.setPositiveButton("예",
                             (dialog, which) -> {
                                 int position = getAdapterPosition();
-
-                                ((RecommendListActivity)mContext)
-                                        .mDrawerViewControl.mDrawerHandler.mCommentHandler
-                                        .deleteComment(mCommentList.get(position));
-    
-                                mCommentList.remove(position);
-                                notifyItemRemoved(position);
-                                itemView.invalidate();
+                                
+                                deleteAndNotifyComment(position);
                             });
                     builder.setNegativeButton("아니오",
                             (dialog, which) -> dialog.cancel());
                     builder.show();
             }
+        }
+        
+        public void deleteAndNotifyComment(int position) {
+            if (mContext instanceof RecommendListActivity) {
+                ((RecommendListActivity) mContext)
+                        .mDrawerViewControl.mDrawerHandler.mCommentHandler
+                        .deleteComment(mCommentList.get(position));
+            }
+            else if (mContext instanceof MyReviewStoryActivity) {
+                ((MyReviewStoryActivity) mContext)
+                        .mDrawerViewControl.mDrawerHandler.mCommentHandler
+                        .deleteComment(mCommentList.get(position));
+            }
+            else if (mContext instanceof MyCommentActivity) {
+                ((MyCommentActivity) mContext)
+                        .mDrawerViewControl.mDrawerHandler.mCommentHandler
+                        .deleteComment(mCommentList.get(position));
+            }
+            mCommentList.remove(position);
+            notifyItemRemoved(position);
+            itemView.invalidate();
         }
     }
     

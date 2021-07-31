@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.kop.daegudot.MorePage.MyReview.MyReviewAndCommentAdapter;
@@ -41,6 +42,7 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
     public MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
     public DrawerViewControl mDrawerViewControl;
     ArrayList<CommentResponse> mCommentList;
+    ProgressBar mProgressBar;
     
     /* Rx java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
@@ -60,8 +62,10 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
         
         TextView title = findViewById(R.id.title);
         title.setText("내가 쓴 댓글");
+        
         ImageButton backbtn = findViewById(R.id.backBtn);
         backbtn.setOnClickListener(this);
+        mProgressBar = findViewById(R.id.progress_bar);
 
         mRecyclerView = findViewById(R.id.my_comment_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
@@ -105,6 +109,8 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
                     @Override
                     public void onComplete() {
                         Log.d("RX", "complete");
+                        
+                        mProgressBar.setVisibility(View.GONE);
                         updateUI();
                     }
                 })
@@ -117,6 +123,11 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
     
         mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mRecommendList);
         mDrawerViewControl.setDrawerLayoutView();
+    }
+    
+    public void deleteRecommendSchedule(int position) {
+        mMyReviewAndCommentAdapter.notifyItemRemoved(position);
+        mRecommendList.remove(position);
     }
     
     public FragmentManager getFM() {

@@ -125,6 +125,11 @@ public class MyReviewStoryActivity extends AppCompatActivity implements View.OnC
         mDrawerViewControl.setDrawerLayoutView();
     }
     
+    public void deleteRecommendSchedule(int position) {
+        mMyReviewAndCommentAdapter.notifyItemRemoved(position);
+        mRecommendList.remove(position);
+    }
+    
     public FragmentManager getFM() {
         return getSupportFragmentManager();
     }
