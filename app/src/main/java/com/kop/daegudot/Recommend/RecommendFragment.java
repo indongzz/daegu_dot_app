@@ -13,12 +13,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponse;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
 import com.kop.daegudot.Network.RestApiService;
@@ -45,6 +48,8 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
     
     ListView mListView;
     RecommendHashtagListAdapter adapter;
+    
+    public ProgressBar progressBar;     // 로딩 중
     
     /* Rx java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
@@ -73,6 +78,11 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
         
         TextView title = mView.findViewById(R.id.title);
         title.setText("추천");
+        
+        ImageButton backBtn = mView.findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(this);
+    
+        progressBar = mView.findViewById(R.id.progress_bar);
     
         // hashtag buttons setting
         mChipGroup = mView.findViewById(R.id.btns_group);
@@ -137,6 +147,9 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
             Intent intent = new Intent(getContext(), AddRecommendActivity.class);
             startActivity(intent);
         }
+        if (v.getId() == R.id.backBtn) {
+            ((MainActivity) getActivity()).changeFragment(2, 1);
+        }
     }
     
     public void selectHashtagsRx() {
@@ -164,6 +177,7 @@ public class RecommendFragment extends Fragment implements View.OnClickListener 
     
                         setHashtagBtns();
                         setRecommendImageList();
+                        progressBar.setVisibility(View.GONE);
                     }
                 })
         );

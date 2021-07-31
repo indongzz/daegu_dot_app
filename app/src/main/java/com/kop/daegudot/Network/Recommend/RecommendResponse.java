@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponse;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponse;
+import com.kop.daegudot.Network.User.UserResponse;
 
 import java.util.ArrayList;
 
@@ -16,6 +17,7 @@ public class RecommendResponse implements Parcelable {
     public String localDateTime;
     public double star;
     public MainScheduleResponse mainScheduleResponseDto;
+    public UserResponse userResponseDto;
     
     public RecommendResponse() {
     
@@ -29,6 +31,7 @@ public class RecommendResponse implements Parcelable {
         localDateTime = in.readString();
         star = in.readDouble();
         mainScheduleResponseDto = in.readParcelable(MainScheduleResponse.class.getClassLoader());
+        userResponseDto = in.readParcelable(UserResponse.class.getClassLoader());
     }
     
     public float getStar() {
@@ -61,5 +64,6 @@ public class RecommendResponse implements Parcelable {
         dest.writeString(localDateTime);
         dest.writeDouble(star);
         dest.writeParcelable(mainScheduleResponseDto, 0);
+        dest.writeParcelable(userResponseDto, 0);
     }
 }

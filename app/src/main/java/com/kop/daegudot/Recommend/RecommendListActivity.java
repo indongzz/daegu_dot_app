@@ -1,5 +1,6 @@
 package com.kop.daegudot.Recommend;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
@@ -7,6 +8,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +25,7 @@ import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.Recommend.RecommendResponseList;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -38,22 +42,24 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class RecommendListActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "RecommendListActivity";
+    public static final int REQUEST_CODE = 100;
     
     Context mContext;
     ImageButton backBtn;
+    ImageButton refreshBtn;
     RecyclerView mRecyclerView;
     static PostAdapter mAdapter;
     
     View mView;
     HashtagResponse mHashtag;
-    
-    DrawerViewControl mDrawerViewControl;
+    ProgressBar progressBar;
+    public DrawerViewControl mDrawerViewControl;
     
     /* RX java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private String mToken;
-    static ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
-    
+    ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
+    private UserResponse mUser;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +72,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     
         SharedPreferences pref = getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
+        selectUserByToken();
         
         Intent intent = getIntent();
         
@@ -77,13 +84,21 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         
         backBtn = findViewById(R.id.backBtn);
         backBtn.setOnClickListener(this);
+        refreshBtn = findViewById(R.id.refreshBtn);
+        refreshBtn.setOnClickListener(this);
+        
+        progressBar = findViewById(R.id.progress_bar);
         
         mRecyclerView = findViewById(R.id.recommend_list_view);
         
         selectAllRecommendListRx(mHashtag);
         
         mAdapter = new PostAdapter(mContext, mRecommendList);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        LinearLayoutManager llm = new LinearLayoutManager(getApplicationContext());
+        llm.setReverseLayout(true); //역순 출력
+        llm.setStackFromEnd(true);
+        mRecyclerView.setLayoutManager(llm);
+        
         
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
@@ -115,6 +130,8 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                     @Override
                     public void onError(Throwable e) {
                         Log.d("RX " + TAG, e.getMessage());
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
                     }
                 
                     @Override
@@ -122,6 +139,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                         Log.d("RX " + TAG, "complete");
                         
                         updateUI();
+                        progressBar.setVisibility(View.GONE);
                     }
                 })
         );
@@ -163,6 +181,10 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         if (v.getId() == R.id.backBtn) {
             finish();
         }
+        if (v.getId() == R.id.refreshBtn) {
+            progressBar.setVisibility(View.VISIBLE);
+            selectAllRecommendListRx(mHashtag);
+        }
     }
     
     // back button 임시 처리
@@ -177,5 +199,52 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         else {
             super.onBackPressed();
         }
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode != Activity.RESULT_OK) {
+                return;
+            }
+            RecommendResponse recommendResponse = data.getParcelableExtra("updatedRecommendPost");
+            int position = data.getIntExtra("position", 0);
+            mRecommendList.set(position, recommendResponse);
+            mAdapter.notifyDataSetChanged();
+            mDrawerViewControl.updateDrawerUI(recommendResponse);
+        }
+    }
+    
+    public UserResponse getUser() {
+        return mUser;
+    }
+    
+    //토큰으로 회원 정보 가져오기
+    private void selectUserByToken() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(mToken);
+        Observable<UserResponse> observable = service.getUserFromToken();
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        mUser = response;
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("TOKEN", e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("TOKEN", "complete");
+                    }
+                })
+        );
     }
 }

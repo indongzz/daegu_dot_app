@@ -9,9 +9,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -21,6 +25,7 @@ import com.applikeysolutions.cosmocalendar.selection.RangeSelectionManager;
 //import com.applikeysolutions.cosmocalendar.utils.SelectionType;
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
 import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.MyScheduleFragment;
 import com.kop.daegudot.Network.RestApiService;
@@ -33,7 +38,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -56,6 +63,7 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     Button mCalendarBtn;
     String mStartDate, mEndDate;
     String mBtnDay1, mBtnDay2;
+    ProgressBar mProgressBar;
     LocalDate localStart, localEnd;
     int flag = 1;
     FragmentManager mFragmentManager;
@@ -81,6 +89,8 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_add_schedule, container, false);
     
+        mProgressBar = view.findViewById(R.id.progress_bar);
+    
         pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
         
@@ -92,13 +102,30 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
         // change top title
         TextView title = view.findViewById(R.id.title);
         title.setText("일정 추가");
-
+        ImageButton backBtn = view.findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(this);
+        
         mCalendar = view.findViewById(R.id.calendar);
         mCalendarBtn = view.findViewById(R.id.calendarBtn);
 
         mCalendarBtn.setOnClickListener(this);
 
         mCalendar.setSelectionType(SelectionType.RANGE);
+    
+        Set<Long> disabledDaysSet = new HashSet<>();
+    
+        long date = System.currentTimeMillis();
+        long mul = 0;
+        
+        // 100일 전까지 선택 불가
+        for (int i = 1; i <= 100; i++) {
+            mul += 86400000;
+            disabledDaysSet.add(date - mul);
+        }
+        
+        mCalendar.setDisabledDays(disabledDaysSet);
+        
+        mProgressBar.setVisibility(View.GONE);
 
         mCalendar.setSelectionManager(new RangeSelectionManager(new OnDaySelectedListener() {
             @Override
@@ -141,18 +168,20 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
     
     @Override
     public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.calendarBtn:
-                if (flag == 1) {
-                    MainScheduleRegister mainScheduleRegister = new MainScheduleRegister();
-                    mainScheduleRegister.startDate = localStart.toString();
-                    mainScheduleRegister.endDate = localEnd.toString();
-                    mainScheduleRegister.userId = user.id;
-                    registerMainSchedule(mainScheduleRegister);
-                } else {
-                    Toast.makeText(getContext(), "날짜를 선택해주세요", Toast.LENGTH_SHORT).show();
-                }
-            //    ((MainActivity)getActivity()).changeFragment(1, 0);
+        if (v.getId() == R.id.calendarBtn) {
+            if (flag == 1) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                MainScheduleRegister mainScheduleRegister = new MainScheduleRegister();
+                mainScheduleRegister.startDate = localStart.toString();
+                mainScheduleRegister.endDate = localEnd.toString();
+                mainScheduleRegister.userId = user.id;
+                registerMainSchedule(mainScheduleRegister);
+            } else {
+                Toast.makeText(getContext(), "날짜를 선택해주세요", Toast.LENGTH_SHORT).show();
+            }
+        }
+        if (v.getId() == R.id.backBtn) {
+                ((MainActivity)getActivity()).changeFragment(1, 0);
         }
     }
     
@@ -193,11 +222,14 @@ public class AddScheduleFragment extends Fragment implements View.OnClickListene
                        mainScheduleInfo.setmEndDate(mEndDate);
                        mainScheduleInfo.setMainId(mMainId);
                        mainScheduleInfo.setmDDate();
+    
+                       mProgressBar.setVisibility(View.GONE);
                        
                        Intent intent = new Intent(getContext(), MapMainActivity.class);
                        intent.putExtra("mainSchedule", mainScheduleInfo);
                        startActivity(intent);
                        flag = 0;
+                       
                    }
                })
        );
