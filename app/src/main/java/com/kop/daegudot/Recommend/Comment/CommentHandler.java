@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
+import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
 import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
@@ -125,11 +127,25 @@ public class CommentHandler {
                     @Override
                     public void onComplete() {
                         Log.d("RX " + TAG, "complete");
-                        ((RecommendListActivity) mContext).mDrawerViewControl
-                                .mDrawerHandler.updateCommentUI();
+                        callUpdateCommentUI();
                     }
                 })
         );
+    }
+    
+    private void callUpdateCommentUI() {
+        if (mContext instanceof RecommendListActivity) {
+            ((RecommendListActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.updateCommentUI();
+        }
+        else if (mContext instanceof MyReviewStoryActivity) {
+            ((MyReviewStoryActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.updateCommentUI();
+        }
+        else if (mContext instanceof MyCommentActivity) {
+            ((MyCommentActivity) mContext).mDrawerViewControl
+                    .mDrawerHandler.updateCommentUI();
+        }
     }
 
     /* Delete Comment */

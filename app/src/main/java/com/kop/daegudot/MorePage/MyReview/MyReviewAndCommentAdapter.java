@@ -67,19 +67,18 @@ public class MyReviewAndCommentAdapter extends RecyclerView.Adapter<MyReviewAndC
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.layout_post_list, parent,false);
         
-        Log.i(TAG, "ViewHolder");
         return new ViewHolder(view);
     }
     
     @Override
     public void onBindViewHolder(@NonNull MyReviewAndCommentAdapter.ViewHolder holder, int position) {
-        Log.i(TAG, "position: " + position);
+        RecommendResponse recommendResponse = mRecommendList.get(position);
         
-        holder.title.setText(mRecommendList.get(position).title);
-        holder.ratingBar.setRating((float) mRecommendList.get(position).star);
-//        holder.writer.setText(mRecommendList.get(position).getWriter());
+        holder.title.setText(recommendResponse.title);
+        holder.ratingBar.setRating(recommendResponse.getStar());
+        holder.writer.setText(recommendResponse.userResponseDto.nickname);
 //        holder.comment.setText(mRecommendList.get(position).getCommentString());
-//        holder.itemView.setId(mRecommendList.get(position).getId());
+//        holder.itemView.setId((int) mRecommendList.get(position).id);
     }
     
     

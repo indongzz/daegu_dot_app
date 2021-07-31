@@ -56,7 +56,6 @@ public class MyReviewStoryActivity extends AppCompatActivity implements View.OnC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_review_story);
         this.mContext = this;
-//        mView = LayoutInflater.from(this).inflate(R.layout.activity_my_review_story, null);
         mView = findViewById(R.id.my_review_layout);
         
         SharedPreferences pref = getSharedPreferences("data", Context.MODE_PRIVATE);
@@ -69,7 +68,6 @@ public class MyReviewStoryActivity extends AppCompatActivity implements View.OnC
         backbtn.setOnClickListener(this);
         mProgressBar = findViewById(R.id.progress_bar);
 
-//        prepareMenu();
         selectMyRecommendScheduleListRx();
         
         mRecyclerView = findViewById(R.id.my_review_list);
@@ -125,31 +123,6 @@ public class MyReviewStoryActivity extends AppCompatActivity implements View.OnC
         
         mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mRecommendList);
         mDrawerViewControl.setDrawerLayoutView();
-    }
-    
-    // TODO: 지우기
-    private void prepareMenu(){
-        mRecommendList = new ArrayList<>();
-        
-        // TODO: DB에서 작성자의 글 가져오기
-    
-        String[] title = {"제목1", "제목2", "제목3", "제목4"};
-        float[] rating = { 1, (float) 1.5, 2, (float) 4.5};
-        String[] writer = {"작성자1", "작성자1", "작성자1", "작성자1"};
-        int[] commentN = {2, 5, 3, 1};
-        String[] content = {"내용1", "내용2", "내용3", "내용4"};
-    
-        for (int i = 0; i < 4; i++) {
-            RecommendResponse data = new RecommendResponse();
-            data.title = title[i];
-            data.star = rating[i];
-            data.content = content[i];
-            data.id = i;
-//            data.setWriter(writer[i]);
-//            data.setCommentNum(commentN[i]);
-    
-            mRecommendList.add(data);
-        }
     }
     
     public FragmentManager getFM() {

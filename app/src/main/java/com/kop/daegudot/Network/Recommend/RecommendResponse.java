@@ -3,6 +3,9 @@ package com.kop.daegudot.Network.Recommend;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
+import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponse;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponse;
 import com.kop.daegudot.Network.User.UserResponse;
@@ -65,5 +68,17 @@ public class RecommendResponse implements Parcelable {
         dest.writeDouble(star);
         dest.writeParcelable(mainScheduleResponseDto, 0);
         dest.writeParcelable(userResponseDto, 0);
+    }
+    
+    
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        boolean bool = false;
+        
+        if (obj instanceof RecommendResponse) {
+            bool = this.id == ((RecommendResponse) obj).id;
+        }
+        
+        return bool;
     }
 }

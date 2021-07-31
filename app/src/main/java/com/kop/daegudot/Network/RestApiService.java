@@ -3,6 +3,7 @@ package com.kop.daegudot.Network;
 import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
+import com.kop.daegudot.Network.More.MyInfo.MyCommentList;
 import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
 import com.kop.daegudot.Network.More.MyInfo.MyRecommendList;
@@ -40,7 +41,7 @@ public interface RestApiService {
 
     /* Login */
     @POST("/user/register")
-    Observable<Long> registerUser(@Body UserRegister userRegisterRequest);
+    Observable<String> registerUser(@Body UserRegister userRegisterRequest);
 
     @GET("/user/register/email/{email}")
     Observable<UserResponse> checkEmailDup(@Path("email") String email);
@@ -164,4 +165,7 @@ public interface RestApiService {
     /* More - My Recommend Schedule & My Comment */
     @GET("/more/recommend")
     Observable<MyRecommendList> selectMyRecommendSchedules();
+    
+    @GET("/more/comment")
+    Observable<MyCommentList> selectMyComments();
 }

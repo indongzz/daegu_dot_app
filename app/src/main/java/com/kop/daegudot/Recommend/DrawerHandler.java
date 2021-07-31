@@ -23,6 +23,7 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
+import com.kop.daegudot.Network.More.MyInfo.MyCommentList;
 import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
@@ -122,6 +123,7 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
                 mCommentRecyclerview.getContext(), DividerItemDecoration.VERTICAL);
         mCommentRecyclerview.addItemDecoration(dividerItemDecoration);
     
+        /* 일정 보기 */
         watchScheduleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,14 +147,22 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
             editComment.setText("");
         });
         
-        // TODO: 작성자가 나인 경우에만 버튼이 보이게 함
-        //       add getUser on MoreFragment
-        
-        mUser = ((RecommendListActivity) mContext).getUser();
-        if (mUser.token.equals(mRecommendPost.userResponseDto.token)) {
-            menuBtn.setVisibility(View.VISIBLE);
-            menuBtn.setOnClickListener(this::showMenu);
+        /* 작성자일 때 - 수정, 삭제 메뉴 버튼 */
+        if (mContext instanceof RecommendListActivity) {
+            mUser = ((RecommendListActivity) mContext).getUser();
+            if (mUser.token.equals(mRecommendPost.userResponseDto.token)) {
+                showMenuButton();
+            }
+        } else if (mContext instanceof MyReviewStoryActivity) {
+            showMenuButton();
+        } else if (mContext instanceof MyCommentActivity) {
+            showMenuButton();
         }
+    }
+    
+    public void showMenuButton() {
+        menuBtn.setVisibility(View.VISIBLE);
+        menuBtn.setOnClickListener(this::showMenu);
     }
     
     public void updateDrawerContent(RecommendResponse recommendResponse) {
@@ -166,6 +176,9 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         else if (mContext instanceof MyReviewStoryActivity) {
             return ((MyReviewStoryActivity) mContext).getLayoutInflater();
         }
+        else if (mContext instanceof MyCommentActivity) {
+            return ((MyCommentActivity) mContext).getLayoutInflater();
+        }
         return null;
     }
     
@@ -176,6 +189,7 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         mCommentRecyclerview.setAdapter(mCommentAdapter);
     }
     
+    // Comment Register
     public void handleComment() {
         // 댓글 등록 버튼 클릭 이벤트
         applyCommentBtn.setOnClickListener(v -> {
@@ -191,6 +205,7 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
         });
     }
     
+    // Add comment on List and notify
     public void addComment(CommentResponse newComment) {
         mCommentList.add(newComment);
         mCommentAdapter.notifyDataSetChanged();
