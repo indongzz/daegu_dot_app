@@ -22,6 +22,7 @@ import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 import com.kop.daegudot.Recommend.DrawerViewControl;
 
@@ -47,6 +48,7 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
     /* Rx java */
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private String mToken;
+    private UserResponse mUser;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +59,7 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
         
         SharedPreferences pref = getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
+        selectUserByToken();
         
         selectAllMyCommentsRx();
         
@@ -132,6 +135,38 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
     
     public FragmentManager getFM() {
         return getSupportFragmentManager();
+    }
+    
+    
+    public UserResponse getUser() {
+        return mUser;
+    }
+    
+    //토큰으로 회원 정보 가져오기
+    private void selectUserByToken() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(mToken);
+        Observable<UserResponse> observable = service.getUserFromToken();
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        mUser = response;
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("TOKEN", e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("TOKEN", "complete");
+                    }
+                })
+        );
     }
     
     @Override

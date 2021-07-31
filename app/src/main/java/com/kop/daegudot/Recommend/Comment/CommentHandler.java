@@ -14,6 +14,7 @@ import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.Recommend.RecommendListActivity;
 
 import java.time.LocalDateTime;
@@ -74,8 +75,7 @@ public class CommentHandler {
                         commentResponse.recommendScheduleResponseDto = mRecommendPost;
                         // Todo: 시간 ? 어쩌지
                         commentResponse.dateTime = LocalDateTime.now().toString();
-                        // Todo: User 정보.
-                        commentResponse.userResponseDto = ((RecommendListActivity) mContext).getUser();
+                        commentResponse.userResponseDto = getUserByActivity();
                         
                         addCommentOnActivity(commentResponse);
                     }
@@ -92,6 +92,19 @@ public class CommentHandler {
                     }
                 })
         );
+    }
+    
+    private UserResponse getUserByActivity() {
+        if (mContext instanceof RecommendListActivity) {
+            return ((RecommendListActivity) mContext).getUser();
+        }
+        else if (mContext instanceof MyReviewStoryActivity) {
+            return ((MyReviewStoryActivity) mContext).getUser();
+        }
+        else if (mContext instanceof MyCommentActivity) {
+            return ((MyCommentActivity) mContext).getUser();
+        }
+        return null;
     }
     
     private void addCommentOnActivity(CommentResponse commentResponse) {
