@@ -48,7 +48,6 @@ public class MoreFragment extends Fragment implements View.OnClickListener{
         mContext = getContext();
         view = inflater.inflate(R.layout.fragment_more, container, false);
 
-        // TODO: 뒤로가기 버튼 구현 필요
         TextView title = view.findViewById(R.id.title);
         title.setText("더보기");
         

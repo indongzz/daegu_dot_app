@@ -138,6 +138,10 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
                     postScheduleBottomSheetDialog
                             .show(((MyReviewStoryActivity) mContext).getFM(),
                                     PostScheduleBottomSheetDialog.TAG);
+                } else if (mContext instanceof MyCommentActivity) {
+                    postScheduleBottomSheetDialog
+                            .show(((MyCommentActivity) mContext).getFM(),
+                                    PostScheduleBottomSheetDialog.TAG);
                 }
             }
         });
@@ -235,7 +239,13 @@ public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
             Intent intent = new Intent(mContext, UpdateRecommendActivity.class);
             intent.putExtra("recommendPost", mRecommendPost);
             intent.putExtra("listIndex", position);
-            mContext.startActivity(intent);
+            if (mContext instanceof RecommendListActivity) {
+                ((RecommendListActivity) mContext).startActivityForResult(intent, 200);
+            } else if (mContext instanceof MyReviewStoryActivity) {
+                ((MyReviewStoryActivity) mContext).startActivityForResult(intent, 200);
+            } else if (mContext instanceof MyCommentActivity) {
+                ((MyCommentActivity) mContext).startActivityForResult(intent, 200);
+            }
             return true;
         }
         return false;

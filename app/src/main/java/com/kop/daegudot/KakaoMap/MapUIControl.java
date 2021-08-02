@@ -54,6 +54,8 @@ public class MapUIControl {
             });
             layout.addView(mCategory[i]);
         }
+        
+        changeButtonUI(0);
     }
     
     public void changeButtonUI(int next) {

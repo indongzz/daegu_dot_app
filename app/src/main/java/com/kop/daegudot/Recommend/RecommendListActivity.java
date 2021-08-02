@@ -29,6 +29,8 @@ import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -122,6 +124,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
                         if (response.status == 1L) {
                             mRecommendList.clear();
                             mRecommendList.addAll(response.recommendScheduleResponseDtoArrayList);
+                            Collections.sort(mRecommendList);
                         } else if (response.status == 0L) {
                             Toast.makeText(mContext, "cannot get recommendList", Toast.LENGTH_SHORT).show();
                         }
@@ -213,6 +216,7 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
             int position = data.getIntExtra("position", 0);
             mRecommendList.set(position, recommendResponse);
             mAdapter.notifyDataSetChanged();
+            mRecyclerView.setAdapter(mAdapter);
             mDrawerViewControl.updateDrawerUI(recommendResponse);
         }
     }
