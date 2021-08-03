@@ -1,5 +1,6 @@
 package com.kop.daegudot.MorePage.MyReview;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
@@ -7,7 +8,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +30,7 @@ import com.kop.daegudot.R;
 import com.kop.daegudot.Recommend.DrawerViewControl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -36,9 +40,10 @@ import io.reactivex.schedulers.Schedulers;
 
 public class MyCommentActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MyCommentActivity";
+    private static final int REQUEST_CODE = 200;
     private Context mContext;
     View mView;
-    private ArrayList<RecommendResponse> mRecommendList;
+    private ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
     private RecyclerView mRecyclerView;
     public MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
     public DrawerViewControl mDrawerViewControl;
@@ -101,6 +106,7 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
                                 if (!mRecommendList.contains(mCommentList.get(i).recommendScheduleResponseDto))
                                     mRecommendList.add(mCommentList.get(i).recommendScheduleResponseDto);
                             }
+                            Collections.sort(mRecommendList);
                         }
                     }
                     
@@ -137,6 +143,22 @@ public class MyCommentActivity extends AppCompatActivity implements View.OnClick
         return getSupportFragmentManager();
     }
     
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode != Activity.RESULT_OK) {
+                return;
+            }
+            RecommendResponse recommendResponse = data.getParcelableExtra("updatedRecommendPost");
+            int position = data.getIntExtra("position", 0);
+            mRecommendList.set(position, recommendResponse);
+            mMyReviewAndCommentAdapter.notifyDataSetChanged();
+//            mRecyclerView.setAdapter(mMyReviewAndCommentAdapter);
+            mDrawerViewControl.updateDrawerUI(recommendResponse);
+        }
+    }
     
     public UserResponse getUser() {
         return mUser;

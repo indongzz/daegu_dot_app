@@ -21,6 +21,7 @@ import com.google.android.material.chip.ChipGroup;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.MyScheduleFragment;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponse;
+import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendRegister;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.RestApiService;
@@ -83,8 +84,12 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
         mConfirmBtn.setOnClickListener(this);
         
         mHashtags = RecommendFragment.getHashtags();
-        setChipGroup();
-        getPreviousContent();
+        if (mHashtags == null) {
+            selectHashtagsRx();
+        } else {
+            setChipGroup();
+            getPreviousContent();
+        }
     }
     
     public void getPreviousContent() {
@@ -253,5 +258,34 @@ public class UpdateRecommendActivity extends AppCompatActivity implements View.O
         recommendResponse.mainScheduleResponseDto = mainScheduleResponse;
     
         return recommendResponse;
+    }
+    
+    private void selectHashtagsRx() {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+        Observable<HashtagResponseList> observable = service.selectHashtagList();
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<HashtagResponseList>() {
+                    @Override
+                    public void onNext(HashtagResponseList response) {
+                        Log.d("RX " + TAG, "Next");
+                        
+                        mHashtags = response.hashtagResponseDtoArrayList;
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX " + TAG, e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX " + TAG, "complete");
+                        setChipGroup();
+                        getPreviousContent();
+                    }
+                })
+        );
     }
 }

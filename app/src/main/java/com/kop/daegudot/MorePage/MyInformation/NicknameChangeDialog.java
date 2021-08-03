@@ -57,7 +57,6 @@ public class NicknameChangeDialog {
         changeBtn = dialog.findViewById(R.id.change_btn_nick);
         cancelBtn = dialog.findViewById(R.id.cancel_btn_nick);
 
-        //TODO: 현재 내 정보로부터 별명 가져와서 설정하기
         currentNickname.setText(mNickname);
 
         changeBtn.setOnClickListener(new View.OnClickListener() {
@@ -65,7 +64,6 @@ public class NicknameChangeDialog {
             public void onClick(View v) {
                 String newNick = newNickname.getText().toString();
                 if(newNick.getBytes().length > 0){
-                    //TODO: 닉네임 중복검사 하기
                     selectNickname(newNick);
                 }
                 else{

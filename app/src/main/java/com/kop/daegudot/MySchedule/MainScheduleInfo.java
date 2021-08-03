@@ -82,6 +82,11 @@ public class MainScheduleInfo implements Comparable<MainScheduleInfo> , Parcelab
     public String getButtonString() {
         // 년도 제외하고 월 일만 추출 + D-day
         // 리스트뷰에 들어가는 버튼 이름에 사용함.
+        if (mDDate < 0) {
+            int date = mDDate * (-1);
+            return mStartDate.substring(5, 7) + "." + mStartDate.substring(8, 10) + " ~ " +
+                    mEndDate.substring(5, 7) + "." + mEndDate.substring(8, 10) + " / " + "D+" + date;
+        }
         return mStartDate.substring(5, 7) + "." + mStartDate.substring(8, 10)+ " ~ " +
                 mEndDate.substring(5, 7) + "." + mEndDate.substring(8, 10) + " / " + "D-" + mDDate;
     }

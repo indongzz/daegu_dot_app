@@ -72,7 +72,6 @@ public class PostScheduleAdapter extends RecyclerView.Adapter<PostScheduleAdapte
             chips[i].setId(i);
             holder.chipGroup.addView(chips[i]);
             chips[i].setOnClickListener(v -> {
-                // Todo: 한번씩 안될 때 있음 고치기
                 Intent intent = new Intent(mContext, MapMainActivity.class);
                 intent.putExtra("markerPlace",
                         mDateSubSchedule.get(holder.getAdapterPosition())

@@ -61,7 +61,6 @@ public class PasswordChangeDialog {
                 String checkPwd = newPasswordCheck.getText().toString();
                 if(newPwd.getBytes().length > 0 && checkPwd.getBytes().length>0) {
                     if (newPwd.equals(checkPwd)) {
-                        //TODO: 변경된 비밀번호 서버로 넘겨주기
                         PasswordUpdate passwordUpdate = new PasswordUpdate();
                         passwordUpdate.password = newPwd;
                         updatePassword(passwordUpdate);
