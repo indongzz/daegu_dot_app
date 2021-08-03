@@ -18,6 +18,7 @@ import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.MorePage.MyInformation.MyInformationActivity;
 import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
+import com.kop.daegudot.MorePage.MyWishlist.MyWishlistActivity;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;

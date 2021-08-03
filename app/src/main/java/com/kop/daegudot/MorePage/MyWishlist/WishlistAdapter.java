@@ -1,4 +1,4 @@
-package com.kop.daegudot.MorePage;
+package com.kop.daegudot.MorePage.MyWishlist;
 
 import android.content.Context;
 import android.util.Log;
@@ -13,7 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.kop.daegudot.KakaoMap.MarkerInfo;
+import com.kop.daegudot.MorePage.MyWishlist.Database.Wishlist;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -21,9 +21,9 @@ import java.util.ArrayList;
 public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHolder> {
     private static final String TAG = "WishListAdapter";
     private static Context mContext;
-    private ArrayList<MarkerInfo> mWishList;
+    private ArrayList<Wishlist> mWishList;
     
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView title;
         private RatingBar rating;
         private TextView address;
@@ -43,17 +43,25 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
             heart = itemView.findViewById(R.id.heart_btn);
             image = itemView.findViewById(R.id.image);
             
+            heart.setOnClickListener(this);
             itemView.setOnClickListener(this);
         }
         
         @Override
         public void onClick(View v) {
-            Log.i(TAG, "id: " + itemView.getId());
-            Log.i(TAG, "context:" + mContext);
+            if (v.getId() == R.id.wishlist_item) {
+                // Todo: 지도로 이동
+            }
+            if (v.getId() == R.id.heart_btn) {
+                int pos = getAdapterPosition();
+                Wishlist wishlist = mWishList.get(pos);
+                ((MyWishlistActivity) mContext).wishlistHandler.deleteWishlists(wishlist);
+                removeItem(pos);
+            }
         }
     }
     
-    WishlistAdapter(Context context, ArrayList<MarkerInfo> wishlist) {
+    WishlistAdapter(Context context, ArrayList<Wishlist> wishlist) {
         mContext = context;
         mWishList = wishlist;
     }
@@ -71,25 +79,15 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
     
     @Override
     public void onBindViewHolder(@NonNull WishlistAdapter.ViewHolder holder, int position) {
-        position = holder.getAdapterPosition();
+        Wishlist wishlist = mWishList.get(position);
         
-        Log.i(TAG, "position: " + position);
-        Log.i(TAG, "myname: " + mWishList.get(0).getName());
-        holder.title.setText(mWishList.get(position).getName());
-        holder.rating.setRating(mWishList.get(position).getRate());
-        holder.address.setText(mWishList.get(position).getAddress());
-        holder.summary.setText(mWishList.get(position).getSummary());
-        holder.image.setImageResource(mWishList.get(position).getImage());
+        Log.d(TAG, "position: " + position);
+        holder.title.setText(wishlist.attractName);
+        holder.rating.setRating(wishlist.star);
+        holder.address.setText(wishlist.address);
+        holder.summary.setText("nn");
+//        holder.image.setImageResource(wishlist);
         holder.heart.setBackgroundResource(R.drawable.full_heart);
-        holder.heart.setTag(holder.getAdapterPosition());
-        holder.heart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int pos = (int) v.getTag();
-                removeItem(pos);
-                Log.d(TAG, "pos : " + pos);
-            }
-        });
     }
     
     
@@ -101,6 +99,6 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
     public void removeItem(int position) {
         mWishList.remove(position);
         notifyItemRemoved(position);
-        notifyDataSetChanged();
+//        notifyDataSetChanged();
     }
 }

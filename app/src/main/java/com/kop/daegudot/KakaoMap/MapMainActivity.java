@@ -108,7 +108,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         // Set MarkerItems
         mMapMarkerItems = new MapMarkerItems(this, mMapView);
         mMapMarkerItems.setMarkerItems();
-        mMapMarkerItems.selectAllKakaoPlaceListRx(128.601705,35.871344);
+//        mMapMarkerItems.selectAllKakaoPlaceListRx(128.601705,35.871344);
         mPlaceList = updatePlaceList();
         
         getSchedule();
@@ -368,5 +368,13 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         }
         
         return bool;
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        
+        if (!mCompositeDisposable.isDisposed())
+            mCompositeDisposable.dispose();
     }
 }
