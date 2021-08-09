@@ -9,7 +9,6 @@ import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
 import com.kop.daegudot.Network.More.MyInfo.MyRecommendList;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendRegister;
-import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.Recommend.RecommendResponseList;
 import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponseList;
@@ -17,9 +16,11 @@ import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
 import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
 import com.kop.daegudot.Network.More.MyInfo.PasswordUpdate;
 import com.kop.daegudot.Network.Schedule.SubScheduleResponseList;
+import com.kop.daegudot.Network.User.UserOauth;
 import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.Network.User.UserLogin;
 import com.kop.daegudot.Network.User.UserResponse;
+import com.kop.daegudot.Network.User.UserResponseStatus;
 
 import java.util.List;
 
@@ -41,13 +42,13 @@ public interface RestApiService {
 
     /* Login */
     @POST("/user/register")
-    Observable<String> registerUser(@Body UserRegister userRegisterRequest);
+    Observable<String> registerUser(@Body UserRegister userRegister);
 
     @GET("/user/register/email/{email}")
-    Observable<UserResponse> checkEmailDup(@Path("email") String email);
+    Observable<UserResponseStatus> checkEmailDup(@Path("email") String email);
 
     @GET("/user/register/nickname/{nickname}")
-    Observable<UserResponse> checkNickDup(@Path("nickname") String nickname);
+    Observable<UserResponseStatus> checkNickDup(@Path("nickname") String nickname);
 
     @POST("/user/login")
     Observable<UserResponse> requestLogin(@Body UserLogin userLogin);
@@ -168,4 +169,7 @@ public interface RestApiService {
     
     @GET("/more/comment")
     Observable<MyCommentList> selectMyComments();
+
+    @POST("/user/register/google")
+    Observable<Long> oauthGoogle(@Body UserOauth userOauth);
 }

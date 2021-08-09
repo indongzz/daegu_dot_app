@@ -4,11 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -26,7 +26,9 @@ import com.kakao.auth.AuthType;
 import com.kakao.auth.Session;
 import com.kakao.usermgmt.LoginButton;
 import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
-import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserOauth;
 import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.R;
 
@@ -34,7 +36,11 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     // Google Login
@@ -47,12 +53,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private SessionCallback sessionCallback;
     Session mSession;
 
-    SharedPreferences mPref;
-    public static SharedPreferences.Editor editor;
+//    SharedPreferences mPref;
+//    public static SharedPreferences.Editor editor;
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     // Register 객체
     private static UserRegister userRegister;
+
+    private String mEmail;
+    private String mNickname;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +72,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         userRegister = new UserRegister();
 
-        mPref = getSharedPreferences("data", MODE_PRIVATE);
-        editor = mPref.edit();
+//        mPref = getSharedPreferences("data", MODE_PRIVATE);
+//        editor = mPref.edit();
 
         // TODO: 자동로그인 활성화
         //    checkAlreadyLogin();
@@ -96,16 +105,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-    public void checkAlreadyLogin() {
-        mPref = getSharedPreferences("data", MODE_PRIVATE);
-        Log.d("checkAlreadyLogin", "...Check login...");
-        if (mPref.getString("email", "") != "") {
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-            Log.d("checkAlreadyLogin", "Already Logged in");
-        }
-    }
+//    public void checkAlreadyLogin() {
+//        mPref = getSharedPreferences("data", MODE_PRIVATE);
+//        Log.d("checkAlreadyLogin", "...Check login...");
+//        if (mPref.getString("email", "") != "") {
+//            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//            startActivity(intent);
+//            finish();
+//            Log.d("checkAlreadyLogin", "Already Logged in");
+//        }
+//    }
 
     // SignIn Clicked
     private void googleSignIn() {
@@ -135,8 +144,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
-            firebaseAuthWithGoogle(account.getIdToken());
+            UserOauth userOauth = new UserOauth();
+            userOauth.oauthToken = account.getIdToken();
+            Log.d(TAG, "firebaseAuthWithGoogle:" + account.getIdToken());
+            oauthGoogle(userOauth);
         }
         catch (ApiException e) {
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
@@ -145,6 +156,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
+    //google token id로부터 사용자 정보 추출하는 함수
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential)
@@ -155,10 +167,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            editor.putString("email", user.getEmail());
-                            editor.putString("passwd", "google");
-                            editor.putString("name", user.getDisplayName());
-                            editor.commit();
+//                            editor.putString("email", user.getEmail());
+//                            editor.putString("passwd", "google");
+//                            editor.putString("name", user.getDisplayName());
+//                            editor.commit();
+                            mEmail = user.getEmail();
+                            mNickname = user.getDisplayName();
 
                             Log.i(TAG, "firebaseAuthWithGoogle email: " + user.getEmail());
                             Log.i(TAG, "firebaseAuthWithGoogle name: " + user.getDisplayName());
@@ -179,6 +193,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         } else {
             Log.d(TAG, "updateUI:success");
             Intent intent = new Intent(getApplicationContext(), SignUpAddInfoActivity.class);
+            intent.putExtra("email", mEmail);
+            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         }
@@ -243,6 +259,36 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    //구글 인증 처리
+    private void oauthGoogle(UserOauth userOauth) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<Long> observable = service.oauthGoogle(userOauth);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Long>() {
+                    @Override
+                    public void onNext(Long response) {
+                        Log.d("USER_GOOGLE", userOauth.oauthToken);
+                        if(response == 1L) Toast.makeText(getApplicationContext(), "구글 인증이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                        else Toast.makeText(getApplicationContext(), "구글 인증에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("USER_GOOGLE", e.getMessage());
+                        Toast.makeText(getApplicationContext(), "구글 인증에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("USER_GOOGLE", "COMPLETE");
+                        firebaseAuthWithGoogle(userOauth.oauthToken);
+                    }
+                })
+        );
+    }
 
     /* for registering Kakao developer
     private void getHashKey() {

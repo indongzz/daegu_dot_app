@@ -46,6 +46,7 @@ public class SessionCallback implements ISessionCallback {
                     public void onSuccess(MeV2Response result) {
                         Log.i("KAKAO_API", "사용자 아이디: " + result.getId());
 
+
                         UserAccount kakaoAccount = result.getKakaoAccount();
 
                         if (kakaoAccount != null) {
@@ -55,7 +56,7 @@ public class SessionCallback implements ISessionCallback {
                             // get email
                             if (email != null) {
                                 Log.i("KAKAO_API", "email: " + email);
-                                LoginActivity.editor.putString("email", email);
+                                //LoginActivity.editor.putString("email", email);
                                 //LoginActivity.setRegisterInfo(email, "kakao", 'k');
                             } else if (kakaoAccount.emailNeedsAgreement() == OptionalBoolean.TRUE) {
                                 // get email after get agreement
@@ -69,12 +70,12 @@ public class SessionCallback implements ISessionCallback {
                             Profile profile = kakaoAccount.getProfile();
                             if (profile != null) {
                                 Log.d("KAKAO_API", "name: " + profile.getNickname());
-                                LoginActivity.editor.putString("name", profile.getNickname());
+                                //LoginActivity.editor.putString("name", profile.getNickname());
                             } else {
                                 Log.e("KAKAO_API", "cannot get profile");
                             }
 
-                            LoginActivity.editor.apply();
+                            //LoginActivity.editor.apply();
                             
                             redirectLoginActivity();
                         }
