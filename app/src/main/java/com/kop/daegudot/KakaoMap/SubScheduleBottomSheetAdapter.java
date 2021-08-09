@@ -29,7 +29,7 @@ import io.reactivex.schedulers.Schedulers;
 public class SubScheduleBottomSheetAdapter
         extends RecyclerView.Adapter<SubScheduleBottomSheetAdapter.ViewHolder> {
         // implements ScheduleItemTouchHelperCallback.OnItemMoveListener {  // drag and swipe
-    private final static String TAG = "ScheduleRecyclerViewAdapter";
+    private final static String TAG = "SubScheduleBottomSheetAdapter";
     private Context mContext;
     private ArrayList<SubScheduleResponse> mSubScheduleList;
     
@@ -64,9 +64,10 @@ public class SubScheduleBottomSheetAdapter
             builder.setMessage("해당 항목을 삭제하시겠습니까?");
             builder.setPositiveButton("예",
                     (dialog, which) -> {
-                
                         int position = getAdapterPosition();
-                        deleteSubscheduleRx(mSubScheduleList.get(position));
+                        
+                        SubScheduleHandler subScheduleHandler = new SubScheduleHandler(mContext);
+                        subScheduleHandler.deleteSubSchedule(mSubScheduleList.get(position));
                         
                         mSubScheduleList.remove(position);
                         notifyItemRemoved(position);
@@ -77,37 +78,6 @@ public class SubScheduleBottomSheetAdapter
                     (dialog, which) -> dialog.cancel());
             builder.show();
         }
-    
-        private void deleteSubscheduleRx(SubScheduleResponse subScheduleResponse) {
-            RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
-            Observable<Long> observable = service.deleteSubSchedule(subScheduleResponse.id);
-    
-            mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeWith(new DisposableObserver<Long>() {
-                        @Override
-                        public void onNext(Long response) {
-                            Log.d("RX " + TAG, "delete subschedule: " + "Next");
-                            if (response == 0L) {
-                                Log.d("RX " + TAG, "delete subSchedule failed");
-                            } else if (response == 1L) {
-                                Log.d("RX " + TAG, "delete subSchedule success");
-                            }
-                        }
-                
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.d("RX " + TAG, "delete subschedule: " + e.getMessage());
-                        }
-                
-                        @Override
-                        public void onComplete() {
-                            Log.d("RX " + TAG, "delete subschedule: complete");
-                        }
-                    })
-            );
-        }
-    
     }
     
     SubScheduleBottomSheetAdapter(ArrayList<SubScheduleResponse> subscheduleList, Context context) {

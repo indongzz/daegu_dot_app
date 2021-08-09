@@ -27,7 +27,7 @@
        android:background="@drawable/search_layout"
        android:layout_marginTop="10dp"
         android:layout_marginHorizontal="30dp"
-       app:queryHint="검색 지역을 입력하세요"
+       app:queryHint="검색어를 입력하세요"
        />
 
     <HorizontalScrollView
@@ -41,7 +41,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/linear_layout"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_gravity="center_horizontal">
 
         </LinearLayout>
 
