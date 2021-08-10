@@ -38,28 +38,30 @@ public class PlaceGeoUpdateActivity extends AppCompatActivity {
 
         mGeoList = new ArrayList<>();
         
-        Log.d("Placegeo update", "place!!");
+        Log.d("rx_update", "Place Activity Start !!");
         
         startRx();
+        
+        // 주소 4000개 전환하는데 대략 1분정도 걸립니다
     
-//        new Handler().postDelayed(new Runnable()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                int n = mGeoList.size();
-//                Log.d("RX_PRINT!!", "total should be: " + mPlaceList.size() +
-//                         "  geo: " + n);
-//
+        new Handler().postDelayed(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                int n = mGeoList.size();
+                Log.d("RX_PRINT!!", "total should be: " + mPlaceList.size() +
+                         "  geo: " + n);
+
 //                for (int i = 0; i < n; i++) {
 //                    Log.d("RX_PRINT", "id: " + mGeoList.get(i).id);
 //                    Log.d("RX_PRINT2", "lat long: " + mGeoList.get(i).latitude +
 //                            ", " + mGeoList.get(i).longitude);
 //                }
-//
-//                putGeoRx();
-//            }
-//        }, 5000);   // 5초 뒤 실행
+
+                putGeoRx();
+            }
+        }, 60000);   // 60초 뒤 실행
     }
 
     private void putGeoRx() {
@@ -122,35 +124,36 @@ public class PlaceGeoUpdateActivity extends AppCompatActivity {
      */
     private void setMarkerRx() {
         RestApiService service2 = RestfulAdapter.getInstance().getKakaoServiceApi();
-
+    
         int n = mPlaceList.size();
+        
+        int index;
+        for (index = 20000; index < n; index++) {
+            if (mPlaceList.get(index).id > 62829)
+                break;
+        }
+        
+        Log.d("rx ", "i : " + index);
 
-        for (int i = 0; i < n; i++) {
+        for (int i = index; i < n; i++) {
             Call<Documents> data = service2.getSearchAddress(key, mPlaceList.get(i).address);
             int finalI = i;
-//            Log.d("RX_ADDRESS", "!!!address:" + mPlaceList.get(i).address);
             data.enqueue(new Callback<Documents>() {
                 @Override
                 public void onResponse(Call<Documents> call, Response<Documents> response) {
-//                    Log.d("RX_ADDRESS", "code: " + response.code());
                     Documents body = response.body();
 
                     if (response.body() != null && body.getDocuments().size() != 0) {
                         Documents.Address address = body.getDocuments().get(0);
-//                        Log.d("RX_ADDRESSS", "address: " + address.address);
-                        //                        Log.d("RX_ADDRESS", "Map: " + address.y + " , " + address.x);
-//                        mPlaceList.get(finalI).mapPoint =
-//                                MapPoint.mapPointWithGeoCoord(address.y, address.x);
-                                
+//                        Log.d("RX_ADDRESS", "Map: " + address.y + " , " + address.x);
+
                         PlaceGeo place = new PlaceGeo();
                         place.id = mPlaceList.get(finalI).id;
-//                        place.latitude = (float) address.y;
-//                        place.longitude = (float) address.x;
                         place.latitude = String.valueOf(address.y);
                         place.longitude = String.valueOf(address.x);
                         mGeoList.add(place);
                     } else {
-                        Log.d("RX_ADDRESS", mPlaceList.get(finalI).address);
+                        Log.d("RX_ADDRESS", "error: " + mPlaceList.get(finalI).address);
                     }
                 }
 
@@ -162,5 +165,4 @@ public class PlaceGeoUpdateActivity extends AppCompatActivity {
             });
         }
     }
-
 }

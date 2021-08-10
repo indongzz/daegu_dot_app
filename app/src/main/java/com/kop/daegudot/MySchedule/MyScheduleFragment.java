@@ -1,6 +1,7 @@
 package com.kop.daegudot.MySchedule;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.kop.daegudot.Network.Map.PlaceGeoUpdateActivity;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponse;
@@ -158,7 +160,9 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.addOtherSBtn) {
-            ((MainActivity) getActivity()).changeFragment(0, 1);
+//            ((MainActivity) getActivity()).changeFragment(0, 1);
+            Intent intent = new Intent(getContext(), PlaceGeoUpdateActivity.class);
+            startActivity(intent);
         }
         if (v.getId() == R.id.backBtn) {
             ((MainActivity) getActivity()).changeFragment(0, 3);
