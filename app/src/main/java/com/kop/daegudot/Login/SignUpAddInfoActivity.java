@@ -56,9 +56,6 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
         editEmail = findViewById(R.id.edit_email);
         editEmail.setText(mEmail);
 
-        // TODO:
-        //  db에서 회원 인지 확인
-
         backBtn = findViewById(R.id.backBtn);
         btnCheckDup = findViewById(R.id.btn_checkDup);
         btnOk = findViewById(R.id.btn_ok);
@@ -90,16 +87,6 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
         Intent intent = new Intent(SignUpAddInfoActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
-    }
-
-    private void addUser(){
-        UserRegister userRegister = new UserRegister();
-        userRegister.nickname = mNickname;
-        userRegister.email = mEmail;
-        userRegister.password = null;
-        userRegister.type = 'D';
-
-        insertUser(userRegister);
     }
 
     //닉네임 중복 검사
