@@ -24,7 +24,7 @@ import com.kop.daegudot.R;
 import java.util.ArrayList;
 
 public class MainScheduleBottomSheetAdapter extends RecyclerView.Adapter<MainScheduleBottomSheetAdapter.ViewHolder> {
-    private static final String TAG = "ViewPagerAdapter";
+    private static final String TAG = "MainScheduleBottomSheetAdapter";
     static Context mContext;
     ArrayList<DateSubSchedule> mDateSubScheduleList;
     
@@ -137,7 +137,6 @@ public class MainScheduleBottomSheetAdapter extends RecyclerView.Adapter<MainSch
     
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Log.d(TAG, position + 1 + "일차 " + " arrow !! " + position + " main " + mMainSchedule.getDateBetween());
         String text = (position + 1) + " 일차";
         holder.nthday.setText(text);
         

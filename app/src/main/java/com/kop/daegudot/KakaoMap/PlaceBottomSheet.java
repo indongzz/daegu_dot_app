@@ -16,6 +16,7 @@ import com.kop.daegudot.MorePage.MyWishlist.WishlistDBHandler;
 import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.Network.Map.Place;
+import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
 import com.kop.daegudot.R;
 
 import java.time.LocalDate;
@@ -42,6 +43,10 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     private int mTag;
     private Button mHeartBtn;
     private Button mAddToSchBtn;
+    private TextView mTitle;
+    private TextView mAddress;
+    private TextView mContents;
+    private RatingBar mStar;
     
     PlaceBottomSheet(Context context,
                      MainScheduleInfo mainSchedule, ArrayList<DateSubSchedule> subScheduleList) {
@@ -49,20 +54,24 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         mMainSchedule = mainSchedule;
         mDateSubScheduleList = subScheduleList;
     
+        bindViews();
+    }
+    
+    public void bindViews() {
         mHeartBtn = ((MapMainActivity)mContext).findViewById(R.id.heart_btn);
         mHeartBtn.setOnClickListener(this);
         mAddToSchBtn = ((MapMainActivity)mContext).findViewById(R.id.addToSch_btn);
         mAddToSchBtn.setOnClickListener(this);
+    
+        mTitle = ((MapMainActivity)mContext).findViewById(R.id.tv_title);
+        mAddress = ((MapMainActivity)mContext).findViewById(R.id.tv_address);
+        mContents = ((MapMainActivity)mContext).findViewById(R.id.tv_spec);
+        mStar = ((MapMainActivity)mContext).findViewById(R.id.rating_bar);
     }
     
     public void changePlaceBottomSheet(int tag) {
         mTag = tag;
-        
-        TextView title = ((MapMainActivity)mContext).findViewById(R.id.tv_title);
-        TextView address = ((MapMainActivity)mContext).findViewById(R.id.tv_address);
-        TextView summary = ((MapMainActivity)mContext).findViewById(R.id.tv_spec);
-        RatingBar rating = ((MapMainActivity)mContext).findViewById(R.id.rating_bar);
-    
+     
         updatePlaceList();
     
         for (Place o : mPlaceList) {
@@ -70,12 +79,12 @@ public class PlaceBottomSheet implements Button.OnClickListener {
                 mPlace = o;
             }
         }
-        
-        title.setText(mPlace.attractName);
-        address.setText(mPlace.address);
-//        summary.setText(item.getAttractContents());
-        summary.setText("너무 길어서 일단 안보이게 하게쑵니다");
-        rating.setRating(mPlace.rate);
+    
+        mTitle.setText(mPlace.attractName);
+        mAddress.setText(mPlace.address);
+//        summary.setText(mPlace.getAttractContents());
+        mContents.setText("너무 길어서 일단 안보이게 하게쑵니다");
+        mStar.setRating(mPlace.rate);
     
         if (mPlace.like) {
             mHeartBtn.setBackgroundResource(R.drawable.full_heart);
@@ -89,8 +98,7 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         mPlaceList = ((MapMainActivity)mContext).updatePlaceList();
     }
     
-    public void addToSubscheduleList() {
-        
+    public void selectSubScheduleDate() {
         int days = mMainSchedule.getDateBetween();
         final String[] list = new String[days];
         
@@ -108,10 +116,8 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         builder.setPositiveButton("선택", (dialog, which) -> {
             int position = checkedItem[0];
         
-            Log.i(TAG, "선택한 날짜 position: " + position);
-        
-            // position으로 선택한 날짜를, tag로 marker를 알 수 있게 함
-            ((MapMainActivity) mContext).adapterChange(dateArray[position].toString(), mTag);
+            // position으로 선택한 날짜를 알 수 있음
+            addSubSchedule(dateArray[position].toString());
         
             dialog.dismiss();
         });
@@ -119,10 +125,23 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         builder.show();
     }
     
+    public void addSubSchedule(String date) {
+        /* update Place list */
+        mPlaceList = ((MapMainActivity) mContext).updatePlaceList();
+        
+        Log.d(TAG, "add subschedule: " + mPlace.id);
+        SubScheduleRegister subScheduleRegister = new SubScheduleRegister();
+        subScheduleRegister.mainScheduleId = mMainSchedule.getMainId();
+        subScheduleRegister.date = date;
+        subScheduleRegister.placesId = mPlace.id;
+        
+        SubScheduleHandler subScheduleHandler = new SubScheduleHandler(mContext);
+        subScheduleHandler.registerSubSchedule(subScheduleRegister, mPlace);
+    }
+    
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.heart_btn) {
-            
             Wishlist wishlist = new Wishlist();
             wishlist.placeId = mPlace.id;
             wishlist.address = mPlace.address;
@@ -146,7 +165,7 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         }
         
         if (v.getId() == R.id.addToSch_btn) {
-            addToSubscheduleList();
+            selectSubScheduleDate();
         }
     }
     
