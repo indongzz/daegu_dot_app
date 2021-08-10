@@ -1,15 +1,18 @@
 package com.kop.daegudot.KakaoMap;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.kop.daegudot.Login.KakaoLogin.GlobalApplication;
+import com.kop.daegudot.MorePage.MyWishlist.Database.Wishlist;
+import com.kop.daegudot.MorePage.MyWishlist.WishlistDBHandler;
 import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.Network.Map.Place;
@@ -19,12 +22,21 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+import io.reactivex.Completable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableCompletableObserver;
+import io.reactivex.schedulers.Schedulers;
+
+/**
+ * 장소 마커 클릭 시 뜨는 BottomSheet
+ *
+ */
 public class PlaceBottomSheet implements Button.OnClickListener {
     private final static String TAG = "PlaceBottomSheet";
     private Context mContext;
     private ArrayList<Place> mPlaceList = null;
+    private Place mPlace = null;
     MainScheduleInfo mMainSchedule;
-//    ArrayList<SubScheduleInfo> mSubScheduleList;
     ArrayList<DateSubSchedule> mDateSubScheduleList;
     
     private int mTag;
@@ -51,24 +63,21 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         TextView summary = ((MapMainActivity)mContext).findViewById(R.id.tv_spec);
         RatingBar rating = ((MapMainActivity)mContext).findViewById(R.id.rating_bar);
     
-    
-        Place item = new Place();
-    
         updatePlaceList();
     
         for (Place o : mPlaceList) {
             if (o.id == tag) {
-                item = o;
+                mPlace = o;
             }
         }
         
-        title.setText(item.attractName);
-        address.setText(item.address);
+        title.setText(mPlace.attractName);
+        address.setText(mPlace.address);
 //        summary.setText(item.getAttractContents());
         summary.setText("너무 길어서 일단 안보이게 하게쑵니다");
-        rating.setRating(item.rate);
+        rating.setRating(mPlace.rate);
     
-        if (item.like) {
+        if (mPlace.like) {
             mHeartBtn.setBackgroundResource(R.drawable.full_heart);
         } else {
             mHeartBtn.setBackgroundResource(R.drawable.heart);
@@ -112,18 +121,33 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     
     @Override
     public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.heart_btn:
-                if (mPlaceList.get(mTag).like) { // 좋아요 했으면 취소
-                    mHeartBtn.setBackgroundResource(R.drawable.heart);
-                    mPlaceList.get(mTag).like = false;
-                } else {    // 좋아요 안했으면 좋아요
-                    mHeartBtn.setBackgroundResource(R.drawable.full_heart);
-                    mPlaceList.get(mTag).like = true;
-                }
-                break;
-            case R.id.addToSch_btn:
-                addToSubscheduleList();
+        if (v.getId() == R.id.heart_btn) {
+            
+            Wishlist wishlist = new Wishlist();
+            wishlist.placeId = mPlace.id;
+            wishlist.address = mPlace.address;
+            wishlist.attractName = mPlace.attractName;
+            wishlist.star = mPlace.rate;
+            
+            if (mPlace.like) { // 좋아요 했으면 취소
+                mHeartBtn.setBackgroundResource(R.drawable.heart);
+                mPlace.like = false;
+                
+                WishlistDBHandler wishlistDBHandler = new WishlistDBHandler(mContext);
+                wishlistDBHandler.deleteWishlists(wishlist);
+            }
+            else {    // 좋아요 안했으면 좋아요
+                mHeartBtn.setBackgroundResource(R.drawable.full_heart);
+                mPlace.like = true;
+                
+                WishlistDBHandler wishlistDBHandler = new WishlistDBHandler(mContext);
+                wishlistDBHandler.insertWishlist(wishlist);
+            }
+        }
+        
+        if (v.getId() == R.id.addToSch_btn) {
+            addToSubscheduleList();
         }
     }
+    
 }
