@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/round_rectangle"
+    android:id="@+id/wishlist_item"
     >
 
     <RelativeLayout
@@ -60,16 +61,6 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:text="summary"
-                />
-
-            <Button
-                android:id="@+id/addToSch_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="23dp"
-                android:background="@drawable/line_btn"
-                android:text="일정에 추가"
-                android:textSize="14sp"
-                android:layout_marginTop="5dp"
                 />
 
         </LinearLayout>

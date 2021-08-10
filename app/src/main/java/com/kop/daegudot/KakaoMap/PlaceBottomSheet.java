@@ -6,9 +6,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.kop.daegudot.Login.KakaoLogin.GlobalApplication;
+import com.kop.daegudot.MorePage.MyWishlist.Database.Wishlist;
+import com.kop.daegudot.MorePage.MyWishlist.WishlistDBHandler;
 import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.Network.Map.Place;
@@ -19,6 +23,15 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+import io.reactivex.Completable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableCompletableObserver;
+import io.reactivex.schedulers.Schedulers;
+
+/**
+ * 장소 마커 클릭 시 뜨는 BottomSheet
+ *
+ */
 public class PlaceBottomSheet implements Button.OnClickListener {
     private final static String TAG = "PlaceBottomSheet";
     private Context mContext;
@@ -58,7 +71,7 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     
     public void changePlaceBottomSheet(int tag) {
         mTag = tag;
-        
+     
         updatePlaceList();
     
         for (Place o : mPlaceList) {
@@ -129,16 +142,31 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.heart_btn) {
-            if (mPlaceList.get(mTag).like) { // 좋아요 했으면 취소
+            Wishlist wishlist = new Wishlist();
+            wishlist.placeId = mPlace.id;
+            wishlist.address = mPlace.address;
+            wishlist.attractName = mPlace.attractName;
+            wishlist.star = mPlace.rate;
+            
+            if (mPlace.like) { // 좋아요 했으면 취소
                 mHeartBtn.setBackgroundResource(R.drawable.heart);
-                mPlaceList.get(mTag).like = false;
-            } else {    // 좋아요 안했으면 좋아요
+                mPlace.like = false;
+                
+                WishlistDBHandler wishlistDBHandler = new WishlistDBHandler(mContext);
+                wishlistDBHandler.deleteWishlists(wishlist);
+            }
+            else {    // 좋아요 안했으면 좋아요
                 mHeartBtn.setBackgroundResource(R.drawable.full_heart);
-                mPlaceList.get(mTag).like = true;
+                mPlace.like = true;
+                
+                WishlistDBHandler wishlistDBHandler = new WishlistDBHandler(mContext);
+                wishlistDBHandler.insertWishlist(wishlist);
             }
         }
+        
         if (v.getId() == R.id.addToSch_btn) {
             selectSubScheduleDate();
         }
     }
+    
 }
