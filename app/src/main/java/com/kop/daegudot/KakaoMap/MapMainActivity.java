@@ -273,12 +273,4 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
             mMapView.selectPOIItem(prevPOIItem, true);
         }
     }
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        
-        if (!mCompositeDisposable.isDisposed())
-            mCompositeDisposable.dispose();
-    }
 }
