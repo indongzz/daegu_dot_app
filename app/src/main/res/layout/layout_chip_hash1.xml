@@ -10,5 +10,5 @@
     app:chipBackgroundColor="@color/white"
     app:chipStrokeColor="@color/lightGray"
     app:chipStrokeWidth="0.5dp"
-    app:rippleColor="@color/transparentPrimary"
+    app:rippleColor="@color/transparentAccent"
     android:textColor="@color/chip_action_font_color" />

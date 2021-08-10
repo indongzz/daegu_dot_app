@@ -38,26 +38,28 @@ public class PlaceGeoUpdateActivity extends AppCompatActivity {
 
         mGeoList = new ArrayList<>();
         
+        Log.d("Placegeo update", "place!!");
+        
         startRx();
     
-        new Handler().postDelayed(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                int n = mGeoList.size();
-                Log.d("RX_PRINT!!", "total should be: " + mPlaceList.size() +
-                         "  geo: " + n);
-                
-                for (int i = 0; i < n; i++) {
-                    Log.d("RX_PRINT", "id: " + mGeoList.get(i).id);
-                    Log.d("RX_PRINT2", "lat long: " + mGeoList.get(i).latitude +
-                            ", " + mGeoList.get(i).longitude);
-                }
-                
-                putGeoRx();
-            }
-        }, 5000);   // 5초 뒤 실행
+//        new Handler().postDelayed(new Runnable()
+//        {
+//            @Override
+//            public void run()
+//            {
+//                int n = mGeoList.size();
+//                Log.d("RX_PRINT!!", "total should be: " + mPlaceList.size() +
+//                         "  geo: " + n);
+//
+//                for (int i = 0; i < n; i++) {
+//                    Log.d("RX_PRINT", "id: " + mGeoList.get(i).id);
+//                    Log.d("RX_PRINT2", "lat long: " + mGeoList.get(i).latitude +
+//                            ", " + mGeoList.get(i).longitude);
+//                }
+//
+//                putGeoRx();
+//            }
+//        }, 5000);   // 5초 뒤 실행
     }
 
     private void putGeoRx() {

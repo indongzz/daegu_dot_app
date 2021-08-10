@@ -99,14 +99,10 @@ public class MapMarkerItems {
     }
     
     public void setMarkerItems() {
-        startRx();
+        selectAllPlaceListRx();
     }
     
     public ArrayList<Place> getPlaceList() {
-//        Log.d(TAG, "Place n: " + mPlaceList.size());
-//        for (Place o : mPlaceList) {
-//            Log.d(TAG, "id: " + o.id + " tag: " + o.tag + " name: " + o.attractName);
-//        }
         return mPlaceList;
     }
     
@@ -114,34 +110,34 @@ public class MapMarkerItems {
         return mMarkerList;
     }
     
-    private void startRx() {
+    private void selectAllPlaceListRx() {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
         Observable<List<Place>> observable = service.getPlaceList();
-        
+    
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(new DisposableObserver<List<Place>>() {
-                            @Override
-                            public void onNext(List<Place> response) {
-                                Log.d("RX", "Next");
-                                mPlaceList.addAll(response);
-                            }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<List<Place>>() {
+                    @Override
+                    public void onNext(List<Place> response) {
+                        Log.d("RX", "Next");
+                        mPlaceList.addAll(response);
+                    }
+                
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX", e.getMessage());
+                    }
+                
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX", "complete");
                     
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.d("RX", e.getMessage());
-                            }
+                        setServerMarker();
                     
-                            @Override
-                            public void onComplete() {
-                                Log.d("RX", "complete");
-                                
-                                setServerMarker();
-                                
-                                /* Progress Loading done */
-                                ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
-                            }
-                        })
+                        /* Progress Loading done */
+                        ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
+                    }
+                })
         );
     }
     
@@ -152,10 +148,14 @@ public class MapMarkerItems {
 
         for (Place place: mPlaceList) {
             if (place.category == null) {
-                mPlaceList.get(tagNum).tag = tagNum;
+                mPlaceList.get(tagNum).tag = (int) mPlaceList.get(tagNum).id;
                 MapPOIItem marker = new MapPOIItem();
                 marker.setItemName(place.attractName);
-                marker.setTag(tagNum++);
+                marker.setTag(mPlaceList.get(tagNum).tag);
+                // Todo: delete after db done
+                if (place.latitude == null) {
+                    continue;
+                }
                 MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
                         Double.parseDouble(place.latitude), Double.parseDouble(place.longitude));
                 marker.setMapPoint(mapPoint);
@@ -166,6 +166,7 @@ public class MapMarkerItems {
                 marker.setShowCalloutBalloonOnTouch(false);
                 mMapView.addPOIItem(marker);
                 mMarkerList.add(marker);
+                tagNum++;
             }
         }
     }
@@ -175,8 +176,8 @@ public class MapMarkerItems {
     //AD5	숙박
     //FD6	음식점
     //CE7	카페
-    public void startRx2(double x, double y) {
-        ArrayList<Documents.Address> temp = new ArrayList<>();
+    public void selectAllKakaoPlaceListRx(double x, double y) {
+        
         RestApiService service = RestfulAdapter.getInstance().getKakaoServiceApi();
         
         for (int i = 1; i <= 5; i++) {
@@ -219,15 +220,16 @@ public class MapMarkerItems {
                     } else {
                         Log.d(TAG, "code: " + response.code());
                     }   // AD if문 종료
-            
+
                 }
-        
+
                 @Override
                 public void onFailure(Call<Documents> call, Throwable t) {
-            
+
                 }
             });
         }
+        
         for (int i = 0; i < 5; i++) {
             Call<Documents> cafeCall = service.getPlacebyCategory(
                     key, "CE7", x + "", y + "", 20000, i + 1);
@@ -293,6 +295,7 @@ public class MapMarkerItems {
         
             //Progress Loading done
             ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
+            ((MapMainActivity) mContext).notifyPlaceListDone(mPlaceList);
         }
     }*/
     

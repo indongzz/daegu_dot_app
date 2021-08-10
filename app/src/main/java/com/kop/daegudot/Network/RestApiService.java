@@ -4,6 +4,14 @@ import com.kop.daegudot.KakaoMap.Documents;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
 import com.kop.daegudot.Network.Map.PlaceRegister;
+import com.kop.daegudot.Network.More.MyInfo.MyCommentList;
+import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
+import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
+import com.kop.daegudot.Network.More.MyInfo.MyRecommendList;
+import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
+import com.kop.daegudot.Network.Recommend.RecommendRegister;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
+import com.kop.daegudot.Network.Recommend.RecommendResponseList;
 import com.kop.daegudot.Network.Schedule.MainScheduleRegister;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponseList;
 import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
@@ -34,7 +42,7 @@ public interface RestApiService {
 
     /* Login */
     @POST("/user/register")
-    Observable<Long> registerUser(@Body UserRegister userRegisterRequest);
+    Observable<String> registerUser(@Body UserRegister userRegisterRequest);
 
     @GET("/user/register/email/{email}")
     Observable<UserResponse> checkEmailDup(@Path("email") String email);
@@ -124,4 +132,44 @@ public interface RestApiService {
     @POST("/places/register/location")
     Observable<Long> insertPlaces(@Body List<PlaceRegister> placeRegister);
 
+    /* Recommandation */
+    @POST("/recommend/register")
+    Observable<Long> registerRecommendSchedule(@Body RecommendRegister recommendRegister);
+    
+    @GET("/recommend/{hashtagId}")
+    Observable<RecommendResponseList> selectAllRecommendList(@Path("hashtagId") long hashtagId);
+    
+    @PUT("/recommend/update/{recommendScheduleId}")
+    Observable<Long> updateRecommendSchedule(
+            @Path("recommendScheduleId") long recommendScheduleId,
+            @Body RecommendRegister recommendRegister);
+    
+    @DELETE("/recommend/delete/{recommendScheduleId}")
+    Observable<Long> deleteRecommendSchedule(@Path("recommendScheduleId") long recommendScheduleId);
+    
+    /* Hashtag */
+    @GET("/hashtag")
+    Observable<HashtagResponseList> selectHashtagList();
+    
+    /* Comment */
+    @POST("/comment/register")
+    Observable<Long> registerComment(@Body CommentRegister commentRegister);
+    
+    @GET("/comment/{recommendScheduleId}")
+    Observable<CommentResponseList> selectAllCommentList(@Path("recommendScheduleId") long recommendScheduleId);
+    
+    @PUT("/comment/update/{commentId}")
+    Observable<Long> updateComment(
+            @Path("commentId") long commentId,
+            @Body String comments);
+    
+    @DELETE("/comment/delete/{commentId}")
+    Observable<Long> deleteComment(@Path("commentId") long commentId);
+    
+    /* More - My Recommend Schedule & My Comment */
+    @GET("/more/recommend")
+    Observable<MyRecommendList> selectMyRecommendSchedules();
+    
+    @GET("/more/comment")
+    Observable<MyCommentList> selectMyComments();
 }

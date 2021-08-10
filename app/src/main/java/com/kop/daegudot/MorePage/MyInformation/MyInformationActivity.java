@@ -1,4 +1,4 @@
-package com.kop.daegudot.MorePage;
+package com.kop.daegudot.MorePage.MyInformation;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -17,16 +17,13 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.kop.daegudot.IntroPageActivity;
-import com.kop.daegudot.MainActivity;
-import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
+import com.kop.daegudot.MorePage.MoreAdapter;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
-import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -67,7 +64,6 @@ public class MyInformationActivity extends AppCompatActivity implements View.OnC
         pref = getSharedPreferences("data", MODE_PRIVATE);
         mToken = pref.getString("token", "");
 
-        //ToDo: 토큰으로 사용자 정보 가져오기
         selectUserByToken();
 
         mListView = findViewById(R.id.myinfo_list);
@@ -108,17 +104,13 @@ public class MyInformationActivity extends AppCompatActivity implements View.OnC
     
     private void logout() {
         // TODO: 로그아웃!!
-        String passwd = pref.getString("passwd", "");
-        if (passwd.equals("google")) {
-            FirebaseAuth.getInstance().signOut();
-            SharedPreferences.Editor editor = pref.edit();
-            editor.clear();
-            editor.apply();
-        } else if (passwd.equals("kakao")) {
-            Toast.makeText(mContext, "카카오", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(mContext, "이메일", Toast.LENGTH_SHORT).show();
-        }
+        
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.apply();
+        
+        // if type equals ("G") {
+        //   FirebaseAuth.getInstance().signOut();
 
         ActivityCompat.finishAffinity(this);
         Intent intent = new Intent(this, IntroPageActivity.class);

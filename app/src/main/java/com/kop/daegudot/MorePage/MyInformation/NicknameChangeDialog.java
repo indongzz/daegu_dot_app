@@ -1,4 +1,4 @@
-package com.kop.daegudot.MorePage;
+package com.kop.daegudot.MorePage.MyInformation;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kop.daegudot.MorePage.MyInformation.MyInformationActivity;
 import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
@@ -56,7 +57,6 @@ public class NicknameChangeDialog {
         changeBtn = dialog.findViewById(R.id.change_btn_nick);
         cancelBtn = dialog.findViewById(R.id.cancel_btn_nick);
 
-        //TODO: 현재 내 정보로부터 별명 가져와서 설정하기
         currentNickname.setText(mNickname);
 
         changeBtn.setOnClickListener(new View.OnClickListener() {
@@ -64,7 +64,6 @@ public class NicknameChangeDialog {
             public void onClick(View v) {
                 String newNick = newNickname.getText().toString();
                 if(newNick.getBytes().length > 0){
-                    //TODO: 닉네임 중복검사 하기
                     selectNickname(newNick);
                 }
                 else{

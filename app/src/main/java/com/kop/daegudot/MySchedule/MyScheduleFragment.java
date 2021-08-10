@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.kop.daegudot.Network.RestApiService;
@@ -36,7 +37,7 @@ import io.reactivex.schedulers.Schedulers;
 public class MyScheduleFragment extends Fragment implements View.OnClickListener {
     static String TAG = "MyScheduleFragment";
     View view;
-    private static ArrayList<MainScheduleInfo> mList = new ArrayList<>();
+    private static ArrayList<MainScheduleInfo> mList;
     private RecyclerView recyclerView;
     private MainScheduleAdapter adapter;
     CompositeDisposable mCompositeDisposable = new CompositeDisposable();
@@ -46,19 +47,18 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
     public MyScheduleFragment() {
         // Required empty public constructor
     }
-
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    
+        
         pref = getActivity().getSharedPreferences("data", Context.MODE_PRIVATE);
         mToken = pref.getString("token", "");
         
-        // TODO: 지우기
-        selectAllMainSchedule();
+        selectAllMainScheduleRx();
     }
     
-
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -67,7 +67,10 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         
         TextView title = view.findViewById(R.id.title);
         title.setText("내 일정");
-
+        
+        ImageButton backBtn = view.findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(this);
+        
         recyclerView = view.findViewById(R.id.dateList);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -75,24 +78,24 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
         Button addOther = view.findViewById(R.id.addOtherSBtn);
         addOther.setOnClickListener(this);
         
-        Collections.sort(mList);
-        adapter = new MainScheduleAdapter(getContext(), mList);
-        recyclerView.setAdapter(adapter);
-        Log.d("MyScheduleFragment", "RecyclerView Adapter Done");
+        if (adapter != null) {
+            recyclerView.setAdapter(adapter);
+        }
         
         return view;
     }
     
-    private void selectAllMainSchedule() {
+    private void selectAllMainScheduleRx() {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
         Observable<MainScheduleResponseList> observable = service.getMainSchedule();
-    
+        
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableObserver<MainScheduleResponseList>() {
                     @Override
                     public void onNext(MainScheduleResponseList response) {
                         Log.d("RX MySchedule", "Next");
+                        mList = new ArrayList<>();
                         if (response != null) {
                             if (response.status == 1L) {
                                 int n = response.mainScheduleResponseDtoArrayList.size();
@@ -112,47 +115,53 @@ public class MyScheduleFragment extends Fragment implements View.OnClickListener
                             }
                         }
                     }
-                
+                    
                     @Override
                     public void onError(Throwable e) {
                         Log.d("RX MySchedule", e.getMessage());
                     }
-                
+                    
                     @Override
                     public void onComplete() {
                         Log.d("RX MySchedule", "complete");
-    
+                        
                         Collections.sort(mList);
-                        refresh();
+                        updateUI();
                     }
                 })
         );
+    }
+    
+    public void updateUI() {
+        try {
+            adapter = new MainScheduleAdapter(getContext(), mList);
+            recyclerView.setAdapter(adapter);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     public static void addMainSchedule(MainScheduleInfo mainScheduleInfo) {
         mList.add(mainScheduleInfo);
     }
     
+    public static ArrayList<MainScheduleInfo> getMainSchedules() {
+        return mList;
+    }
+    
     public void refresh() {
         // 데이터 추가 시 갱신
-         adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
     }
     
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.addOtherSBtn:
-                // 0 = MyScheduleFragment, 1 = AddScheduleFragment
-                ((MainActivity)getActivity()).changeFragment(0, 1);
-                break;
+        if (v.getId() == R.id.addOtherSBtn) {
+            ((MainActivity) getActivity()).changeFragment(0, 1);
+        }
+        if (v.getId() == R.id.backBtn) {
+            ((MainActivity) getActivity()).changeFragment(0, 3);
         }
     }
-    
-//    public void ConvertToMapMainActivity() {
-//        Intent intent = new Intent(getContext(), MapMainActivity.class);
-//        intent.putExtra("firstDay", mFirstDay);
-//        intent.putExtra("lastDay", mLastDay);
-//
-//        startActivity(intent);
-//    }
 }

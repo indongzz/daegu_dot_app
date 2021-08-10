@@ -1,44 +1,67 @@
 package com.kop.daegudot.Recommend;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponse;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
+import com.kop.daegudot.Network.Recommend.RecommendResponseList;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
+/**
+ * 추천글 목록을 띄우는 Activity
+ * 해시태그 클릭 시 뜸
+ */
 public class RecommendListActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = "RecommendListActivity";
+    public static final int REQUEST_CODE = 100;
     
     Context mContext;
     ImageButton backBtn;
+    ImageButton refreshBtn;
     RecyclerView mRecyclerView;
-    PostAdapter mAdapter;
+    static PostAdapter mAdapter;
     
-    ArrayList<PostItem> mPostList = new ArrayList<>();
-    DrawerLayout drawer;
     View mView;
-    DrawerHandler mDrawerHandler;
+    HashtagResponse mHashtag;
+    ProgressBar progressBar;
+    public DrawerViewControl mDrawerViewControl;
+    
+    /* RX java */
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+    private String mToken;
+    ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
+    private UserResponse mUser;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,108 +71,98 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
         setContentView(mView);
         
         mContext = this;
+    
+        SharedPreferences pref = getSharedPreferences("data", Context.MODE_PRIVATE);
+        mToken = pref.getString("token", "");
+        selectUserByToken();
         
-        Log.i(TAG, "list context: " + mContext);
         Intent intent = getIntent();
         
-        if (intent.getStringExtra("hashtag") != null) {
+        if (intent.getParcelableExtra("hashtag") != null) {
+            mHashtag = intent.getParcelableExtra("hashtag");
             TextView title = findViewById(R.id.title);
-            title.setText(intent.getStringExtra("hashtag"));
+            title.setText(mHashtag.content);
         }
         
         backBtn = findViewById(R.id.backBtn);
         backBtn.setOnClickListener(this);
+        refreshBtn = findViewById(R.id.refreshBtn);
+        refreshBtn.setOnClickListener(this);
+        
+        progressBar = findViewById(R.id.progress_bar);
         
         mRecyclerView = findViewById(R.id.recommend_list_view);
         
-        // TODO: delete
-        temporarySet();
+        selectAllRecommendListRx(mHashtag);
         
-        mAdapter = new PostAdapter(mContext, mPostList);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        mAdapter = new PostAdapter(mContext, mRecommendList);
+        LinearLayoutManager llm = new LinearLayoutManager(getApplicationContext());
+        llm.setReverseLayout(true); //역순 출력
+        llm.setStackFromEnd(true);
+        mRecyclerView.setLayoutManager(llm);
+        
         
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
         
-        // 작성한 글 Drawerlayout으로 띄우기
-        drawer = findViewById(R.id.drawer);
-        drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-            }
-    
-            @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNDEFINED);
-                int n = Math.min(mRecyclerView.getChildCount(), 10);
-                for (int i = 0; i < n; i++) {
-                    mRecyclerView.getChildAt(i).setClickable(false);
-                }
-            }
-    
-            @Override
-            public void onDrawerClosed(@NonNull View drawerView) {
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                    int n = Math.min(mRecyclerView.getChildCount(), 10);
-                for (int i = 0; i < n; i++) {
-                    mRecyclerView.getChildAt(i).setClickable(true);
-                }
-            }
-    
-            @Override
-            public void onDrawerStateChanged(int newState) {
-            }
-        });
-        
         ImageButton backbtn2 = findViewById(R.id.drawer_backBtn);
         backbtn2.setOnClickListener(this);
-        TextView drawerTitle = findViewById(R.id.drawer_title);
-        drawerTitle.setText("");
         
     }
     
-    public void temporarySet() {
-        // TODO: DB에서 해시태그별 목록 가져오기
-        String[] title = {"제목1", "제목2", "제목3", "제목4"};
-        float[] rating = { 1, (float) 1.5, 2, (float) 4.5};
-        String[] writer = {"작성자1", "행갱", "펭귄", "샤스"};
-        int[] commentN = {2, 5, 3, 1};
-        String[] content = {"내용1", "내용2", "내용3", "내용4"};
-        
-        for (int i = 0; i < 4; i++) {
-            PostItem data = new PostItem();
-            data.setTitle(title[i]);
-            data.setRating(rating[i]);
-            data.setWriter(writer[i]);
-            data.setCommentNum(commentN[i]);
-            data.setContent(content[i]);
-            //TODO : id 할당
-            data.setId(i);
-            
-            mPostList.add(data);
-            
-        }
+    public void selectAllRecommendListRx(HashtagResponse hashtag) {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+        Observable<RecommendResponseList> observable = service.selectAllRecommendList(hashtag.id);
+    
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<RecommendResponseList>() {
+                    @Override
+                    public void onNext(RecommendResponseList response) {
+                        Log.d("RX " + TAG, "Next");
+                        if (response.status == 1L) {
+                            mRecommendList.clear();
+                            mRecommendList.addAll(response.recommendScheduleResponseDtoArrayList);
+                            Collections.sort(mRecommendList);
+                        } else if (response.status == 0L) {
+                            Toast.makeText(mContext, "cannot get recommendList", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX " + TAG, e.getMessage());
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+                    }
+                
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX " + TAG, "complete");
+                        
+                        updateUI();
+                        progressBar.setVisibility(View.GONE);
+                    }
+                })
+        );
     }
     
-    public void openDrawer(int id) {
-        PostItem post = null;
-        for (PostItem o : mPostList) {
-            if (id == o.getId()) {
-                post = o;
-                break;
-            }
-        }
-        
-        if (post != null) {
-            drawer.openDrawer(GravityCompat.END);
-            mDrawerHandler = new DrawerHandler(mContext, mView, post);
-            mDrawerHandler.setDrawer();
-        }
-        else {
-            Log.e(TAG, "post: null");
-        }
+    public void updateUI() {
+        mRecyclerView.setAdapter(mAdapter);
+        mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mRecommendList);
+        mDrawerViewControl.setDrawerLayoutView();
+        refresh();
+    }
+    
+    public void deleteRecommendSchedule(int position) {
+        mAdapter.notifyItemRemoved(position);
+        mRecommendList.remove(position);
+        refresh();
+    }
+    
+    public static void refresh() {
+        mAdapter.notifyDataSetChanged();
     }
     
     public FragmentManager getFM() {
@@ -157,27 +170,85 @@ public class RecommendListActivity extends AppCompatActivity implements View.OnC
     }
     
     @Override
+    protected void onResume() {
+        super.onResume();
+        mAdapter = new PostAdapter(mContext, mRecommendList);
+        mRecyclerView.setAdapter(mAdapter);
+    
+        mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mRecommendList);
+        mDrawerViewControl.setDrawerLayoutView();
+    }
+    
+    @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.backBtn:
-                finish();
-                break;
-            case R.id.drawer_backBtn:
-                drawer.closeDrawer(GravityCompat.END);
-                InputMethodManager keyboardManager =
-                        (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                keyboardManager.hideSoftInputFromWindow(mView.getWindowToken(), 0);
-                break;
+        if (v.getId() == R.id.backBtn) {
+            finish();
+        }
+        if (v.getId() == R.id.refreshBtn) {
+            progressBar.setVisibility(View.VISIBLE);
+            selectAllRecommendListRx(mHashtag);
         }
     }
     
     // back button 임시 처리
     @Override
     public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.END)) {
-            drawer.closeDrawer(GravityCompat.END);
-        } else {
+        if (mDrawerViewControl == null) {
             super.onBackPressed();
         }
+        else if (mDrawerViewControl.mDrawer.isDrawerOpen(GravityCompat.END)) {
+            mDrawerViewControl.closeDrawer();
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode != Activity.RESULT_OK) {
+                return;
+            }
+            RecommendResponse recommendResponse = data.getParcelableExtra("updatedRecommendPost");
+            int position = data.getIntExtra("position", 0);
+            mRecommendList.set(position, recommendResponse);
+            mAdapter.notifyDataSetChanged();
+            mRecyclerView.setAdapter(mAdapter);
+            mDrawerViewControl.updateDrawerUI(recommendResponse);
+        }
+    }
+    
+    public UserResponse getUser() {
+        return mUser;
+    }
+    
+    //토큰으로 회원 정보 가져오기
+    private void selectUserByToken() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(mToken);
+        Observable<UserResponse> observable = service.getUserFromToken();
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        mUser = response;
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("TOKEN", e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("TOKEN", "complete");
+                    }
+                })
+        );
     }
 }

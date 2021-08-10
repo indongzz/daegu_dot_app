@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private SessionCallback sessionCallback;
     Session mSession;
 
-    SharedPreferences pref ;
+    SharedPreferences mPref;
     public static SharedPreferences.Editor editor;
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
@@ -63,11 +63,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         userRegister = new UserRegister();
 
-        pref = getSharedPreferences("data", MODE_PRIVATE);
-        editor = pref.edit();
-
-        // TODO: 자동로그인 활성화
-        //    checkAlreadyLogin();
+        mPref = getSharedPreferences("data", MODE_PRIVATE);
+        editor = mPref.edit();
 
         /* Google Sign In */
         findViewById(R.id.signin_google).setOnClickListener(this);
@@ -97,30 +94,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public void checkAlreadyLogin() {
-        pref = getSharedPreferences("data", MODE_PRIVATE);
+        mPref = getSharedPreferences("data", MODE_PRIVATE);
         Log.d("checkAlreadyLogin", "...Check login...");
-        if (pref.getString("email", "") != "") {
+        if (mPref.getString("email", "") != "") {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
             Log.d("checkAlreadyLogin", "Already Logged in");
         }
     }
-
-/*    public void testRx() {
-        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
-        RestApiService service =  restfulAdapter.getServiceApi();
-
-        HashMap<String, Object> hashmap = new HashMap<String, Object> ();
-        Observable<Long> observable = service.postRegister(hashmap);
-
-        *//*
-        Disposable disposable = observable
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .
-        *//*
-    }*/
 
     // SignIn Clicked
     private void googleSignIn() {

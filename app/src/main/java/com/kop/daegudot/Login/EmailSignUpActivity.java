@@ -3,6 +3,7 @@ package com.kop.daegudot.Login;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.User.UserRegister;
@@ -38,6 +40,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
     String emailValidation = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
     boolean NICK_CHECKED = false;
+    SharedPreferences mTokenPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,19 +100,6 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    public void addData() {
-        // 자동 로그인을 위한 정보 저장
-        /*SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString("email", email);
-        editor.putString("name", nickName);
-        editor.putString("pw", pw);
-        editor.apply();*/
-
-
-        //LoginActivity.setRegisterInfo(email, pw, 'N');
-    }
-
     public boolean checkInfo() {
         email = editEmail.getText().toString();
         pw = editPw.getText().toString();
@@ -155,48 +145,55 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         } else if (len < 2 || len > 6) {
             Toast.makeText(getApplicationContext(), "닉네임은 2글자 이상 6글자 이하로 설정해주세요", Toast.LENGTH_SHORT).show();
         } else {
-            // Todo: db 닉네임 중복 확인
             selectNickname(name);
         }
     }
 
 
-    public void convertToEmailLoginActivity() {
-        Intent intent = new Intent(this, EmailLoginActivity.class);
+    public void convertToMainActivity() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
         finish();
     }
 
+    //회원가입
     private void insertUser(UserRegister userRegister) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
-        Observable<Long> observable = service.registerUser(userRegister);
+        Observable<String> observable = service.registerUser(userRegister);
 
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<Long>() {
+                .subscribeWith(new DisposableObserver<String>() {
                     @Override
-                    public void onNext(Long response) {
-                        Toast.makeText(getApplicationContext(), "회원가입에 실패하였습니다.", Toast.LENGTH_SHORT).show();
-                        Log.d("INSERT USER", "REGISTER Success!");
+                    public void onNext(String response) {
+                        Log.d("USER_EMAIL_REGISTER", "REGISTER Success!");
+                        Toast.makeText(getApplicationContext(), "회원가입이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+
+                        //SharedPreference에 토큰 저장하기
+                        mTokenPref = getSharedPreferences("data", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = mTokenPref.edit();
+                        editor.putString("token", response);
+                        editor.apply();
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Toast.makeText(getApplicationContext(), "회원가입이 완료되었습니다.", Toast.LENGTH_SHORT).show();
-                        Log.d("INSERT USER", e.getMessage());
-                        //ToDo: 로그인 화면으로 전환할지 바로 메인으로 넘어갈지 정하기
-                        convertToEmailLoginActivity();
-                        //ToDo: 토큰 읽어오기
+                        Log.d("USER_EMAIL_REGISTER", e.getMessage());
+                        Toast.makeText(getApplicationContext(), "회원가입에 실패하였습니다.", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onComplete() {
-                        Log.d("INSERT USER", "complete");
+                        Log.d("USER_EMAIL_REGISTER", "complete");
+                        //메인 화면으로 이동
+                        convertToMainActivity();
                     }
                 })
         );
     }
+
+    //닉네임 중복 검사
     private void selectNickname(String nickname) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
@@ -225,6 +222,8 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
                 })
         );
     }
+
+    //이메일 중복 검사
     private void selectEmail(String email) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
@@ -242,8 +241,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onError(Throwable e) {
                         Toast.makeText(getApplicationContext(), "사용가능한 이메일 입니다.", Toast.LENGTH_SHORT).show();
-                        // Todo:
-                        //  db에 회원가입 정보 저장하기 : email, pw, nickName
+                        
                         UserRegister userRegister = new UserRegister();
                         userRegister.email = email;
                         userRegister.nickname = nickName;

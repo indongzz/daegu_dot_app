@@ -1,6 +1,7 @@
 package com.kop.daegudot.Recommend;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.kop.daegudot.KakaoMap.MapMainActivity;
+import com.kop.daegudot.MySchedule.DateSubSchedule;
+import com.kop.daegudot.Network.Schedule.SubScheduleResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -21,7 +25,7 @@ public class PostScheduleAdapter extends RecyclerView.Adapter<PostScheduleAdapte
     private static final String TAG = "PostScheduleAdapter";
     private Context mContext;
     LayoutInflater li;
-    private ArrayList<PostScheduleItem> mPostScheduleList;
+    private ArrayList<DateSubSchedule> mDateSubSchedule;
     
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView nthday;
@@ -36,9 +40,9 @@ public class PostScheduleAdapter extends RecyclerView.Adapter<PostScheduleAdapte
     
     }
     
-    public PostScheduleAdapter(Context context, ArrayList<PostScheduleItem> scheduleList) {
+    public PostScheduleAdapter(Context context, ArrayList<DateSubSchedule> dateSubSchedules) {
         mContext = context;
-        mPostScheduleList = scheduleList;
+        mDateSubSchedule = dateSubSchedules;
     }
     
     @NonNull
@@ -54,25 +58,25 @@ public class PostScheduleAdapter extends RecyclerView.Adapter<PostScheduleAdapte
     
     @Override
     public void onBindViewHolder(@NonNull PostScheduleAdapter.ViewHolder holder, int position) {
-        Log.d(TAG, "viewholder!!");
-        String day = mPostScheduleList.get(position).getDay() + " 일차";
-        holder.nthday.setText(day);
-        int n = mPostScheduleList.get(position).getPlaceName().size();
+        String dayText = position + 1 + "일차";
+        holder.nthday.setText(dayText);
+        
+        int n = mDateSubSchedule.get(position).subScheduleList.size();
         Chip[] chips = new Chip[n];
-        Log.d(TAG, "position: " + position + ", n: " + n);
-        Log.d(TAG, "mpostschedule: " + mPostScheduleList.get(position).getDay());
         for(int i = 0; i < n; i++) {
+            SubScheduleResponse subScheduleResponse
+                    = mDateSubSchedule.get(position).subScheduleList.get(i);
             chips[i] = (Chip) li.inflate(R.layout.layout_chip_choice, holder.chipGroup, false);
-            chips[i].setText(mPostScheduleList.get(position).getPlaceName().get(i));
-            chips[i].setTag(mPostScheduleList.get(position).getPlaceName().get(i));
+            chips[i].setText(subScheduleResponse.placesResponseDto.attractName);
+            chips[i].setTag(subScheduleResponse.placesResponseDto.attractName);
             chips[i].setId(i);
             holder.chipGroup.addView(chips[i]);
-            chips[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO: Marker 찍은 후에 Map의 해당 marker로 이동하기
-                    Toast.makeText(mContext, v.getTag() + "marker로 이동하기", Toast.LENGTH_SHORT).show();
-                }
+            chips[i].setOnClickListener(v -> {
+                Intent intent = new Intent(mContext, MapMainActivity.class);
+                intent.putExtra("markerPlace",
+                        mDateSubSchedule.get(holder.getAdapterPosition())
+                                .subScheduleList.get(v.getId()).placesResponseDto);
+                mContext.startActivity(intent);
             });
         }
         
@@ -80,6 +84,6 @@ public class PostScheduleAdapter extends RecyclerView.Adapter<PostScheduleAdapte
     
     @Override
     public int getItemCount() {
-        return mPostScheduleList.size();
+        return mDateSubSchedule.size();
     }
 }

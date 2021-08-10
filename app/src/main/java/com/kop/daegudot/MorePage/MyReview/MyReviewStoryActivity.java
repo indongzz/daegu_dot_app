@@ -1,0 +1,207 @@
+package com.kop.daegudot.MorePage.MyReview;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.kop.daegudot.Network.More.MyInfo.MyRecommendList;
+import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserResponse;
+import com.kop.daegudot.R;
+import com.kop.daegudot.Recommend.DrawerViewControl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
+
+/**
+ * 더보기 - 내가 쓴 글
+ * 추천의 글 목록과 똑같이 동작하지만 서버에서 받아오는 부분만 다름
+ */
+public class MyReviewStoryActivity extends AppCompatActivity implements View.OnClickListener {
+    private static final String TAG = "MyReviewStoryActivity";
+    private static final int REQUEST_CODE = 200;
+    private Context mContext;
+    private ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
+    private RecyclerView mRecyclerView;
+    public MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
+    View mView;
+    
+    ProgressBar mProgressBar;
+    public DrawerViewControl mDrawerViewControl;
+    
+    /* Rx java */
+    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+    private String mToken;
+    private UserResponse mUser;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_my_review_story);
+        this.mContext = this;
+        mView = findViewById(R.id.my_review_layout);
+        
+        SharedPreferences pref = getSharedPreferences("data", Context.MODE_PRIVATE);
+        mToken = pref.getString("token", "");
+        selectUserByToken();
+    
+        TextView title = findViewById(R.id.title);
+        title.setText("내가 쓴 글");
+        
+        ImageButton backbtn = findViewById(R.id.backBtn);
+        backbtn.setOnClickListener(this);
+        mProgressBar = findViewById(R.id.progress_bar);
+
+        selectMyRecommendScheduleListRx();
+        
+        mRecyclerView = findViewById(R.id.my_review_list);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        layoutManager.setReverseLayout(true);
+        layoutManager.setStackFromEnd(true);
+        mRecyclerView.setLayoutManager(layoutManager);
+        
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
+                mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        mRecyclerView.addItemDecoration(dividerItemDecoration);
+        
+    }
+    
+    private void selectMyRecommendScheduleListRx() {
+        RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
+        Observable<MyRecommendList> observable = service.selectMyRecommendSchedules();
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<MyRecommendList>() {
+                    @Override
+                    public void onNext(MyRecommendList response) {
+                        Log.d("RX " + TAG, "Next");
+                        if (response.status == 1L) {
+                            mRecommendList = response.recommendScheduleResponseDtoArrayList;
+                            
+                            Collections.sort(mRecommendList);
+                        }
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX " + TAG, e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX " + TAG, "complete");
+                        
+                        mProgressBar.setVisibility(View.GONE);
+                        updateUI();
+                    }
+                })
+        );
+    }
+    
+    public void updateUI() {
+        mMyReviewAndCommentAdapter = new MyReviewAndCommentAdapter(mContext, mRecommendList);
+        mRecyclerView.setAdapter(mMyReviewAndCommentAdapter);
+        
+        mDrawerViewControl = new DrawerViewControl(mView, mContext, mRecyclerView, mRecommendList);
+        mDrawerViewControl.setDrawerLayoutView();
+    }
+    
+    public void deleteRecommendSchedule(int position) {
+        mMyReviewAndCommentAdapter.notifyItemRemoved(position);
+        mRecommendList.remove(position);
+    }
+    
+    public FragmentManager getFM() {
+        return getSupportFragmentManager();
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode != Activity.RESULT_OK) {
+                return;
+            }
+            RecommendResponse recommendResponse = data.getParcelableExtra("updatedRecommendPost");
+            int position = data.getIntExtra("position", 0);
+            mRecommendList.set(position, recommendResponse);
+            mMyReviewAndCommentAdapter.notifyItemChanged(position);
+//            mRecyclerView.setAdapter(mMyReviewAndCommentAdapter);
+            mDrawerViewControl.updateDrawerUI(recommendResponse);
+        }
+    }
+    
+    public UserResponse getUser() {
+        return mUser;
+    }
+    
+    //토큰으로 회원 정보 가져오기
+    private void selectUserByToken() {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(mToken);
+        Observable<UserResponse> observable = service.getUserFromToken();
+        
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponse>() {
+                    @Override
+                    public void onNext(UserResponse response) {
+                        mUser = response;
+                    }
+                    
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("TOKEN", e.getMessage());
+                    }
+                    
+                    @Override
+                    public void onComplete() {
+                        Log.d("TOKEN", "complete");
+                    }
+                })
+        );
+    }
+    
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.backBtn) {
+            finish();
+        }
+    }
+    
+    @Override
+    public void onBackPressed() {
+        if (mDrawerViewControl.mDrawer.isDrawerOpen(GravityCompat.END)) {
+            mDrawerViewControl.mDrawer.closeDrawer(GravityCompat.END);
+        } else {
+            super.onBackPressed();
+        }
+    }
+}

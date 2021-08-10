@@ -50,21 +50,30 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         TextView address = ((MapMainActivity)mContext).findViewById(R.id.tv_address);
         TextView summary = ((MapMainActivity)mContext).findViewById(R.id.tv_spec);
         RatingBar rating = ((MapMainActivity)mContext).findViewById(R.id.rating_bar);
-        
+    
+    
+        Place item = new Place();
+    
         updatePlaceList();
-        Place item = mPlaceList.get(tag);
+    
+        for (Place o : mPlaceList) {
+            if (o.id == tag) {
+                item = o;
+            }
+        }
         
         title.setText(item.attractName);
         address.setText(item.address);
 //        summary.setText(item.getAttractContents());
         summary.setText("너무 길어서 일단 안보이게 하게쑵니다");
         rating.setRating(item.rate);
-        
-        if (mPlaceList.get(mTag).like) {
+    
+        if (item.like) {
             mHeartBtn.setBackgroundResource(R.drawable.full_heart);
         } else {
             mHeartBtn.setBackgroundResource(R.drawable.heart);
         }
+        
     }
     
     public void updatePlaceList() {

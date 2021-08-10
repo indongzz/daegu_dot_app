@@ -1,11 +1,17 @@
 package com.kop.daegudot.Recommend;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -13,43 +19,62 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
+import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
+import com.kop.daegudot.Network.More.MyInfo.MyCommentList;
+import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
+import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
+import com.kop.daegudot.Network.Recommend.RecommendResponse;
+import com.kop.daegudot.Network.User.UserResponse;
 import com.kop.daegudot.R;
-import com.kop.daegudot.Recommend.PostComment.CommentItem;
-import com.kop.daegudot.Recommend.PostComment.CommentListAdapter;
+import com.kop.daegudot.Recommend.Comment.CommentHandler;
+import com.kop.daegudot.Recommend.Comment.CommentListAdapter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
-public class DrawerHandler {
+/**
+ * 글 목록에서 글 선택 시 나오는 DrawerLayout
+ * 추천글, 내가 쓴 글, 내가 쓴 댓글 볼 때 사용됨
+ */
+public class DrawerHandler implements PopupMenu.OnMenuItemClickListener {
     private final static String TAG = "DrawerHandler";
-    PostItem mPost;
+    RecommendResponse mRecommendPost;
     Context mContext;
     View mView;
+    int position;   // to delete arraylist
     
+    ImageButton drawerBackbtn;
+    ImageButton menuBtn;
     TextView postTitle, postWriter, postContent;
     RatingBar postRating;
     EditText editComment;
     Button applyCommentBtn, watchScheduleBtn;
+    ChipGroup mChipGroup;
     
+    public CommentHandler mCommentHandler;
     RecyclerView mCommentRecyclerview;
-    CommentListAdapter mAdapter;
-    ArrayList<CommentItem> mCommentList;
+    public CommentListAdapter mCommentAdapter;
+    ArrayList<CommentResponse> mCommentList;
     
+    private UserResponse mUser;
     InputMethodManager keyboard;
     
-    DrawerHandler(Context context, View view, PostItem post) {
+    public DrawerHandler(Context context, View view, RecommendResponse post, int position) {
         mContext = context;
-        mPost = post;
+        mRecommendPost = post;
         mView = view;
-        
+        this.position = position;
+    
         bindView();
-        prepareComment();
         handleComment();
     }
     
     public void bindView() {
+        drawerBackbtn = mView.findViewById(R.id.drawer_backBtn);
+        menuBtn = mView.findViewById(R.id.menu_option);
         postTitle = mView.findViewById(R.id.post_title);
         postWriter = mView.findViewById(R.id.post_writer);
         postRating = mView.findViewById(R.id.post_rating);
@@ -57,6 +82,7 @@ public class DrawerHandler {
         editComment = mView.findViewById(R.id.comment_edit);
         applyCommentBtn = mView.findViewById(R.id.apply_comment_btn);
         mCommentRecyclerview = mView.findViewById(R.id.comment_list);
+        mChipGroup = mView.findViewById(R.id.hashtag_groups);
         
         watchScheduleBtn = mView.findViewById(R.id.btn_schedule);
         
@@ -64,68 +90,176 @@ public class DrawerHandler {
     }
     
     public void setDrawer() {
-        postTitle.setText(mPost.getTitle());
-        postRating.setRating(mPost.getRating());
-        postWriter.setText(mPost.getWriter());
-        postContent.setText(mPost.getContent());
+        postTitle.setText(mRecommendPost.title);
+        postRating.setRating((float) mRecommendPost.star);
+        postWriter.setText(mRecommendPost.userResponseDto.nickname);
+        postContent.setText(mRecommendPost.content);
         
-        mAdapter = new CommentListAdapter(mContext, mCommentList);
-        mCommentRecyclerview.setAdapter(mAdapter);
+        mChipGroup.removeAllViews();
+        
+        int n = mRecommendPost.hashtags.size();
+        final Chip[] chips = new Chip[n];
+        
+        for(int i = 0; i < n; i++) {
+            LayoutInflater layoutInflater = getLayoutInflaterByActivity();
+            
+            chips[i] = (Chip) layoutInflater
+                    .inflate(R.layout.layout_chip_choice, mChipGroup, false);
+            String hashName = "#" + mRecommendPost.hashtags.get(i).content;
+            
+            chips[i].setText(hashName);
+            chips[i].setTag(mRecommendPost.hashtags.get(i).content);
+            chips[i].setId((int)mRecommendPost.hashtags.get(i).id);
+            chips[i].setCheckable(false);
+            chips[i].setChecked(true);
+            mChipGroup.addView(chips[i]);
+        }
+        
+        /* 댓글 */
+        mCommentHandler = new CommentHandler(mContext, mView, mRecommendPost);
         mCommentRecyclerview.setLayoutManager(new LinearLayoutManager(mContext));
     
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 mCommentRecyclerview.getContext(), DividerItemDecoration.VERTICAL);
         mCommentRecyclerview.addItemDecoration(dividerItemDecoration);
     
+        /* 일정 보기 */
         watchScheduleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // 일정 보기
-                PostScheduleBottomSheetDialog postScheduleBottomSheetDialog = new PostScheduleBottomSheetDialog();
-                postScheduleBottomSheetDialog
-                        .show(((RecommendListActivity)mContext).getFM(),
-                                PostScheduleBottomSheetDialog.TAG);
+                PostScheduleBottomSheetDialog postScheduleBottomSheetDialog
+                        = new PostScheduleBottomSheetDialog(mRecommendPost.mainScheduleResponseDto);
+                if (mContext instanceof RecommendListActivity) {
+                    postScheduleBottomSheetDialog
+                            .show(((RecommendListActivity) mContext).getFM(),
+                                    PostScheduleBottomSheetDialog.TAG);
+                } else if (mContext instanceof MyReviewStoryActivity) {
+                    postScheduleBottomSheetDialog
+                            .show(((MyReviewStoryActivity) mContext).getFM(),
+                                    PostScheduleBottomSheetDialog.TAG);
+                } else if (mContext instanceof MyCommentActivity) {
+                    postScheduleBottomSheetDialog
+                            .show(((MyCommentActivity) mContext).getFM(),
+                                    PostScheduleBottomSheetDialog.TAG);
+                }
             }
         });
-    
+        
+        drawerBackbtn.setOnClickListener(v -> {
+            callCloseDrawer();
+            editComment.setText("");
+        });
+        
+        /* 작성자일 때 - 수정, 삭제 메뉴 버튼 */
+        if (mContext instanceof RecommendListActivity) {
+            mUser = ((RecommendListActivity) mContext).getUser();
+            if (mUser.token.equals(mRecommendPost.userResponseDto.token)) {
+                showMenuButton();
+            }
+        } else if (mContext instanceof MyReviewStoryActivity) {
+            showMenuButton();
+        } else if (mContext instanceof MyCommentActivity) {
+            showMenuButton();
+        }
     }
     
+    public void showMenuButton() {
+        menuBtn.setVisibility(View.VISIBLE);
+        menuBtn.setOnClickListener(this::showMenu);
+    }
+    
+    public void updateDrawerContent(RecommendResponse recommendResponse) {
+        mRecommendPost = recommendResponse;
+    }
+    
+    public LayoutInflater getLayoutInflaterByActivity() {
+        if (mContext instanceof RecommendListActivity) {
+            return ((RecommendListActivity) mContext).getLayoutInflater();
+        }
+        else if (mContext instanceof MyReviewStoryActivity) {
+            return ((MyReviewStoryActivity) mContext).getLayoutInflater();
+        }
+        else if (mContext instanceof MyCommentActivity) {
+            return ((MyCommentActivity) mContext).getLayoutInflater();
+        }
+        return null;
+    }
+    
+    /* Comment */
+    public void updateCommentUI() {
+        mCommentList = mCommentHandler.getCommentList();
+        mCommentAdapter = new CommentListAdapter(mContext, mCommentList);
+        mCommentRecyclerview.setAdapter(mCommentAdapter);
+    }
+    
+    // Comment Register
     public void handleComment() {
         // 댓글 등록 버튼 클릭 이벤트
-        applyCommentBtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                // TODO: DB에 댓글 추가
-                CommentItem newComment = new CommentItem();
-                // TODO: 나의 정보에서 닉네임 가져오기
-                newComment.setWriter("샤스");
-                newComment.setContent(editComment.getText().toString());
-                newComment.setTime(LocalDateTime.now());
-                
-                mCommentList.add(newComment);
-                
-                editComment.setText("");
-                editComment.clearFocus();
-                keyboard.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
-            }
+        applyCommentBtn.setOnClickListener(v -> {
+            CommentRegister newComment = new CommentRegister();
+            newComment.comments = editComment.getText().toString();
+            newComment.recommendScheduleId = mRecommendPost.id;
+            
+            mCommentHandler.registerComment(newComment);
+            
+            editComment.setText("");
+            editComment.clearFocus();
+            keyboard.hideSoftInputFromWindow(editComment.getWindowToken(), 0);
         });
     }
     
-    // TODO: get comments from DB
-    public void prepareComment() {
-        mCommentList = new ArrayList<>();
-        
-        String[] writers = {"작성자1", "작성자2"};
-        String[] contents = {"내용내용내용1", "내용내욘애뇽3"};
-        LocalDateTime[] times = {LocalDateTime.parse("2021-02-25T19:30:00"), LocalDateTime.parse("2021-02-25T19:37:00")};
-        
-        for (int i = 0; i < 2; i++) {
-            CommentItem item = new CommentItem();
-            item.setWriter(writers[i]);
-            item.setContent(contents[i]);
-            item.setTime(times[i]);
+    // Add comment on List and notify
+    public void addComment(CommentResponse newComment) {
+        mCommentList.add(newComment);
+        mCommentAdapter.notifyDataSetChanged();
+    }
+    
+    // menu option
+    public void showMenu(View v) {
+        PopupMenu popup = new PopupMenu(mContext, v);
+        MenuInflater inflater = popup.getMenuInflater();
+        popup.setOnMenuItemClickListener(this);
+        inflater.inflate(R.menu.menu_option, popup.getMenu());
+        popup.show();
+    }
+    
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        if (item.getItemId() == R.id.menu_delete) {
+            Log.d("Menu: ", "delete clicked");
+            DeleteRecommendSchedule deleteRecommendSchedule
+                    = new DeleteRecommendSchedule(mContext, mRecommendPost, position);
+            callCloseDrawer();
             
-            mCommentList.add(item);
+            return true;
+        }
+        if (item.getItemId() == R.id.menu_update) {
+            Log.d("Menu: ", "update clicked");
+            Intent intent = new Intent(mContext, UpdateRecommendActivity.class);
+            intent.putExtra("recommendPost", mRecommendPost);
+            intent.putExtra("listIndex", position);
+            if (mContext instanceof RecommendListActivity) {
+                ((RecommendListActivity) mContext).startActivityForResult(intent, 200);
+            } else if (mContext instanceof MyReviewStoryActivity) {
+                ((MyReviewStoryActivity) mContext).startActivityForResult(intent, 200);
+            } else if (mContext instanceof MyCommentActivity) {
+                ((MyCommentActivity) mContext).startActivityForResult(intent, 200);
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    public void callCloseDrawer() {
+        if (mContext instanceof MyReviewStoryActivity) {
+            ((MyReviewStoryActivity)mContext).mDrawerViewControl.closeDrawer();
+        }
+        else if (mContext instanceof MyCommentActivity) {
+            ((MyCommentActivity)mContext).mDrawerViewControl.closeDrawer();
+        }
+        else if (mContext instanceof RecommendListActivity) {
+            ((RecommendListActivity)mContext).mDrawerViewControl.closeDrawer();
         }
     }
 }
