@@ -48,10 +48,11 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     ArrayList<DateSubSchedule> mDateSubScheduleList;
     int position = 0; // default = first page
     Place mPlace;
+    long placeId;
     
     ArrayList<Place> mPlaceList = new ArrayList<>();
     BottomSheetBehavior<View> mBSBPlace;
-    PlaceBottomSheet placeBottomSheet;
+    public PlaceBottomSheet placeBottomSheet;
     BottomSheetBehavior<View> mBSBSchedule;
     ViewPager2 mMainListView;
     MainScheduleBottomSheetAdapter mMainScheduleBottomSheetAdapter;
@@ -112,7 +113,6 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
     }
     
-    /* MainSchedule 이용해서 SubSchedule List 서버로부터 받아오기 */
     public void getSchedule() {
         Intent intent = getIntent();
         
@@ -122,6 +122,8 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         position = intent.getIntExtra("position", 0);
         // 추천글에서 일정 Chip 클릭 시
         mPlace = intent.getParcelableExtra("markerPlace");
+        // 찜 목록 클릭 시
+        placeId = intent.getLongExtra("placeId", 0);
         
         if (mMainSchedule != null) {
             String titleString = mMainSchedule.getDateString();
@@ -135,10 +137,13 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         }
     }
     
-    public void notifyPlaceListDone(ArrayList<Place> placeList) {
-        mPlaceList = placeList;
+    public void notifyPlaceListDone() {
+        Log.d(TAG, "done place id : " + placeId);
         if (mPlace != null) {
             placeBottomSheet.changePlaceBottomSheet((int) mPlace.id);
+            mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else if (placeId != 0) {
+            placeBottomSheet.changePlaceBottomSheet(placeId);
             mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
     }
@@ -187,12 +192,12 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
-    
+        Log.d(TAG, "touched");
     }
     
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
-    
+        Log.d(TAG, "touched");
     }
     
     @Override

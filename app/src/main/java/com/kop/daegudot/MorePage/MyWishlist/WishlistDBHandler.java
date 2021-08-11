@@ -5,6 +5,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.Login.KakaoLogin.GlobalApplication;
 import com.kop.daegudot.MorePage.MyWishlist.Database.Wishlist;
 
@@ -49,7 +50,7 @@ public class WishlistDBHandler {
     }
     
     public void getWishlistByPlaceId(long id) {
-    
+        getWishlistByPlaceIdRx(id);
     }
     
     private void insertWishlistRx(Wishlist wishlist) {
@@ -91,35 +92,6 @@ public class WishlistDBHandler {
                     ((MyWishlistActivity) mContext).updateUI(mWishList);
                 })
         );
-        
-        // Todo: 왜 onComplete가 불리지 않을까?
-//        Observable<List<Wishlist>> observable =
-//                GlobalApplication.db.wishlistDao().selectAllWishlists();
-//
-//        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribeWith(new DisposableObserver<List<Wishlist>>() {
-//                    @Override
-//                    public void onNext(List<Wishlist> response) {
-//                        Log.d("RX " + TAG, "Next");
-//                        mWishList.addAll(response);
-//                        Log.d("RX " + TAG, "size: " + mWishList.size());
-//                        ((MyWishlistActivity) mContext).updateUI(mWishList);
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        Log.d("RX " + TAG, e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//                        Log.d("RX " + TAG, "complete");
-//                        ((MyWishlistActivity) mContext).updateUI(mWishList);
-//                    }
-//                })
-//        );
-//
     }
     
     private void deleteWishlistRx(Wishlist wishlist) {
@@ -155,7 +127,8 @@ public class WishlistDBHandler {
                     @Override
                     public void onNext(Wishlist response) {
                         Log.d("RX " + TAG, "Next");
-                        Toast.makeText(mContext, "response: " + response.attractName, Toast.LENGTH_SHORT).show();
+    
+                        ((MapMainActivity) mContext).placeBottomSheet.setHeartBtn();
                     }
 
                     @Override
@@ -166,7 +139,7 @@ public class WishlistDBHandler {
                     @Override
                     public void onComplete() {
                         Log.d("RX " + TAG, "complete");
-                        ((MyWishlistActivity) mContext).updateUI(mWishList);
+//                        ((MyWishlistActivity) mContext).updateUI(mWishList);
                     }
                 })
         );

@@ -39,7 +39,8 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     MainScheduleInfo mMainSchedule;
     ArrayList<DateSubSchedule> mDateSubScheduleList;
     
-    private int mTag;
+    WishlistDBHandler wishlistDBHandler;
+    
     private Button mHeartBtn;
     private Button mAddToSchBtn;
     private TextView mTitle;
@@ -53,6 +54,7 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         mMainSchedule = mainSchedule;
         mDateSubScheduleList = subScheduleList;
     
+        wishlistDBHandler = new WishlistDBHandler(mContext);
         bindViews();
     }
     
@@ -68,9 +70,7 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         mStar = ((MapMainActivity)mContext).findViewById(R.id.rating_bar);
     }
     
-    public void changePlaceBottomSheet(int tag) {
-        mTag = tag;
-    
+    public void changePlaceBottomSheet(long tag) {
         for (Place o : ((MapMainActivity) mContext).mPlaceList) {
             if (o.id == tag) {
                 mPlace = o;
@@ -83,12 +83,15 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         mContents.setText("너무 길어서 일단 안보이게 하게쑵니다");
         mStar.setRating(mPlace.rate);
     
-        if (mPlace.like) {
-            mHeartBtn.setBackgroundResource(R.drawable.full_heart);
-        } else {
-            mHeartBtn.setBackgroundResource(R.drawable.heart);
-        }
+        mPlace.like = false;
+        mHeartBtn.setBackgroundResource(R.drawable.heart);
         
+        wishlistDBHandler.getWishlistByPlaceId(mPlace.id);
+    }
+    
+    public void setHeartBtn() {
+        mPlace.like = true;
+        mHeartBtn.setBackgroundResource(R.drawable.full_heart);
     }
     
     public void selectSubScheduleDate() {
@@ -142,14 +145,12 @@ public class PlaceBottomSheet implements Button.OnClickListener {
                 mHeartBtn.setBackgroundResource(R.drawable.heart);
                 mPlace.like = false;
                 
-                WishlistDBHandler wishlistDBHandler = new WishlistDBHandler(mContext);
                 wishlistDBHandler.deleteWishlists(wishlist);
             }
             else {    // 좋아요 안했으면 좋아요
                 mHeartBtn.setBackgroundResource(R.drawable.full_heart);
                 mPlace.like = true;
                 
-                WishlistDBHandler wishlistDBHandler = new WishlistDBHandler(mContext);
                 wishlistDBHandler.insertWishlist(wishlist);
             }
         }
