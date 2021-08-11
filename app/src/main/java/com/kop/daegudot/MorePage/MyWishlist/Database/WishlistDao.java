@@ -9,6 +9,7 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import io.reactivex.Observable;
 
 @Dao
 public interface WishlistDao {
@@ -20,4 +21,7 @@ public interface WishlistDao {
     
     @Query("select * from wishlist")
     public Flowable<List<Wishlist>> selectAllWishlists();
+    
+    @Query("SELECT * from wishlist WHERE placeId = :placeId")
+    public Observable<Wishlist> selectWishlistByPlaceId(long placeId);
 }

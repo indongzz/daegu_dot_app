@@ -35,7 +35,6 @@ import io.reactivex.schedulers.Schedulers;
 public class PlaceBottomSheet implements Button.OnClickListener {
     private final static String TAG = "PlaceBottomSheet";
     private Context mContext;
-    private ArrayList<Place> mPlaceList = null;
     private Place mPlace = null;
     MainScheduleInfo mMainSchedule;
     ArrayList<DateSubSchedule> mDateSubScheduleList;
@@ -71,10 +70,8 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     
     public void changePlaceBottomSheet(int tag) {
         mTag = tag;
-     
-        updatePlaceList();
     
-        for (Place o : mPlaceList) {
+        for (Place o : ((MapMainActivity) mContext).mPlaceList) {
             if (o.id == tag) {
                 mPlace = o;
             }
@@ -92,10 +89,6 @@ public class PlaceBottomSheet implements Button.OnClickListener {
             mHeartBtn.setBackgroundResource(R.drawable.heart);
         }
         
-    }
-    
-    public void updatePlaceList() {
-        mPlaceList = ((MapMainActivity)mContext).updatePlaceList();
     }
     
     public void selectSubScheduleDate() {
@@ -126,9 +119,6 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     }
     
     public void addSubSchedule(String date) {
-        /* update Place list */
-        mPlaceList = ((MapMainActivity) mContext).updatePlaceList();
-        
         Log.d(TAG, "add subschedule: " + mPlace.id);
         SubScheduleRegister subScheduleRegister = new SubScheduleRegister();
         subScheduleRegister.mainScheduleId = mMainSchedule.getMainId();

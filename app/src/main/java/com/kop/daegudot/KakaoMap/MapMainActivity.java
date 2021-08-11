@@ -21,7 +21,6 @@ import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.SubScheduleDialog;
 import com.kop.daegudot.Network.Map.Place;
-import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -50,10 +49,10 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     int position = 0; // default = first page
     Place mPlace;
     
-    ArrayList<Place> mPlaceList;
-    BottomSheetBehavior mBSBPlace;
+    ArrayList<Place> mPlaceList = new ArrayList<>();
+    BottomSheetBehavior<View> mBSBPlace;
     PlaceBottomSheet placeBottomSheet;
-    BottomSheetBehavior mBSBSchedule;
+    BottomSheetBehavior<View> mBSBSchedule;
     ViewPager2 mMainListView;
     MainScheduleBottomSheetAdapter mMainScheduleBottomSheetAdapter;
     MapPOIItem prevPOIItem = null;
@@ -94,23 +93,22 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         // Set MarkerItems
         mMapMarkerItems = new MapMarkerItems(this, mMapView);
         mMapMarkerItems.setMarkerItems();
-//        mMapMarkerItems.selectAllKakaoPlaceListRx(128.601705,35.871344);
-        mPlaceList = updatePlaceList();
+//        mPlaceList = updatePlaceList();
         
         getSchedule();
-        
+
         /* BottomSheet */
         placeBottomSheet =
                 new PlaceBottomSheet(this, mMainSchedule, mDateSubScheduleList);
 
-        CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
+        CoordinatorLayout placeLayout = findViewById(R.id.bottomSheet);
         mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         mMainListView = findViewById(R.id.viewPager);
         mMainListView.setNestedScrollingEnabled(false);
 
-        NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
+        NestedScrollView scheduleLayout = findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
     }
     
@@ -150,7 +148,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         placeBottomSheet =
                 new PlaceBottomSheet(mContext, mMainSchedule, mDateSubScheduleList);
     
-        CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
+        CoordinatorLayout placeLayout = findViewById(R.id.bottomSheet);
         mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
     
@@ -159,15 +157,11 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mMainListView.setAdapter(mMainScheduleBottomSheetAdapter);
         mMainListView.setOffscreenPageLimit(mMainSchedule.getDateBetween() * 2);
     
-        NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
+        NestedScrollView scheduleLayout = findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
         
         // move to n일차
         mMainListView.setCurrentItem(position);
-    }
-    
-    public ArrayList<Place> updatePlaceList() {
-        return mMapMarkerItems.getPlaceList();
     }
     
     // click event
@@ -209,20 +203,22 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     // MapView Click event
     @Override
     public void onMapViewInitialized(MapView mapView) {
-    
+        Log.d(TAG, "MapView Initialized");
     }
     
     @Override
     public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
+        Log.d(TAG, "MapView Center Point Moved");
     }
     
     @Override
     public void onMapViewZoomLevelChanged(MapView mapView, int i) {
-    
+        Log.d(TAG, "MapView Zoom Level Changed");
     }
     
     @Override
     public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
+        Log.d(TAG, "MapView Single Tapped");
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
         mBSBSchedule.setState(BottomSheetBehavior.STATE_EXPANDED);
         prevPOIItem = null;
@@ -232,40 +228,44 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     @Override
     public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint) {
-    
+        Log.d(TAG, "MapView Double Tapped");
     }
     
     @Override
     public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint) {
-    
+        Log.d(TAG, "MapView Long Pressed");
     }
     
     @Override
     public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
-    
+        Log.d(TAG, "MapView Drag Started");
     }
     
     @Override
     public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
-    
+        Log.d(TAG, "MapView Drag Ended");
     }
     
     @Override
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
+        Log.d(TAG, "MapView Moved: " + mPlaceList.size());
         
-        ArrayList<MapPOIItem> lists = mMapMarkerItems.getmMarkerList();
-        addPOItoMapView(lists);
+        addPOItoMapView();
     }
     
-    public void addPOItoMapView(ArrayList<MapPOIItem> lists) {
+    public void addPOItoMapView() {
+        ArrayList<MapPOIItem> lists = mMapMarkerItems.getMarkerList();
         mMapView.removeAllPOIItems();
         
+        int count = 0;
         for (MapPOIItem item: lists) {
             if (mMapView.getMapPointBounds().contains(item.getMapPoint())) {
                 if (mMapUIControl.checkCategory(item)) {
                     mMapView.addPOIItem(item);
+                    count++;
                 }
             }
+            if (count > 100) break;
         }
         
         // 이전에 클릭한 POIItem 띄우기

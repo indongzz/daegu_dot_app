@@ -1,10 +1,10 @@
 package com.kop.daegudot.MorePage.MyWishlist;
 
 import android.content.Context;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.Login.KakaoLogin.GlobalApplication;
 import com.kop.daegudot.MorePage.MyWishlist.Database.Wishlist;
 
@@ -16,7 +16,6 @@ import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -49,6 +48,9 @@ public class WishlistDBHandler {
         deleteWishlistRx(wishlist);
     }
     
+    public void getWishlistByPlaceId(long id) {
+    
+    }
     
     private void insertWishlistRx(Wishlist wishlist) {
         Log.d("Rx " + TAG, "insert!");
@@ -143,5 +145,30 @@ public class WishlistDBHandler {
                 );
     }
     
+    private void getWishlistByPlaceIdRx(long placeId) {
+        Observable<Wishlist> observable =
+                GlobalApplication.db.wishlistDao().selectWishlistByPlaceId(placeId);
     
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Wishlist>() {
+                    @Override
+                    public void onNext(Wishlist response) {
+                        Log.d("RX " + TAG, "Next");
+                        Toast.makeText(mContext, "response: " + response.attractName, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("RX " + TAG, e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("RX " + TAG, "complete");
+                        ((MyWishlistActivity) mContext).updateUI(mWishList);
+                    }
+                })
+        );
+    }
 }

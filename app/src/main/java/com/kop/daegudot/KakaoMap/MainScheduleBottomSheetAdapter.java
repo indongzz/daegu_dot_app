@@ -40,8 +40,8 @@ public class MainScheduleBottomSheetAdapter extends RecyclerView.Adapter<MainSch
     
     static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView nthday;
-        static Button leftBtn;
-        static Button rightBtn;
+        Button leftBtn;
+        Button rightBtn;
         
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -58,17 +58,15 @@ public class MainScheduleBottomSheetAdapter extends RecyclerView.Adapter<MainSch
             int position = Integer.parseInt
                     (nthday.getText().toString().replaceAll("[^0-9]", ""));
             
-            switch(v.getId()) {
-                case R.id.left_btn:
-                    if (position > 1) {
-                        ((MapMainActivity) mContext).mMainListView.setCurrentItem(position - 2);
-                    }
-                    break;
-                case R.id.right_btn:
-                    if (position < mMainSchedule.getDateBetween()) {
-                        ((MapMainActivity) mContext).mMainListView.setCurrentItem(position);
-                    }
-                    break;
+            if (v.getId() == R.id.left_btn) {
+                if (position > 1) {
+                    ((MapMainActivity) mContext).mMainListView.setCurrentItem(position - 2);
+                }
+            }
+            if (v.getId() == R.id.right_btn) {
+                if (position < mMainSchedule.getDateBetween()) {
+                    ((MapMainActivity) mContext).mMainListView.setCurrentItem(position);
+                }
             }
         }
     }
@@ -89,18 +87,17 @@ public class MainScheduleBottomSheetAdapter extends RecyclerView.Adapter<MainSch
         RecyclerView.OnItemTouchListener mScrollTouchListener =
                 new RecyclerView.OnItemTouchListener() {
             @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+            public boolean onInterceptTouchEvent(@io.reactivex.annotations.NonNull RecyclerView rv, MotionEvent e) {
                 int action = e.getAction();
-                switch (action) {
-                    case MotionEvent.ACTION_MOVE:
-                        rv.getParent().requestDisallowInterceptTouchEvent(true);
-                        break;
+                if (action == MotionEvent.ACTION_MOVE) {
+                    rv.getParent().requestDisallowInterceptTouchEvent(true);
                 }
                 return false;
             }
 
             @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+            public void onTouchEvent(@io.reactivex.annotations.NonNull RecyclerView rv,
+                                     @io.reactivex.annotations.NonNull MotionEvent e) {
 
             }
 
@@ -143,16 +140,16 @@ public class MainScheduleBottomSheetAdapter extends RecyclerView.Adapter<MainSch
     
         if (position == 0) {
             Log.d(TAG, "position is 0. blank left");
-            ViewHolder.leftBtn.setBackgroundResource(R.drawable.blank_arrow_left);
-            ViewHolder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
+            holder.leftBtn.setBackgroundResource(R.drawable.blank_arrow_left);
+            holder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
         } else if (position == mMainSchedule.getDateBetween() - 1) {
             Log.d(TAG, "position is last. blank right");
-            ViewHolder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
-            ViewHolder.rightBtn.setBackgroundResource(R.drawable.blank_arrow_right);
+            holder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
+            holder.rightBtn.setBackgroundResource(R.drawable.blank_arrow_right);
         } else {
             Log.d(TAG, "full arrow");
-            ViewHolder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
-            ViewHolder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
+            holder.leftBtn.setBackgroundResource(R.drawable.arrow_left);
+            holder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
         }
         
         mSubScheduleBottomSheetAdapter = new SubScheduleBottomSheetAdapter(

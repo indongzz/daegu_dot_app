@@ -9,6 +9,7 @@ import android.widget.Toast;
 import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
 import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
+import com.kop.daegudot.Network.Recommend.Comment.CommentRegisterResponse;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
@@ -60,21 +61,23 @@ public class CommentHandler {
 
     private void registerCommentRx(CommentRegister commentRegister) {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
-        Observable<Long> observable = service.registerComment(commentRegister);
-
+        Observable<CommentRegisterResponse> observable = service.registerComment(commentRegister);
+//        Observable<Long> observable = service.registerComment(commentRegister);
+        
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<Long>() {
+                .subscribeWith(new DisposableObserver<CommentRegisterResponse>() {
                     @Override
-                    public void onNext(Long response) {
+                    public void onNext(CommentRegisterResponse response) {
                         Log.d("RX " + TAG, "comment register Next");
     
                         CommentResponse commentResponse = new CommentResponse();
-                        commentResponse.id = response;
+                        commentResponse.id = response.id;
+//                        commentResponse.id = response;
                         commentResponse.comments = commentRegister.comments;
                         commentResponse.recommendScheduleResponseDto = mRecommendPost;
-                        // Todo: 시간 ? 어쩌지
-                        commentResponse.dateTime = LocalDateTime.now().toString();
+                        commentResponse.dateTime = response.localTime;
+//                        commentResponse.dateTime = String.valueOf(System.currentTimeMillis());
                         commentResponse.userResponseDto = getUserByActivity();
                         
                         addCommentOnActivity(commentResponse);

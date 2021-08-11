@@ -2,13 +2,10 @@ package com.kop.daegudot.KakaoMap;
 
 import android.content.Context;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
-import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -55,13 +52,10 @@ public class MapUIControl {
             mCategory[i].setPadding(1, 1, 1, 1);
             mCategory[i].setBackground(ContextCompat.getDrawable(mContext, R.drawable.round_line_btn));
             final int next = i;
-            mCategory[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    current = next;
-                    changeButtonUI(current);
-                    changeCategory(current);
-                }
+            mCategory[i].setOnClickListener(v -> {
+                changeButtonUI(next);
+                changeCategory(next);
+                current = next;
             });
             layout.addView(mCategory[i]);
         }
@@ -82,9 +76,7 @@ public class MapUIControl {
         ((MapMainActivity) mContext).prevPOIItem = null;
         categoryFlag = category;
         
-        ArrayList<MapPOIItem> lists =
-                ((MapMainActivity) mContext).mMapMarkerItems.getmMarkerList();
-        ((MapMainActivity) mContext).addPOItoMapView(lists);
+        ((MapMainActivity) mContext).addPOItoMapView();
     }
     
     
@@ -93,7 +85,7 @@ public class MapUIControl {
         
         Place place = new Place();
         
-        for (Place o: ((MapMainActivity)mContext).mPlaceList) {
+        for (Place o: ((MapMainActivity) mContext).mPlaceList) {
             if (o.id == item.getTag()) {
                 place = o;
                 break;
@@ -101,13 +93,14 @@ public class MapUIControl {
         }
         String category = place.category;
         
-        // TODO: 카테고리 변경
+        // TODO: category 해결
         if (category == null) {
-            if (categoryFlag == 0) {
+            bool = true;
+        }
+        else {
+            if (categoryFlag == 0 && category.equals("TR")) {
                 bool = true;
-            }
-        } else {
-            if (categoryFlag == 1 && category.equals("AD")) {  // 숙박
+            } else if (categoryFlag == 1 && category.equals("AD")) {  // 숙박
                 bool = true;
             } else if (categoryFlag == 2 && category.equals("FD")) {  // 음식
                 bool = true;
