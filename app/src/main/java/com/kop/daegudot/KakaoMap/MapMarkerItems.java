@@ -142,9 +142,6 @@ public class MapMarkerItems {
         
         ((MapMainActivity) mContext).addPOItoMapView();
     
-        /* Progress Loading done */
-        ((MapMainActivity) mContext).progressBar.setVisibility(View.GONE);
-    
         /* if move from recommend list or wishlist activity*/
         ((MapMainActivity) mContext).notifyPlaceListDone();
     }

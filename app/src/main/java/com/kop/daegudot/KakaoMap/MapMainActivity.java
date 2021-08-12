@@ -138,7 +138,6 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     }
     
     public void notifyPlaceListDone() {
-        Log.d(TAG, "done place id : " + placeId);
         if (mPlace != null) {
             placeBottomSheet.changePlaceBottomSheet((int) mPlace.id);
             mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -249,12 +248,13 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     @Override
     public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
         Log.d(TAG, "MapView Drag Ended");
+        progressBar.setVisibility(View.VISIBLE);
     }
     
     @Override
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
         Log.d(TAG, "MapView Moved: " + mPlaceList.size());
-        
+    
         addPOItoMapView();
     }
     
@@ -270,12 +270,17 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
                     count++;
                 }
             }
-            if (count > 100) break;
+            if (count > 50) break;
         }
         
         // 이전에 클릭한 POIItem 띄우기
         if (prevPOIItem != null) {
             mMapView.selectPOIItem(prevPOIItem, true);
+        }
+    
+        /* Progress Loading done */
+        if (mPlaceList.size() != 0) {
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 }
