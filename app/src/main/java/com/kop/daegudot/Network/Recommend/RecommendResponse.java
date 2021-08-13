@@ -10,9 +10,11 @@ import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponse;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponse;
 import com.kop.daegudot.Network.User.UserResponse;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-public class RecommendResponse implements Parcelable {
+public class RecommendResponse implements Parcelable, Comparable<RecommendResponse> {
     public long id;
     public String title;
     public String content;
@@ -70,7 +72,6 @@ public class RecommendResponse implements Parcelable {
         dest.writeParcelable(userResponseDto, 0);
     }
     
-    
     @Override
     public boolean equals(@Nullable Object obj) {
         boolean bool = false;
@@ -80,5 +81,21 @@ public class RecommendResponse implements Parcelable {
         }
         
         return bool;
+    }
+    
+    
+    @Override
+    public int compareTo(RecommendResponse o) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        LocalDateTime date1 = LocalDateTime.parse(localDateTime, formatter);
+        LocalDateTime date2 = LocalDateTime.parse(o.localDateTime, formatter);
+    
+        if (date1.isBefore(date2)) {
+            return -1;
+        } else if (date1.isAfter(date2)) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }

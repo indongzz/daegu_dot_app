@@ -2,23 +2,17 @@ package com.kop.daegudot.KakaoMap;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Display;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,18 +22,17 @@ import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
-import java.util.Map;
 
-public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.ViewHolder> {
-    private static final String TAG = "ViewPagerAdapter";
+public class MainScheduleBottomSheetAdapter extends RecyclerView.Adapter<MainScheduleBottomSheetAdapter.ViewHolder> {
+    private static final String TAG = "MainScheduleBottomSheetAdapter";
     static Context mContext;
     ArrayList<DateSubSchedule> mDateSubScheduleList;
     
     RecyclerView mRecyclerView;
     static MainScheduleInfo mMainSchedule;
-    ScheduleRecyclerViewAdapter adapter;
+    SubScheduleBottomSheetAdapter mSubScheduleBottomSheetAdapter;
     
-    ViewPagerAdapter(Context context, MainScheduleInfo mainSchedule, ArrayList<DateSubSchedule> subScheduleList) {
+    MainScheduleBottomSheetAdapter(Context context, MainScheduleInfo mainSchedule, ArrayList<DateSubSchedule> subScheduleList) {
         mContext = context;
         mDateSubScheduleList = subScheduleList;
         mMainSchedule = mainSchedule;
@@ -68,12 +61,12 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
             switch(v.getId()) {
                 case R.id.left_btn:
                     if (position > 1) {
-                        ((MapMainActivity) mContext).mViewPager.setCurrentItem(position - 2);
+                        ((MapMainActivity) mContext).mMainListView.setCurrentItem(position - 2);
                     }
                     break;
                 case R.id.right_btn:
                     if (position < mMainSchedule.getDateBetween()) {
-                        ((MapMainActivity) mContext).mViewPager.setCurrentItem(position);
+                        ((MapMainActivity) mContext).mMainListView.setCurrentItem(position);
                     }
                     break;
             }
@@ -82,12 +75,12 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     
     @NonNull
     @Override
-    public ViewPagerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MainScheduleBottomSheetAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater =
                 (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     
         View view = inflater.inflate(R.layout.bottom_sheet_schedule, parent, false);
-        ViewPagerAdapter.ViewHolder vh = new ViewPagerAdapter.ViewHolder(view);
+        MainScheduleBottomSheetAdapter.ViewHolder vh = new MainScheduleBottomSheetAdapter.ViewHolder(view);
         
         mRecyclerView = view.findViewById(R.id.BSScheduleList);
         mRecyclerView.getLayoutParams().width = 830;
@@ -144,7 +137,6 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
     
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Log.d(TAG, position + 1 + "일차 " + " arrow !! " + position + " main " + mMainSchedule.getDateBetween());
         String text = (position + 1) + " 일차";
         holder.nthday.setText(text);
         
@@ -163,10 +155,10 @@ public class ViewPagerAdapter extends RecyclerView.Adapter<ViewPagerAdapter.View
             ViewHolder.rightBtn.setBackgroundResource(R.drawable.arrow_right);
         }
         
-        adapter = new ScheduleRecyclerViewAdapter(
+        mSubScheduleBottomSheetAdapter = new SubScheduleBottomSheetAdapter(
                 mDateSubScheduleList.get(position).subScheduleList, mContext);
     
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(mSubScheduleBottomSheetAdapter);
     
     //    setRecyclerViewDivider();
        

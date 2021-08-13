@@ -64,7 +64,6 @@ public class MyInformationActivity extends AppCompatActivity implements View.OnC
         pref = getSharedPreferences("data", MODE_PRIVATE);
         mToken = pref.getString("token", "");
 
-        //ToDo: 토큰으로 사용자 정보 가져오기
         selectUserByToken();
 
         mListView = findViewById(R.id.myinfo_list);

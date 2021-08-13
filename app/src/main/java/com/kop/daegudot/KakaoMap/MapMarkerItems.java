@@ -90,7 +90,7 @@ public class MapMarkerItems {
     }
     
     public void setMarkerItems() {
-        startRx();
+        selectAllPlaceListRx();
     }
     
     public ArrayList<Place> getPlaceList() {
@@ -101,7 +101,7 @@ public class MapMarkerItems {
         return mMarkerList;
     }
     
-    private void startRx() {
+    private void selectAllPlaceListRx() {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(null);
         Observable<List<Place>> observable = service.getPlaceList();
     
@@ -143,6 +143,10 @@ public class MapMarkerItems {
                 MapPOIItem marker = new MapPOIItem();
                 marker.setItemName(place.attractName);
                 marker.setTag(mPlaceList.get(tagNum).tag);
+                // Todo: delete after db done
+                if (place.latitude == null) {
+                    continue;
+                }
                 MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
                         Double.parseDouble(place.latitude), Double.parseDouble(place.longitude));
                 marker.setMapPoint(mapPoint);
@@ -163,7 +167,7 @@ public class MapMarkerItems {
     //AD5	숙박
     //FD6	음식점
     //CE7	카페
-    public void startRx2(double x, double y) {
+    public void selectAllKakaoPlaceListRx(double x, double y) {
         
         RestApiService service = RestfulAdapter.getInstance().getKakaoServiceApi();
         
@@ -206,16 +210,16 @@ public class MapMarkerItems {
                     } else {
                         Log.d(TAG, "code: " + response.code());
                     }   // AD if문 종료
-            
+
                 }
-        
+
                 @Override
                 public void onFailure(Call<Documents> call, Throwable t) {
-            
+
                 }
             });
         }
-    
+        
         for (int i = 0; i < 5; i++) {
             Call<Documents> cafeCall = service.getPlacebyCategory(
                     key, "CE7", x + "", y + "", 20000, i + 1);

@@ -107,25 +107,20 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
                     @Override
                     public void onNext(SubScheduleResponseList response) {
                         Log.d("RX " + TAG, "getsubschedule: " + "Next");
+                        mSubScheduleList = new ArrayList<>();
                         if (response.status == 0L) {
                             /* no subschedule just pass MapMainSchedule */
-                            
                             moveToMapMainActivity();
-                            
-                        } else if (response.status == 1L){
+                        }
+                        else if (response.status == 1L){
                             // subschedule exists
-                            mSubScheduleList = new ArrayList<>();
-                            mSubScheduleList.addAll(response.subScheduleResponseDtoArrayList);
+                            mSubScheduleList = response.subScheduleResponseDtoArrayList;
                         }
                     }
                     
                     @Override
                     public void onError(Throwable e) {
                         Log.d("RX " + TAG, "getsubschedule: " + e.getMessage());
-                        // TODO: select SubSchedule 수정
-                        // 여기 error가 있으면 안됨
-                        Log.d("RX getSubschedule: ", mMainScheduleInfo.getMainId() + " ");
-                        moveToMapMainActivity();
                     }
                     
                     @Override
@@ -156,20 +151,21 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
             dateSubSchedules.add(ds);
         }
         
-        int index = 0;
-        for (int i = 0; i < sub.size(); i++) {
-            if (dateSubSchedules.get(index).date.equals(sub.get(i).date)) {
-                dateSubSchedules.get(index).subScheduleList.add(sub.get(i));
-            }
-            else {
-                index++;
-                i--;
+        if (sub != null) {
+            int index = 0;
+            for (int i = 0; i < sub.size(); i++) {
+                if (dateSubSchedules.get(index).date.equals(sub.get(i).date)) {
+                    dateSubSchedules.get(index).subScheduleList.add(sub.get(i));
+                } else {
+                    index++;
+                    i--;
+                }
             }
         }
         
-        for (int i = 0; i < dateSubSchedules.size(); i++) {
-            Log.d(TAG, dateSubSchedules.get(i).subScheduleList + " ");
-        }
+//        for (int i = 0; i < dateSubSchedules.size(); i++) {
+//            Log.d(TAG, dateSubSchedules.get(i).subScheduleList + " ");
+//        }
         
         return dateSubSchedules;
     }
@@ -189,6 +185,4 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
                 break;
         }
     }
-    
-    
 }

@@ -11,10 +11,12 @@ import com.kakao.auth.IApplicationConfig;
 import com.kakao.auth.ISessionConfig;
 import com.kakao.auth.KakaoAdapter;
 import com.kakao.auth.KakaoSDK;
+import com.kop.daegudot.MorePage.MyWishlist.Database.WishlistDatabase;
 
 // initiate Kakao SDK
 public class GlobalApplication extends Application {
     private static GlobalApplication instance;
+    public static WishlistDatabase db = null;
 
     public static GlobalApplication getGlobalApplicationContext() {
         if (instance == null) {
@@ -29,6 +31,7 @@ public class GlobalApplication extends Application {
         super.onCreate();
         instance = this;
 
+        db = WishlistDatabase.getInstance(getGlobalApplicationContext());
         KakaoSDK.init(new KakaoSDKAdapter());
     }
 

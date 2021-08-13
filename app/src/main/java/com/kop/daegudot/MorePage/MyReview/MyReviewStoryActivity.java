@@ -1,5 +1,6 @@
 package com.kop.daegudot.MorePage.MyReview;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
@@ -7,7 +8,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.kop.daegudot.Network.More.MyInfo.MyRecommendList;
+import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
@@ -25,6 +29,7 @@ import com.kop.daegudot.R;
 import com.kop.daegudot.Recommend.DrawerViewControl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -39,8 +44,9 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class MyReviewStoryActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MyReviewStoryActivity";
+    private static final int REQUEST_CODE = 200;
     private Context mContext;
-    private ArrayList<RecommendResponse> mRecommendList;
+    private ArrayList<RecommendResponse> mRecommendList = new ArrayList<>();
     private RecyclerView mRecyclerView;
     public MyReviewAndCommentAdapter mMyReviewAndCommentAdapter;
     View mView;
@@ -98,9 +104,7 @@ public class MyReviewStoryActivity extends AppCompatActivity implements View.OnC
                         if (response.status == 1L) {
                             mRecommendList = response.recommendScheduleResponseDtoArrayList;
                             
-                            for (int i = 0; i < mRecommendList.size(); i++) {
-                                Log.d("RX " + TAG, "i: " + mRecommendList.get(i).title);
-                            }
+                            Collections.sort(mRecommendList);
                         }
                     }
                     
@@ -135,6 +139,23 @@ public class MyReviewStoryActivity extends AppCompatActivity implements View.OnC
     
     public FragmentManager getFM() {
         return getSupportFragmentManager();
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode != Activity.RESULT_OK) {
+                return;
+            }
+            RecommendResponse recommendResponse = data.getParcelableExtra("updatedRecommendPost");
+            int position = data.getIntExtra("position", 0);
+            mRecommendList.set(position, recommendResponse);
+            mMyReviewAndCommentAdapter.notifyItemChanged(position);
+//            mRecyclerView.setAdapter(mMyReviewAndCommentAdapter);
+            mDrawerViewControl.updateDrawerUI(recommendResponse);
+        }
     }
     
     public UserResponse getUser() {

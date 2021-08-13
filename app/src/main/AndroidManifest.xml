@@ -14,16 +14,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".Recommend.UpdateRecommendActivity"></activity>
+        <activity android:name=".Recommend.UpdateRecommendActivity" />
         <activity android:name=".Network.Map.PlaceGeoUpdateActivity" />
         <activity android:name=".MorePage.MyReview.MyReviewStoryActivity" />
         <activity android:name=".MorePage.MyReview.MyCommentActivity" />
-        <activity android:name=".MorePage.MyWishlistActivity" />
+        <activity android:name=".MorePage.MyWishlist.MyWishlistActivity" />
         <activity android:name=".MorePage.MyInformation.MyInformationActivity" />
         <activity
             android:name=".Recommend.RecommendListActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".KakaoMap.MapMainActivity" />
+        <activity android:name=".KakaoMap.MapMainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
         <activity android:name=".Login.SignUpAddInfoActivity" />
         <activity android:name=".Login.EmailSignUpActivity" />
         <activity android:name=".Login.EmailLoginActivity" />

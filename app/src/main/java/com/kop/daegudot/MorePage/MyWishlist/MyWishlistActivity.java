@@ -1,4 +1,4 @@
-package com.kop.daegudot.MorePage;
+package com.kop.daegudot.MorePage.MyWishlist;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -12,68 +12,65 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.kop.daegudot.KakaoMap.MarkerInfo;
+import com.kop.daegudot.Login.KakaoLogin.GlobalApplication;
+import com.kop.daegudot.MorePage.MyWishlist.Database.Wishlist;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
+/**
+ * 찜 한 장소를 띄움
+ */
 public class MyWishlistActivity extends AppCompatActivity implements View.OnClickListener {
     private final static String TAG = "MyWishListActivity";
     private Context mContext;
-    private ArrayList<MarkerInfo> mWishList;
+    private ArrayList<Wishlist> mWishList;
     private RecyclerView mRecyclerView;
     private WishlistAdapter mWishlistAdapter;
-
+    
+    WishlistDBHandler wishlistHandler;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_wishlist);
-        mContext = getApplicationContext();
+        mContext = this;
 
-        prepareMenu();
+        Log.d("rx test", "onCreate");
+        wishlistHandler = new WishlistDBHandler(mContext);
+        wishlistHandler.selectAllWishlist();
 
         TextView title = findViewById(R.id.title);
         title.setText("찜 목록");
         ImageButton backbtn = findViewById(R.id.backBtn);
         backbtn.setOnClickListener(this);
         
-
         mRecyclerView = findViewById(R.id.mywish_list);
-        mWishlistAdapter = new WishlistAdapter(mContext, mWishList);
-        mRecyclerView.setAdapter(mWishlistAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mRecyclerView.addItemDecoration(
                 new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
     }
-
-    private void prepareMenu(){
-        //TODO: 찜한 여행지 읽어와서 ArrayList에 담기
-        mWishList = new ArrayList<>();
-        
-        for (int i = 0; i < 3; i++) {
-            MarkerInfo data = new MarkerInfo(this);
-            
-            data.setName("hello " + i);
-            data.setAddress("서울특별시");
-            data.setImage(R.drawable.daegu);
-            data.setSummary("어디어디어디임");
-            data.setRate(4);
-            data.setLike(true);
     
-            mWishList.add(data);
-        }
+    
+    
+    public void updateUI(ArrayList<Wishlist> wishlists) {
+        mWishList = wishlists;
         
-        for (int i = 0; i < 3; i++) {
-            Log.d(TAG, "mWishList name: " + mWishList.get(i).getName());
-        }
+        mWishlistAdapter = new WishlistAdapter(mContext, mWishList);
+        mRecyclerView.setAdapter(mWishlistAdapter);
     }
     
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.backBtn:
-                finish();
-                break;
+        if (v.getId() == R.id.backBtn) {
+            finish();
         }
     }
 }

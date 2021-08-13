@@ -1,7 +1,6 @@
 package com.kop.daegudot.KakaoMap;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
-import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
 import com.kop.daegudot.Network.Schedule.SubScheduleResponse;
 import com.kop.daegudot.R;
 
@@ -28,10 +26,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class ScheduleRecyclerViewAdapter
-        extends RecyclerView.Adapter<ScheduleRecyclerViewAdapter.ViewHolder> {
+public class SubScheduleBottomSheetAdapter
+        extends RecyclerView.Adapter<SubScheduleBottomSheetAdapter.ViewHolder> {
         // implements ScheduleItemTouchHelperCallback.OnItemMoveListener {  // drag and swipe
-    private final static String TAG = "ScheduleRecyclerViewAdapter";
+    private final static String TAG = "SubScheduleBottomSheetAdapter";
     private Context mContext;
     private ArrayList<SubScheduleResponse> mSubScheduleList;
     
@@ -66,10 +64,10 @@ public class ScheduleRecyclerViewAdapter
             builder.setMessage("해당 항목을 삭제하시겠습니까?");
             builder.setPositiveButton("예",
                     (dialog, which) -> {
-                
-                        // TODO: DB에서 데이터 삭제하기
                         int position = getAdapterPosition();
-                        deleteSubscheduleRx(mSubScheduleList.get(position));
+                        
+                        SubScheduleHandler subScheduleHandler = new SubScheduleHandler(mContext);
+                        subScheduleHandler.deleteSubSchedule(mSubScheduleList.get(position));
                         
                         mSubScheduleList.remove(position);
                         notifyItemRemoved(position);
@@ -80,47 +78,16 @@ public class ScheduleRecyclerViewAdapter
                     (dialog, which) -> dialog.cancel());
             builder.show();
         }
-    
-        private void deleteSubscheduleRx(SubScheduleResponse subScheduleResponse) {
-            RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
-            Observable<Long> observable = service.deleteSubSchedule(subScheduleResponse.id);
-    
-            mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeWith(new DisposableObserver<Long>() {
-                        @Override
-                        public void onNext(Long response) {
-                            Log.d("RX " + TAG, "delete subschedule: " + "Next");
-                            if (response == 0L) {
-                                Log.d("RX " + TAG, "delete subSchedule failed");
-                            } else if (response == 1L) {
-                                Log.d("RX " + TAG, "delete subSchedule success");
-                            }
-                        }
-                
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.d("RX " + TAG, "delete subschedule: " + e.getMessage());
-                        }
-                
-                        @Override
-                        public void onComplete() {
-                            Log.d("RX " + TAG, "delete subschedule: complete");
-                        }
-                    })
-            );
-        }
-    
     }
     
-    ScheduleRecyclerViewAdapter(ArrayList<SubScheduleResponse> subscheduleList, Context context) {
+    SubScheduleBottomSheetAdapter(ArrayList<SubScheduleResponse> subscheduleList, Context context) {
         mContext = context;
         mSubScheduleList = subscheduleList;
     }
     
     @NonNull
     @Override
-    public ScheduleRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public SubScheduleBottomSheetAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater =
                 (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     
@@ -134,7 +101,7 @@ public class ScheduleRecyclerViewAdapter
     }
     
     @Override
-    public void onBindViewHolder(@NonNull ScheduleRecyclerViewAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull SubScheduleBottomSheetAdapter.ViewHolder holder, int position) {
         holder.text.setText(mSubScheduleList.get(position).placesResponseDto.attractName);
         
     }

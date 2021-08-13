@@ -18,6 +18,7 @@ import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.MorePage.MyInformation.MyInformationActivity;
 import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
+import com.kop.daegudot.MorePage.MyWishlist.MyWishlistActivity;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ public class MoreFragment extends Fragment implements View.OnClickListener{
         mContext = getContext();
         view = inflater.inflate(R.layout.fragment_more, container, false);
 
-        // TODO: 뒤로가기 버튼 구현 필요
         TextView title = view.findViewById(R.id.title);
         title.setText("더보기");
         

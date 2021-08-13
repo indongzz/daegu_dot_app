@@ -146,7 +146,6 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
         } else if (len < 2 || len > 6) {
             Toast.makeText(getApplicationContext(), "닉네임은 2글자 이상 6글자 이하로 설정해주세요", Toast.LENGTH_SHORT).show();
         } else {
-            // Todo: db 닉네임 중복 확인
             selectNickname(name);
         }
     }
@@ -248,8 +247,7 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onError(Throwable e) {
                         Toast.makeText(getApplicationContext(), "사용가능한 이메일 입니다.", Toast.LENGTH_SHORT).show();
-                        // Todo:
-                        //  db에 회원가입 정보 저장하기 : email, pw, nickName
+                        
                         UserRegister userRegister = new UserRegister();
                         userRegister.email = email;
                         userRegister.nickname = nickName;

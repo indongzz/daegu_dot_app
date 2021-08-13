@@ -133,7 +133,7 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
                     @Override
                     public void onNext(Long response) {
                         Log.d("RX", "Next");
-                        // Todo : Check if Delete is Success
+                        
                         if (response == 0L) {
                             Toast.makeText(mContext, "삭제 실패", Toast.LENGTH_SHORT).show();
                         } else if (response == 1L) {
@@ -149,9 +149,9 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
                     @Override
                     public void onComplete() {
                         Log.d("RX", "complete");
-                        
-                            mMainScheduleList.remove(n);
-                            notifyDataSetChanged();
+    
+                        mMainScheduleList.remove(n);
+                        notifyDataSetChanged();
                     }
                 })
         );
