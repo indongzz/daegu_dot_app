@@ -119,25 +119,22 @@ public class MapMarkerItems {
      * set Markers on map
      */
     private void setServerMarker() {
-        // Todo: delete category check
-        for (Place place: ((MapMainActivity) mContext).mPlaceList) {
-            if (place.category == null) {
-                ((MapMainActivity) mContext).mPlaceList.get(index).tag =
-                        (int) ((MapMainActivity) mContext).mPlaceList.get(index).id;
-                MapPOIItem marker = new MapPOIItem();
-                marker.setItemName(place.attractName);
-                marker.setTag(((MapMainActivity) mContext).mPlaceList.get(index).tag);
-                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
-                        Double.parseDouble(place.latitude), Double.parseDouble(place.longitude));
-                marker.setMapPoint(mapPoint);
-                marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-                marker.setCustomImageResourceId(R.drawable.blue_pin2);
-                marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-                marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
-                marker.setShowCalloutBalloonOnTouch(false);
-                mMarkerList.add(marker);
-                index++;
-            }
+        for (Place place : ((MapMainActivity) mContext).mPlaceList) {
+            ((MapMainActivity) mContext).mPlaceList.get(index).tag =
+                    (int) ((MapMainActivity) mContext).mPlaceList.get(index).id;
+            MapPOIItem marker = new MapPOIItem();
+            marker.setItemName(place.attractName);
+            marker.setTag(((MapMainActivity) mContext).mPlaceList.get(index).tag);
+            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(
+                    Double.parseDouble(place.latitude), Double.parseDouble(place.longitude));
+            marker.setMapPoint(mapPoint);
+            marker.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+            marker.setCustomImageResourceId(R.drawable.blue_pin2);
+            marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+            marker.setCustomSelectedImageResourceId(R.drawable.big_yellow_pin);
+            marker.setShowCalloutBalloonOnTouch(false);
+            mMarkerList.add(marker);
+            index++;
         }
         
         ((MapMainActivity) mContext).addPOItoMapView();

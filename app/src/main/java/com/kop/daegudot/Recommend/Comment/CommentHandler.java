@@ -9,7 +9,7 @@ import android.widget.Toast;
 import com.kop.daegudot.MorePage.MyReview.MyCommentActivity;
 import com.kop.daegudot.MorePage.MyReview.MyReviewStoryActivity;
 import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
-import com.kop.daegudot.Network.Recommend.Comment.CommentRegisterResponse;
+import com.kop.daegudot.Network.Recommend.Comment.CommentRegisterResponseDto;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponse;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
 import com.kop.daegudot.Network.Recommend.RecommendResponse;
@@ -61,14 +61,14 @@ public class CommentHandler {
 
     private void registerCommentRx(CommentRegister commentRegister) {
         RestApiService service = RestfulAdapter.getInstance().getServiceApi(mToken);
-        Observable<CommentRegisterResponse> observable = service.registerComment(commentRegister);
+        Observable<CommentRegisterResponseDto> observable = service.registerComment(commentRegister);
 //        Observable<Long> observable = service.registerComment(commentRegister);
         
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<CommentRegisterResponse>() {
+                .subscribeWith(new DisposableObserver<CommentRegisterResponseDto>() {
                     @Override
-                    public void onNext(CommentRegisterResponse response) {
+                    public void onNext(CommentRegisterResponseDto response) {
                         Log.d("RX " + TAG, "comment register Next");
     
                         CommentResponse commentResponse = new CommentResponse();

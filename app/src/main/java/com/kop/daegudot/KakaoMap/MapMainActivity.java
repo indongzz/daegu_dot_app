@@ -9,6 +9,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import android.view.View;
@@ -179,6 +180,23 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         }
     }
     
+    public void setProgressLoading(boolean bool) {
+        if (bool) {
+            Handler handler = new Handler(getMainLooper());
+            handler.post(() -> progressBar.setVisibility(View.VISIBLE));
+        } else {
+            Handler handler = new Handler(getMainLooper());
+            handler.post(() -> progressBar.setVisibility(View.GONE));
+        }
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        
+        mMapMarkerItems.mCompositeDisposable.dispose();
+    }
+    
     // marker POIItem click event
     @Override
     public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
@@ -262,25 +280,30 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         ArrayList<MapPOIItem> lists = mMapMarkerItems.getMarkerList();
         mMapView.removeAllPOIItems();
         
-        int count = 0;
-        for (MapPOIItem item: lists) {
-            if (mMapView.getMapPointBounds().contains(item.getMapPoint())) {
-                if (mMapUIControl.checkCategory(item)) {
-                    mMapView.addPOIItem(item);
-                    count++;
+        Handler handler = new Handler();
+        handler.post(() -> {
+            int count = 0;
+            for (MapPOIItem item: lists) {
+                if (mMapView.getMapPointBounds().contains(item.getMapPoint())) {
+                    if (mMapUIControl.checkCategory(item)) {
+                        mMapView.addPOIItem(item);
+                        count++;
+                    }
                 }
+                if (count > 50) break;
             }
-            if (count > 50) break;
-        }
+        });
+        
         
         // 이전에 클릭한 POIItem 띄우기
         if (prevPOIItem != null) {
             mMapView.selectPOIItem(prevPOIItem, true);
         }
     
+        Log.d("progress bar", "done!");
         /* Progress Loading done */
         if (mPlaceList.size() != 0) {
-            progressBar.setVisibility(View.INVISIBLE);
+            setProgressLoading(false);
         }
     }
 }

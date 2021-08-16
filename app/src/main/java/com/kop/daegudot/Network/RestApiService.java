@@ -5,7 +5,7 @@ import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.Network.Map.PlaceGeo;
 import com.kop.daegudot.Network.More.MyInfo.MyCommentList;
 import com.kop.daegudot.Network.Recommend.Comment.CommentRegister;
-import com.kop.daegudot.Network.Recommend.Comment.CommentRegisterResponse;
+import com.kop.daegudot.Network.Recommend.Comment.CommentRegisterResponseDto;
 import com.kop.daegudot.Network.Recommend.Comment.CommentResponseList;
 import com.kop.daegudot.Network.More.MyInfo.MyRecommendList;
 import com.kop.daegudot.Network.Recommend.Hashtag.HashtagResponseList;
@@ -150,7 +150,7 @@ public interface RestApiService {
     
     /* Comment */
     @POST("/comment/register")
-    Observable<CommentRegisterResponse> registerComment(@Body CommentRegister commentRegister);
+    Observable<CommentRegisterResponseDto> registerComment(@Body CommentRegister commentRegister);
 //    Observable<Long> registerComment(@Body CommentRegister commentRegister);
     
     @GET("/comment/{recommendScheduleId}")

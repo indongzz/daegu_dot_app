@@ -17,6 +17,8 @@ import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.Network.Schedule.SubScheduleResponse;
 import com.kop.daegudot.R;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.ViewHolder> {
@@ -46,12 +48,19 @@ public class SubScheduleAdapter extends RecyclerView.Adapter<SubScheduleAdapter.
                 // 세부 일정 클릭하여 MapMainActivity로 넘어가기
                 String whatDay = mDateSubScheduleList.get(pos).date;
                 Toast.makeText(mContext, whatDay, Toast.LENGTH_SHORT).show();
-
-                Intent intent = new Intent(mContext, MapMainActivity.class);
-                intent.putExtra("mainSchedule", mMainSchedule);
-                intent.putParcelableArrayListExtra("dateSubSchedule", mDateSubScheduleList);
-                intent.putExtra("position", pos);
-                mContext.startActivity(intent);
+    
+                LocalDate localDate = LocalDate.parse(whatDay);
+                localDate.plusDays(mMainSchedule.getDateBetween());
+                if (localDate.isAfter(LocalDate.now())) {
+                    Intent intent = new Intent(mContext, MapMainActivity.class);
+                    intent.putExtra("mainSchedule", mMainSchedule);
+                    intent.putParcelableArrayListExtra("dateSubSchedule", mDateSubScheduleList);
+                    intent.putExtra("position", pos);
+                    mContext.startActivity(intent);
+                }
+                else {
+                    Toast.makeText(mContext, "지난 날짜는 수정할 수 없습니다", Toast.LENGTH_SHORT).show();
+                }
             }
         }
         

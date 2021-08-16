@@ -14,8 +14,6 @@ import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
 
-import java.util.ArrayList;
-
 public class MapUIControl {
     Context mContext;
     View mView;
@@ -53,6 +51,7 @@ public class MapUIControl {
             mCategory[i].setBackground(ContextCompat.getDrawable(mContext, R.drawable.round_line_btn));
             final int next = i;
             mCategory[i].setOnClickListener(v -> {
+                ((MapMainActivity) mContext).setProgressLoading(true);
                 changeButtonUI(next);
                 changeCategory(next);
                 current = next;
@@ -93,19 +92,14 @@ public class MapUIControl {
         }
         String category = place.category;
         
-        // TODO: category 해결
-        if (category == null) {
+        if (categoryFlag == 0 && category.equals("TR")) {
+            bool = true;
+        } else if (categoryFlag == 1 && category.equals("AC")) {  // 숙박
+            bool = true;
+        } else if (categoryFlag == 2 && category.equals("FD")) {  // 음식
             bool = true;
         }
-        else {
-            if (categoryFlag == 0 && category.equals("TR")) {
-                bool = true;
-            } else if (categoryFlag == 1 && category.equals("AD")) {  // 숙박
-                bool = true;
-            } else if (categoryFlag == 2 && category.equals("FD")) {  // 음식
-                bool = true;
-            }
-        }
+        
         
         return bool;
     }
