@@ -21,7 +21,6 @@ import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.SubScheduleDialog;
 import com.kop.daegudot.Network.Map.Place;
-import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -43,6 +42,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     MapMarkerItems mMapMarkerItems;     // set map markerItems
     MapUIControl mMapUIControl;         // to control category and hash tag button
+    SearchViewHandler mSearchViewHandler;
     
     // get Main and sub schedule list from previous activity
     MainScheduleInfo mMainSchedule;
@@ -74,8 +74,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         mSearchView = findViewById(R.id.search_view);
         mSearchView.setOnClickListener(this);
-        SearchViewHandler searchViewHandler = new SearchViewHandler(mContext);
-        searchViewHandler.setSearchView();
+        mSearchViewHandler = new SearchViewHandler(mContext);
         
         progressBar = findViewById(R.id.progress_bar);
         
@@ -145,6 +144,13 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         }
     }
     
+    public void moveToPlace(Place place) {
+        placeBottomSheet.changePlaceBottomSheet((int) place.id);
+        mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
+        
+        mSearchViewHandler.closeRecyclerView();
+    }
+    
     public void updateBottomSheetUI() {
         /* BottomSheet */
         placeBottomSheet =
@@ -177,6 +183,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
             finish();
         }
         if (v.getId() == R.id.search_view) {
+            mSearchViewHandler.setSearchView();
             mSearchView.onActionViewExpanded();
         }
     }
@@ -228,6 +235,9 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         prevPOIItem = null;
         
         mSearchView.onActionViewCollapsed();
+        if (mSearchViewHandler != null) {
+            mSearchViewHandler.closeRecyclerView();
+        }
     }
     
     @Override
