@@ -1,8 +1,6 @@
 package com.kop.daegudot.KakaoMap;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,18 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.kop.daegudot.Network.RestApiService;
-import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.Schedule.SubScheduleResponse;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableObserver;
-import io.reactivex.schedulers.Schedulers;
 
 public class SubScheduleBottomSheetAdapter
         extends RecyclerView.Adapter<SubScheduleBottomSheetAdapter.ViewHolder> {
@@ -32,11 +22,6 @@ public class SubScheduleBottomSheetAdapter
     private final static String TAG = "SubScheduleBottomSheetAdapter";
     private Context mContext;
     private ArrayList<SubScheduleResponse> mSubScheduleList;
-    
-    /* RX java */
-    CompositeDisposable mCompositeDisposable = new CompositeDisposable();
-    private SharedPreferences pref;
-    private String mToken;
     
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
         Button button;
@@ -92,10 +77,6 @@ public class SubScheduleBottomSheetAdapter
                 (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     
         View view = inflater.inflate(R.layout.bs_item_view, parent, false);
-    
-    
-        pref = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
-        mToken = pref.getString("token", "");
         
         return new ViewHolder(view);
     }

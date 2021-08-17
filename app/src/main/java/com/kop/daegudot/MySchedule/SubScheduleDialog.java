@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -110,7 +111,15 @@ public class SubScheduleDialog extends Dialog implements View.OnClickListener { 
                         mSubScheduleList = new ArrayList<>();
                         if (response.status == 0L) {
                             /* no subschedule just pass MapMainSchedule */
-                            moveToMapMainActivity();
+                            LocalDate localDate = LocalDate.parse(mMainScheduleInfo.getmEndDate());
+                            localDate.plusDays(mMainScheduleInfo.getDateBetween());
+                            
+                            if (localDate.isAfter(LocalDate.now())) {
+                                moveToMapMainActivity();
+                            }
+                            else {
+                                Toast.makeText(mContext, "지난 날짜는 수정할 수 없습니다", Toast.LENGTH_SHORT).show();
+                            }
                         }
                         else if (response.status == 1L){
                             // subschedule exists

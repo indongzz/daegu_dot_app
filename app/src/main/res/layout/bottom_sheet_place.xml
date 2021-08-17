@@ -16,7 +16,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_centerVertical="true"
-            android:src="@drawable/daegu"
+            android:src="@drawable/colorful_daegu"
             android:layout_marginHorizontal="20dp"
             />
 

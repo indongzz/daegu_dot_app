@@ -9,6 +9,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import android.view.View;
@@ -21,7 +22,6 @@ import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.SubScheduleDialog;
 import com.kop.daegudot.Network.Map.Place;
-import com.kop.daegudot.Network.Schedule.SubScheduleRegister;
 import com.kop.daegudot.R;
 
 import net.daum.mf.map.api.MapPOIItem;
@@ -49,11 +49,12 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     ArrayList<DateSubSchedule> mDateSubScheduleList;
     int position = 0; // default = first page
     Place mPlace;
+    long placeId;
     
-    ArrayList<Place> mPlaceList;
-    BottomSheetBehavior mBSBPlace;
-    PlaceBottomSheet placeBottomSheet;
-    BottomSheetBehavior mBSBSchedule;
+    ArrayList<Place> mPlaceList = new ArrayList<>();
+    BottomSheetBehavior<View> mBSBPlace;
+    public PlaceBottomSheet placeBottomSheet;
+    BottomSheetBehavior<View> mBSBSchedule;
     ViewPager2 mMainListView;
     MainScheduleBottomSheetAdapter mMainScheduleBottomSheetAdapter;
     MapPOIItem prevPOIItem = null;
@@ -94,27 +95,25 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         // Set MarkerItems
         mMapMarkerItems = new MapMarkerItems(this, mMapView);
         mMapMarkerItems.setMarkerItems();
-//        mMapMarkerItems.selectAllKakaoPlaceListRx(128.601705,35.871344);
-        mPlaceList = updatePlaceList();
+//        mPlaceList = updatePlaceList();
         
         getSchedule();
-        
+
         /* BottomSheet */
         placeBottomSheet =
                 new PlaceBottomSheet(this, mMainSchedule, mDateSubScheduleList);
 
-        CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
+        CoordinatorLayout placeLayout = findViewById(R.id.bottomSheet);
         mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         mMainListView = findViewById(R.id.viewPager);
         mMainListView.setNestedScrollingEnabled(false);
 
-        NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
+        NestedScrollView scheduleLayout = findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
     }
     
-    /* MainSchedule 이용해서 SubSchedule List 서버로부터 받아오기 */
     public void getSchedule() {
         Intent intent = getIntent();
         
@@ -124,6 +123,8 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         position = intent.getIntExtra("position", 0);
         // 추천글에서 일정 Chip 클릭 시
         mPlace = intent.getParcelableExtra("markerPlace");
+        // 찜 목록 클릭 시
+        placeId = intent.getLongExtra("placeId", 0);
         
         if (mMainSchedule != null) {
             String titleString = mMainSchedule.getDateString();
@@ -137,10 +138,12 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         }
     }
     
-    public void notifyPlaceListDone(ArrayList<Place> placeList) {
-        mPlaceList = placeList;
+    public void notifyPlaceListDone() {
         if (mPlace != null) {
             placeBottomSheet.changePlaceBottomSheet((int) mPlace.id);
+            mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else if (placeId != 0) {
+            placeBottomSheet.changePlaceBottomSheet(placeId);
             mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
     }
@@ -150,7 +153,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         placeBottomSheet =
                 new PlaceBottomSheet(mContext, mMainSchedule, mDateSubScheduleList);
     
-        CoordinatorLayout placeLayout = (CoordinatorLayout) findViewById(R.id.bottomSheet);
+        CoordinatorLayout placeLayout = findViewById(R.id.bottomSheet);
         mBSBPlace = BottomSheetBehavior.from(placeLayout);
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
     
@@ -159,15 +162,11 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mMainListView.setAdapter(mMainScheduleBottomSheetAdapter);
         mMainListView.setOffscreenPageLimit(mMainSchedule.getDateBetween() * 2);
     
-        NestedScrollView scheduleLayout = (NestedScrollView) findViewById(R.id.scrollView);
+        NestedScrollView scheduleLayout = findViewById(R.id.scrollView);
         mBSBSchedule = BottomSheetBehavior.from(scheduleLayout);
         
         // move to n일차
         mMainListView.setCurrentItem(position);
-    }
-    
-    public ArrayList<Place> updatePlaceList() {
-        return mMapMarkerItems.getPlaceList();
     }
     
     // click event
@@ -179,6 +178,23 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         if (v.getId() == R.id.search_view) {
             mSearchView.onActionViewExpanded();
         }
+    }
+    
+    public void setProgressLoading(boolean bool) {
+        if (bool) {
+            Handler handler = new Handler(getMainLooper());
+            handler.post(() -> progressBar.setVisibility(View.VISIBLE));
+        } else {
+            Handler handler = new Handler(getMainLooper());
+            handler.post(() -> progressBar.setVisibility(View.GONE));
+        }
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        
+        mMapMarkerItems.mCompositeDisposable.dispose();
     }
     
     // marker POIItem click event
@@ -193,12 +209,12 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
-    
+        Log.d(TAG, "touched");
     }
     
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
-    
+        Log.d(TAG, "touched");
     }
     
     @Override
@@ -209,20 +225,22 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     // MapView Click event
     @Override
     public void onMapViewInitialized(MapView mapView) {
-    
+        Log.d(TAG, "MapView Initialized");
     }
     
     @Override
     public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
+        Log.d(TAG, "MapView Center Point Moved");
     }
     
     @Override
     public void onMapViewZoomLevelChanged(MapView mapView, int i) {
-    
+        Log.d(TAG, "MapView Zoom Level Changed");
     }
     
     @Override
     public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
+        Log.d(TAG, "MapView Single Tapped");
         mBSBPlace.setState(BottomSheetBehavior.STATE_HIDDEN);
         mBSBSchedule.setState(BottomSheetBehavior.STATE_EXPANDED);
         prevPOIItem = null;
@@ -232,45 +250,60 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     @Override
     public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint) {
-    
+        Log.d(TAG, "MapView Double Tapped");
     }
     
     @Override
     public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint) {
-    
+        Log.d(TAG, "MapView Long Pressed");
     }
     
     @Override
     public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
-    
+        Log.d(TAG, "MapView Drag Started");
     }
     
     @Override
     public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
-    
+        Log.d(TAG, "MapView Drag Ended");
+        progressBar.setVisibility(View.VISIBLE);
     }
     
     @Override
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
-        
-        ArrayList<MapPOIItem> lists = mMapMarkerItems.getmMarkerList();
-        addPOItoMapView(lists);
+        Log.d(TAG, "MapView Moved: " + mPlaceList.size());
+    
+        addPOItoMapView();
     }
     
-    public void addPOItoMapView(ArrayList<MapPOIItem> lists) {
+    public void addPOItoMapView() {
+        ArrayList<MapPOIItem> lists = mMapMarkerItems.getMarkerList();
         mMapView.removeAllPOIItems();
         
-        for (MapPOIItem item: lists) {
-            if (mMapView.getMapPointBounds().contains(item.getMapPoint())) {
-                if (mMapUIControl.checkCategory(item)) {
-                    mMapView.addPOIItem(item);
+        Handler handler = new Handler();
+        handler.post(() -> {
+            int count = 0;
+            for (MapPOIItem item: lists) {
+                if (mMapView.getMapPointBounds().contains(item.getMapPoint())) {
+                    if (mMapUIControl.checkCategory(item)) {
+                        mMapView.addPOIItem(item);
+                        count++;
+                    }
                 }
+                if (count > 50) break;
             }
-        }
+        });
+        
         
         // 이전에 클릭한 POIItem 띄우기
         if (prevPOIItem != null) {
             mMapView.selectPOIItem(prevPOIItem, true);
+        }
+    
+        Log.d("progress bar", "done!");
+        /* Progress Loading done */
+        if (mPlaceList.size() != 0) {
+            setProgressLoading(false);
         }
     }
 }
