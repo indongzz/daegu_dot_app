@@ -2,6 +2,8 @@ package com.kop.daegudot.Network;
 
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.AuthenticationInterceptor;
 import com.kop.daegudot.R;
@@ -38,9 +40,10 @@ public class RestfulAdapter {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         clientBuilder.addInterceptor(loggingInterceptor);
 
+        Gson gson = new GsonBuilder().setLenient().create();
         Retrofit retrofit = new Retrofit.Builder()
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(clientBuilder.build())
                 .baseUrl(BASE_URL)
                 .build();

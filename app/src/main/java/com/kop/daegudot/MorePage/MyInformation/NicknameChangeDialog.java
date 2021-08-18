@@ -16,6 +16,7 @@ import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.User.UserResponse;
+import com.kop.daegudot.Network.User.UserResponseStatus;
 import com.kop.daegudot.R;
 
 import io.reactivex.Observable;
@@ -34,6 +35,8 @@ public class NicknameChangeDialog {
     private Button cancelBtn;
     private String mToken;
     private String mNickname;
+
+    boolean NICK_CHECKED = false;
 
     public NicknameChangeDialog(Context context, String token, String nickname){
         mContext = context;
@@ -116,19 +119,23 @@ public class NicknameChangeDialog {
     private void selectNickname(String nickname) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
-        Observable<UserResponse> observable = service.checkNickDup(nickname);
+        Observable<UserResponseStatus> observable = service.checkNickDup(nickname);
 
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<UserResponse>() {
+                .subscribeWith(new DisposableObserver<UserResponseStatus>() {
                     @Override
-                    public void onNext(UserResponse response) {
-                        Toast.makeText(mContext, "중복된 별명 입니다.", Toast.LENGTH_SHORT).show();
-                        Log.d("NICKNAME_DUP", "DUPLICATE NICKNAME" + " " + nickname);
+                    public void onNext(UserResponseStatus response) {
+                        if(response.status == 1L){
+                            Toast.makeText(mContext, "중복된 별명 입니다.", Toast.LENGTH_SHORT).show();
+                            NICK_CHECKED = false;
+                            Log.d("NICKNAME_DUP", "DUPLICATE NICKNAME" + " " + nickname);
+                        }
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        NICK_CHECKED = true;
                         NicknameUpdate nicknameUpdate = new NicknameUpdate();
                         nicknameUpdate.nickname = nickname;
                         updateNickname(nicknameUpdate);

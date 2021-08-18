@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -27,14 +28,22 @@ import com.kakao.auth.Session;
 import com.kakao.usermgmt.LoginButton;
 import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
 import com.kop.daegudot.MainActivity;
+import com.kop.daegudot.Network.RestApiService;
+import com.kop.daegudot.Network.RestfulAdapter;
+import com.kop.daegudot.Network.User.UserOauth;
 import com.kop.daegudot.Network.User.UserRegister;
+import com.kop.daegudot.Network.User.UserResponseStatus;
 import com.kop.daegudot.R;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     // Google Login
@@ -47,12 +56,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private SessionCallback sessionCallback;
     Session mSession;
 
-    SharedPreferences mPref;
-    public static SharedPreferences.Editor editor;
+//    SharedPreferences mPref;
+//    public static SharedPreferences.Editor editor;
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     // Register 객체
     private static UserRegister userRegister;
+
+    private String mEmail;
+    private String mNickname;
+    SharedPreferences mTokenPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +75,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         //   getHashKey();
 
         userRegister = new UserRegister();
-
-        mPref = getSharedPreferences("data", MODE_PRIVATE);
-        editor = mPref.edit();
 
         /* Google Sign In */
         findViewById(R.id.signin_google).setOnClickListener(this);
@@ -93,16 +103,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-    public void checkAlreadyLogin() {
-        mPref = getSharedPreferences("data", MODE_PRIVATE);
-        Log.d("checkAlreadyLogin", "...Check login...");
-        if (mPref.getString("email", "") != "") {
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-            Log.d("checkAlreadyLogin", "Already Logged in");
-        }
-    }
+//    public void checkAlreadyLogin() {
+//        mPref = getSharedPreferences("data", MODE_PRIVATE);
+//        Log.d("checkAlreadyLogin", "...Check login...");
+//        if (mPref.getString("email", "") != "") {
+//            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//            startActivity(intent);
+//            finish();
+//            Log.d("checkAlreadyLogin", "Already Logged in");
+//        }
+//    }
 
     // SignIn Clicked
     private void googleSignIn() {
@@ -132,8 +142,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
-            firebaseAuthWithGoogle(account.getIdToken());
+            UserOauth userOauth = new UserOauth();
+            userOauth.oauthToken = account.getIdToken();
+            Log.d(TAG, "firebaseAuthWithGoogle:" + account.getIdToken());
+            oauthGoogle(userOauth);
         }
         catch (ApiException e) {
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
@@ -142,6 +154,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
+    //google token id로부터 사용자 정보 추출하는 함수
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential)
@@ -152,15 +165,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            editor.putString("email", user.getEmail());
-                            editor.putString("passwd", "google");
-                            editor.putString("name", user.getDisplayName());
-                            editor.commit();
+
+                            mEmail = user.getEmail();
+                            mNickname = user.getDisplayName();
 
                             Log.i(TAG, "firebaseAuthWithGoogle email: " + user.getEmail());
                             Log.i(TAG, "firebaseAuthWithGoogle name: " + user.getDisplayName());
 
-                            updateUI(true);
+                            //TODO: DB회원인지 아닌지 확인 아니면 UpdateUI함수 호출 맞으면 Main호출
+                            selectEmail(mEmail);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -176,9 +189,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         } else {
             Log.d(TAG, "updateUI:success");
             Intent intent = new Intent(getApplicationContext(), SignUpAddInfoActivity.class);
+            intent.putExtra("email", mEmail);
+            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         }
+    }
+
+    public void convertToMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -197,12 +218,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public void convertToEmailLogin() {
-        String email = "test";
-        String nickname = "test123";
-        String pw = "test1234";
-        char type = 'a';
-        //String encryptedPassWord = encryptSHA256(pw);
-
         Intent intent = new Intent(LoginActivity.this, EmailLoginActivity.class);
         startActivity(intent);
     }
@@ -240,6 +255,76 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    //구글 인증 처리
+    private void oauthGoogle(UserOauth userOauth) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<Long> observable = service.oauthGoogle(userOauth);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<Long>() {
+                    @Override
+                    public void onNext(Long response) {
+                        Log.d("USER_GOOGLE", userOauth.oauthToken);
+                        if(response == 1L) Toast.makeText(getApplicationContext(), "구글 인증이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                        else Toast.makeText(getApplicationContext(), "구글 인증에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("USER_GOOGLE", e.getMessage());
+                        Toast.makeText(getApplicationContext(), "구글 인증에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("USER_GOOGLE", "COMPLETE");
+                        firebaseAuthWithGoogle(userOauth.oauthToken);
+                    }
+                })
+        );
+    }
+
+    //이메일 중복 검사
+    private void selectEmail(String email) {
+        RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
+        RestApiService service =  restfulAdapter.getServiceApi(null);
+        Observable<UserResponseStatus> observable = service.checkEmailDup(email);
+
+        mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<UserResponseStatus>() {
+                    @Override
+                    public void onNext(UserResponseStatus response) {
+                        if(response.status == 1L){
+                            Toast.makeText(getApplicationContext(), "로그인에 성공하였습니다.", Toast.LENGTH_SHORT).show();
+                            Log.d("EMAIl_DUP", "DUPLICATE EMAIL" + " " + response.userResponseDto.email);
+
+                            //SharedPreference에 토큰 저장하기
+                            mTokenPref = getSharedPreferences("data", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = mTokenPref.edit();
+                            editor.putString("token", response.userResponseDto.token);
+                            editor.apply();
+
+                            convertToMainActivity();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(getApplicationContext(), "회원가입이 필요합니다.", Toast.LENGTH_SHORT).show();
+                        Log.d("EMAIL_DUP", e.getMessage() + " " + email);
+                        updateUI(true);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("EMAIL_DUP", "complete");
+                    }
+                })
+        );
+    }
 
     /* for registering Kakao developer
     private void getHashKey() {

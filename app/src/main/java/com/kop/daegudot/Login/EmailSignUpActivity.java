@@ -19,6 +19,7 @@ import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.Network.User.UserResponse;
+import com.kop.daegudot.Network.User.UserResponseStatus;
 import com.kop.daegudot.R;
 
 import io.reactivex.Observable;
@@ -197,15 +198,18 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
     private void selectNickname(String nickname) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
-        Observable<UserResponse> observable = service.checkNickDup(nickname);
+        Observable<UserResponseStatus> observable = service.checkNickDup(nickname);
 
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<UserResponse>() {
+                .subscribeWith(new DisposableObserver<UserResponseStatus>() {
                     @Override
-                    public void onNext(UserResponse response) {
-                        Toast.makeText(getApplicationContext(), "중복된 닉네임 입니다.", Toast.LENGTH_SHORT).show();
-                        Log.d("NICKNAME_DUP", "DUPLICATE NICKNAME" + " " + nickname);
+                    public void onNext(UserResponseStatus response) {
+                        if(response.status == 1L){
+                            Toast.makeText(getApplicationContext(), "중복된 닉네임 입니다.", Toast.LENGTH_SHORT).show();
+                            NICK_CHECKED = false;
+                            Log.d("NICKNAME_DUP", "DUPLICATE NICKNAME" + " " + nickname);
+                        }
                     }
 
                     @Override
@@ -227,15 +231,17 @@ public class EmailSignUpActivity extends AppCompatActivity implements View.OnCli
     private void selectEmail(String email) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
-        Observable<UserResponse> observable = service.checkEmailDup(email);
+        Observable<UserResponseStatus> observable = service.checkEmailDup(email);
 
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<UserResponse>() {
+                .subscribeWith(new DisposableObserver<UserResponseStatus>() {
                     @Override
-                    public void onNext(UserResponse response) {
-                        Toast.makeText(getApplicationContext(), "중복된 이메일 입니다.", Toast.LENGTH_SHORT).show();
-                        Log.d("EMAIl_DUP", "DUPLICATE EMAIL" + " " + email);
+                    public void onNext(UserResponseStatus response) {
+                        if(response.status == 1L){
+                            Toast.makeText(getApplicationContext(), "중복된 이메일 입니다.", Toast.LENGTH_SHORT).show();
+                            Log.d("EMAIl_DUP", "DUPLICATE EMAIL" + " " + email);
+                        }
                     }
 
                     @Override
