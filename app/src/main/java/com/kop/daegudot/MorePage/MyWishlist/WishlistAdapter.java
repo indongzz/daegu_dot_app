@@ -1,6 +1,7 @@
 package com.kop.daegudot.MorePage.MyWishlist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.MorePage.MyWishlist.Database.Wishlist;
 import com.kop.daegudot.R;
 
@@ -49,12 +51,17 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
         
         @Override
         public void onClick(View v) {
+            int pos = getAdapterPosition();
+            Wishlist wishlist = mWishList.get(pos);
+            
             if (v.getId() == R.id.wishlist_item) {
                 // Todo: 지도로 이동
+                Intent intent = new Intent(mContext, MapMainActivity.class);
+                Log.d(TAG, "place id: " + wishlist.placeId);
+                intent.putExtra("placeId", wishlist.placeId);
+                mContext.startActivity(intent);
             }
             if (v.getId() == R.id.heart_btn) {
-                int pos = getAdapterPosition();
-                Wishlist wishlist = mWishList.get(pos);
                 ((MyWishlistActivity) mContext).wishlistHandler.deleteWishlists(wishlist);
                 removeItem(pos);
             }
