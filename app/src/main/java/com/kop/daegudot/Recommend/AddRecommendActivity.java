@@ -28,7 +28,9 @@ import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.Schedule.MainScheduleResponse;
 import com.kop.daegudot.R;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -142,21 +144,32 @@ public class AddRecommendActivity extends AppCompatActivity implements View.OnCl
         final int[] checkedItem = {-1};
         String[] list = new String[mMainScheduleList.size()];
         
+        int index = 0;
         for (int i = 0; i < mMainScheduleList.size(); i++) {
-            list[i] = mMainScheduleList.get(i).getDateString();
-            Log.d(TAG, list[i]);
+            Log.d("TIME", mMainScheduleList.get(i).getmEndDate());
+            LocalDate date = LocalDate.parse(mMainScheduleList.get(i).getmEndDate());
+            if (date.isAfter(LocalDate.now())) {
+                list[index++] = mMainScheduleList.get(i).getDateString();
+            }
         }
         
-        builder.setTitle("날짜를 선택하세요");
-        builder.setSingleChoiceItems(list, checkedItem[0], (dialog, which) -> checkedItem[0] = which);
-        builder.setPositiveButton("선택", (dialog, which) -> {
-            position = checkedItem[0];
+        if (index > 0) {
+            list = Arrays.copyOf(list, index);
+    
+            builder.setTitle("날짜를 선택하세요");
+            builder.setSingleChoiceItems(list, checkedItem[0], (dialog, which) -> checkedItem[0] = which);
+            builder.setPositiveButton("선택", (dialog, which) -> {
+                position = checkedItem[0];
         
-            mAddMyScheduleBtn.setText(mMainScheduleList.get(position).getDateString());
-            dialog.dismiss();
-        });
-        builder.setNegativeButton("취소", (dialog, which) -> dialog.dismiss());
-        builder.show();
+                mAddMyScheduleBtn.setText(mMainScheduleList.get(position).getDateString());
+                dialog.dismiss();
+            });
+            builder.setNegativeButton("취소", (dialog, which) -> dialog.dismiss());
+            builder.show();
+        }
+        else {
+            Toast.makeText(getApplicationContext(), "등록 가능한 일정이 없습니다", Toast.LENGTH_SHORT).show();
+        }
     }
     
     public boolean checkIfSelectedAll() {
