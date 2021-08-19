@@ -46,7 +46,6 @@ public class PlaceBottomSheet implements Button.OnClickListener {
     private TextView mTitle;
     private TextView mAddress;
     private TextView mContents;
-    private RatingBar mStar;
     
     PlaceBottomSheet(Context context,
                      MainScheduleInfo mainSchedule, ArrayList<DateSubSchedule> subScheduleList) {
@@ -67,7 +66,6 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         mTitle = ((MapMainActivity)mContext).findViewById(R.id.tv_title);
         mAddress = ((MapMainActivity)mContext).findViewById(R.id.tv_address);
         mContents = ((MapMainActivity)mContext).findViewById(R.id.tv_spec);
-        mStar = ((MapMainActivity)mContext).findViewById(R.id.rating_bar);
     }
     
     public void changePlaceBottomSheet(long tag) {
@@ -81,7 +79,6 @@ public class PlaceBottomSheet implements Button.OnClickListener {
         mAddress.setText(mPlace.address);
 //        summary.setText(mPlace.getAttractContents());
         mContents.setText("너무 길어서 일단 안보이게 하게쑵니다");
-        mStar.setRating(mPlace.rate);
     
         mPlace.like = false;
         mHeartBtn.setBackgroundResource(R.drawable.heart);
