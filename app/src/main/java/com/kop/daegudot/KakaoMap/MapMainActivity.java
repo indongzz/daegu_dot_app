@@ -299,8 +299,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         if (prevPOIItem != null) {
             mMapView.selectPOIItem(prevPOIItem, true);
         }
-    
-        Log.d("progress bar", "done!");
+        
         /* Progress Loading done */
         if (mPlaceList.size() != 0) {
             setProgressLoading(false);
