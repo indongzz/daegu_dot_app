@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.kop.daegudot.KakaoMap.Search.SearchViewHandler;
 import com.kop.daegudot.MySchedule.DateSubSchedule;
 import com.kop.daegudot.MySchedule.MainScheduleInfo;
 import com.kop.daegudot.MySchedule.SubScheduleDialog;
@@ -38,12 +39,12 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     
     TextView mTitle;    // default = 장소 검색
     ImageButton mBackBtn;
-    SearchView mSearchView;
+    public SearchView mSearchView;
     public ProgressBar progressBar;     // 로딩 중
     
     MapMarkerItems mMapMarkerItems;     // set map markerItems
     MapUIControl mMapUIControl;         // to control category and hash tag button
-    SearchViewHandler mSearchViewHandler;
+    public SearchViewHandler mSearchViewHandler;
     
     // get Main and sub schedule list from previous activity
     MainScheduleInfo mMainSchedule;
@@ -52,7 +53,7 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     Place mPlace;
     long placeId;
     
-    ArrayList<Place> mPlaceList = new ArrayList<>();
+    public ArrayList<Place> mPlaceList = new ArrayList<>();
     BottomSheetBehavior<View> mBSBPlace;
     public PlaceBottomSheet placeBottomSheet;
     BottomSheetBehavior<View> mBSBSchedule;
@@ -76,6 +77,10 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         
         mSearchView = findViewById(R.id.search_view);
         mSearchView.setOnClickListener(this);
+        mSearchView.setOnCloseListener(() -> {
+            mSearchView.onActionViewCollapsed();
+            return false;
+        });
         mSearchViewHandler = new SearchViewHandler(mContext);
         
         progressBar = findViewById(R.id.progress_bar);
@@ -149,10 +154,23 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     }
     
     public void moveToPlace(Place place) {
+        mSearchView.onActionViewCollapsed();
+        mSearchViewHandler.closeRecyclerView();
+        
         placeBottomSheet.changePlaceBottomSheet((int) place.id);
+        mBSBSchedule.setState(BottomSheetBehavior.STATE_HIDDEN);
         mBSBPlace.setState(BottomSheetBehavior.STATE_EXPANDED);
         
-        mSearchViewHandler.closeRecyclerView();
+        Handler handler = new Handler();
+        handler.post(() -> {
+            for (MapPOIItem item : mMapMarkerItems.getMarkerList()) {
+                if (item.getTag() == place.id) {
+                    mMapView.setMapCenterPoint(item.getMapPoint(), true);
+                }
+            }
+            setProgressLoading(false);
+        });
+        
     }
     
     public void updateBottomSheetUI() {

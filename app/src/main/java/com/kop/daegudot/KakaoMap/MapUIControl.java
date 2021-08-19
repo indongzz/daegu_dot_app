@@ -92,12 +92,14 @@ public class MapUIControl {
         }
         String category = place.category;
         
-        if (categoryFlag == 0 && category.equals("TR")) {
-            bool = true;
-        } else if (categoryFlag == 1 && category.equals("AC")) {  // 숙박
-            bool = true;
-        } else if (categoryFlag == 2 && category.equals("FD")) {  // 음식
-            bool = true;
+        if (category != null) {
+            if (categoryFlag == 0 && category.equals("TR")) {
+                bool = true;
+            } else if (categoryFlag == 1 && category.equals("AC")) {  // 숙박
+                bool = true;
+            } else if (categoryFlag == 2 && category.equals("FD")) {  // 음식
+                bool = true;
+            }
         }
         
         

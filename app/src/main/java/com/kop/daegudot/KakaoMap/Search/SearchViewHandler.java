@@ -1,7 +1,8 @@
-package com.kop.daegudot.KakaoMap;
+package com.kop.daegudot.KakaoMap.Search;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kop.daegudot.KakaoMap.MapMainActivity;
 import com.kop.daegudot.KakaoMap.Search.SearchAdapter;
 import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.R;
@@ -29,10 +31,8 @@ public class SearchViewHandler {
     
     public void setViews() {
         mRecyclerView = ((MapMainActivity) mContext).findViewById(R.id.recyclerview_search);
-    
-//        ViewGroup.LayoutParams params = mRecyclerView.getLayoutParams();
-    
-        mAdapter = new SearchAdapter(mContext, ((MapMainActivity) mContext).mPlaceList);
+        
+        mAdapter = new SearchAdapter(mContext);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mContext, 1));
@@ -41,6 +41,7 @@ public class SearchViewHandler {
     
     public void setSearchView() {
         setViews();
+        mRecyclerView.setVisibility(View.VISIBLE);
         
         ((MapMainActivity) mContext).mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -61,7 +62,7 @@ public class SearchViewHandler {
     
     public void closeRecyclerView() {
         if (mRecyclerView != null) {
-            mRecyclerView.setAdapter(null);
+            mRecyclerView.setVisibility(View.INVISIBLE);
         }
     }
 }

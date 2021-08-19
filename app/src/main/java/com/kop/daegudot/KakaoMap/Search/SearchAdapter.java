@@ -20,14 +20,15 @@ import com.kop.daegudot.Network.Map.Place;
 import com.kop.daegudot.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> implements Filterable {
     private static final String TAG = "SearchAdapter";
     
     private Context mContext;
     private ArrayList<Place> mSearchlist;
-    private ArrayList<Place> mPlaceList;
     
     class SearchViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView searchName;
@@ -45,17 +46,19 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         @Override
         public void onClick(View v) {
             if (v.getId() == R.id.search_list) {
-                Toast.makeText(mContext, mPlaceList.get(getAdapterPosition()).attractName, Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, mSearchlist.get(getAdapterPosition()).attractName, Toast.LENGTH_SHORT).show();
                 
-                ((MapMainActivity) mContext).moveToPlace(mPlaceList.get(getAdapterPosition()));
+                ((MapMainActivity) mContext).setProgressLoading(true);
+                ((MapMainActivity) mContext).moveToPlace(mSearchlist.get(getAdapterPosition()));
             }
         }
     }
     
-    public SearchAdapter(Context context, ArrayList<Place> placeList) {
+    public SearchAdapter(Context context) {
         mContext = context;
-        mPlaceList = placeList;
-        mSearchlist = mPlaceList;
+//        mPlaceList = placeList;
+        mSearchlist = ((MapMainActivity) mContext).mPlaceList;
+        Log.d(TAG, "Search Adapter Create" + mSearchlist.size());
     }
     
     @NonNull
@@ -69,7 +72,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
     
     @Override
     public void onBindViewHolder(@NonNull SearchAdapter.SearchViewHolder holder, int position) {
-            Place item = mPlaceList.get(position);
+            Place item = mSearchlist.get(position);
             
             holder.searchName.setText(item.attractName);
             holder.searchAddress.setText(item.address);
@@ -90,18 +93,24 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         protected FilterResults performFiltering(CharSequence constraint) {
             ArrayList<Place> filteredList = new ArrayList<>();
             
-            Handler handler = new Handler();
-            handler.post(() -> {
+            Log.d(TAG, "search: " + mSearchlist.size());
+//            Handler handler = new Handler();
+//            handler.post(() -> {
                 if (constraint != null || constraint.toString().length() != 0) {
                     String filterPattern = constraint.toString().toLowerCase().trim();
     
-                    for (Place item : mSearchlist) {
-                        if (item.attractName.toLowerCase().contains(filterPattern)) {
-                            filteredList.add(item);
+                    try {
+                        for (Place item : mSearchlist) {
+                            if (item.attractName.toLowerCase().contains(filterPattern)) {
+                                filteredList.add(item);
+                            }
                         }
                     }
+                    catch (Exception e) {
+                        Log.e(TAG, Arrays.toString(e.getStackTrace()));
+                    }
                 }
-            });
+//            });
             
             FilterResults results = new FilterResults();
             results.values = filteredList;
