@@ -37,9 +37,21 @@
         <activity android:name=".Login.LoginActivity" />
         <activity android:name=".Recommend.AddRecommendActivity" />
 
-        <meta-data
-            android:name="com.kakao.sdk.AppKey"
-            android:value="@string/kakao_app_key" />
+        <!-- kakao login -->
+        <activity android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- Redirect URI: kakao{NATIVE_APP_KEY}://oauth" -->
+                <data android:host="oauth"
+                        android:scheme="@string/kakao_native_app_key" />
+            </intent-filter>
+        </activity>
+<!--        <meta-data-->
+<!--            android:name="com.kakao.sdk.AppKey"-->
+<!--            android:value="@string/kakao_app_key" />-->
 
         <activity android:name=".MainActivity" />
         <activity android:name=".IntroPageActivity">

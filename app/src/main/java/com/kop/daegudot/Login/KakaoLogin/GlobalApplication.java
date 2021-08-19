@@ -5,13 +5,9 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
-import com.kakao.auth.ApprovalType;
-import com.kakao.auth.AuthType;
-import com.kakao.auth.IApplicationConfig;
-import com.kakao.auth.ISessionConfig;
-import com.kakao.auth.KakaoAdapter;
-import com.kakao.auth.KakaoSDK;
+import com.kakao.sdk.common.KakaoSdk;
 import com.kop.daegudot.MorePage.MyWishlist.Database.WishlistDatabase;
+import com.kop.daegudot.R;
 
 // initiate Kakao SDK
 public class GlobalApplication extends Application {
@@ -30,58 +26,15 @@ public class GlobalApplication extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        
+        KakaoSdk.init(this, getResources().getString(R.string.kakao_native_app_key_wo));
 
         db = WishlistDatabase.getInstance(getGlobalApplicationContext());
-        KakaoSDK.init(new KakaoSDKAdapter());
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
         instance = null;
-    }
-
-    public class KakaoSDKAdapter extends KakaoAdapter {
-
-        @Override
-        public ISessionConfig getSessionConfig() {
-            return new ISessionConfig() {
-                @Override
-                public AuthType[] getAuthTypes() {
-                    return new AuthType[] {AuthType.KAKAO_LOGIN_ALL};
-                }
-
-                @Override
-                public boolean isUsingWebviewTimer() {
-                    return false;
-                }
-
-                @Override
-                public boolean isSecureMode() {
-                    return false;
-                }
-
-                @Nullable
-                @Override
-                public ApprovalType getApprovalType() {
-                    return ApprovalType.INDIVIDUAL;
-                }
-
-                @Override
-                public boolean isSaveFormData() {
-                    return true;
-                }
-            };
-        }
-
-        @Override
-        public IApplicationConfig getApplicationConfig() {
-            return new IApplicationConfig() {
-                @Override
-                public Context getApplicationContext() {
-                    return GlobalApplication.getGlobalApplicationContext();
-                }
-            };
-        }
     }
 }

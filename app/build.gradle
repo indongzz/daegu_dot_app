@@ -9,7 +9,7 @@ android {
             keyPassword daegu_dot
         }
         debug {
-            storeFile file('C:\\Users\\kdi43\\Desktop\\snsaccount.jks')
+            storeFile file(snsaccount)
             storePassword daegu_dot
             keyAlias key0
             keyPassword daegu_dot
@@ -49,7 +49,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:17.4.4'
     implementation 'com.google.firebase:firebase-auth:19.3.2'
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
-    implementation group: 'com.kakao.sdk', name: 'usermgmt', version: '1.30.0'
+
+    // kakao login
+//    implementation group: 'com.kakao.sdk', name: 'usermgmt', version: '1.30.0'
+    implementation "com.kakao.sdk:v2-user:2.6.0"
+
     implementation 'com.github.applikeysolutions:cosmocalendar:1.0.4'
     //noinspection GradleCompatible
     implementation 'com.android.support:design:28.0.0-rc01'
