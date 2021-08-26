@@ -174,4 +174,7 @@ public interface RestApiService {
 
     @POST("/user/register/google")
     Observable<Long> oauthGoogle(@Body UserOauth userOauth);
+
+    @POST("/user/register/kakao")
+    Observable<Long> oauthKakao(@Body UserOauth userOauth);
 }
