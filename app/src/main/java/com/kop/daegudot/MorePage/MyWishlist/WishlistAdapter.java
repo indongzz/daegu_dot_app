@@ -27,7 +27,6 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
     
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView title;
-        private RatingBar rating;
         private TextView address;
         private TextView summary;
         private Button addToScheduleBtn;
@@ -40,7 +39,6 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
             title = itemView.findViewById(R.id.tv_title);
             address = itemView.findViewById(R.id.tv_address);
             summary = itemView.findViewById(R.id.tv_spec);
-            rating = itemView.findViewById(R.id.rating_bar);
             addToScheduleBtn = itemView.findViewById(R.id.addToSch_btn);
             heart = itemView.findViewById(R.id.heart_btn);
             image = itemView.findViewById(R.id.image);
@@ -55,7 +53,6 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
             Wishlist wishlist = mWishList.get(pos);
             
             if (v.getId() == R.id.wishlist_item) {
-                // Todo: 지도로 이동
                 Intent intent = new Intent(mContext, MapMainActivity.class);
                 Log.d(TAG, "place id: " + wishlist.placeId);
                 intent.putExtra("placeId", wishlist.placeId);
@@ -90,9 +87,8 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
         
         Log.d(TAG, "position: " + position);
         holder.title.setText(wishlist.attractName);
-        holder.rating.setRating(wishlist.star);
         holder.address.setText(wishlist.address);
-        holder.summary.setText("nn");
+//        holder.summary.setText();
 //        holder.image.setImageResource(wishlist);
         holder.heart.setBackgroundResource(R.drawable.full_heart);
     }
