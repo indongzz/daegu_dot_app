@@ -18,6 +18,7 @@ import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.User.UserOauth;
+import com.kop.daegudot.Network.User.UserOauthResponse;
 import com.kop.daegudot.Network.User.UserResponseStatus;
 
 import io.reactivex.Observable;
@@ -62,7 +63,7 @@ public class KakaoLoginHandler {
         if (throwable != null) {
             // 로그인 실패
             Log.d("KakaoCallback", throwable.getLocalizedMessage());
-            Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
         }
         return null;
     };
@@ -74,12 +75,12 @@ public class KakaoLoginHandler {
                 Toast.makeText(mContext, "카카오 로그인에 성공하였습니다.", Toast.LENGTH_SHORT).show();
             }
             else if (user != null) {
-                Log.d(TAG, "User id: " + user.getId() +
+                /*Log.d(TAG, "User id: " + user.getId() +
                             "\nUser Email: " + user.getKakaoAccount().getEmail() +
                             "\nUser Nickname: " + user.getKakaoAccount().getProfile().getNickname());
                 
                 mEmail = user.getKakaoAccount().getEmail();
-                mNickname = user.getKakaoAccount().getProfile().getNickname();
+                mNickname = user.getKakaoAccount().getProfile().getNickname();*/
 
                 selectEmail(mEmail);
                 //updateUI(true);
@@ -100,19 +101,23 @@ public class KakaoLoginHandler {
             ((LoginActivity) mContext).finish();
         }
     }
-    //구글 인증 처리
+    //카카오 인증 처리
     private void oauthKakao(UserOauth userOauth) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
-        Observable<Long> observable = service.oauthKakao(userOauth);
+        Observable<UserOauthResponse> observable = service.oauthKakao(userOauth);
 
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<Long>() {
+                .subscribeWith(new DisposableObserver<UserOauthResponse>() {
                     @Override
-                    public void onNext(Long response) {
+                    public void onNext(UserOauthResponse response) {
                         Log.d("USER_KAKAO", userOauth.oauthToken);
-                        if(response == 1L) Toast.makeText(mContext, "카카오 인증이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                        if(response.status == 1L){
+                            Toast.makeText(mContext, "카카오 인증이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                            mEmail = response.email;
+                            mNickname = response.nickname;
+                        }
                         else Toast.makeText(mContext, "카카오 인증에 실패하였습니다.", Toast.LENGTH_SHORT).show();
                     }
 

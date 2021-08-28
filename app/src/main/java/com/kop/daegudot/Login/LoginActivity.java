@@ -33,6 +33,7 @@ import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.User.UserOauth;
+import com.kop.daegudot.Network.User.UserOauthResponse;
 import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.Network.User.UserResponseStatus;
 import com.kop.daegudot.R;
@@ -235,15 +236,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void oauthGoogle(UserOauth userOauth) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
-        Observable<Long> observable = service.oauthGoogle(userOauth);
+        Observable<UserOauthResponse> observable = service.oauthGoogle(userOauth);
 
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<Long>() {
+                .subscribeWith(new DisposableObserver<UserOauthResponse>() {
                     @Override
-                    public void onNext(Long response) {
+                    public void onNext(UserOauthResponse response) {
                         Log.d("USER_GOOGLE", userOauth.oauthToken);
-                        if(response == 1L) Toast.makeText(getApplicationContext(), "구글 인증이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                        if(response.status == 1L) {
+                            Toast.makeText(getApplicationContext(), "구글 인증이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                            mEmail = response.email;
+                            mNickname = response.nickname;
+                            selectEmail(mEmail);
+                        }
                         else Toast.makeText(getApplicationContext(), "구글 인증에 실패하였습니다.", Toast.LENGTH_SHORT).show();
                     }
 
@@ -256,7 +262,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onComplete() {
                         Log.d("USER_GOOGLE", "COMPLETE");
-                        firebaseAuthWithGoogle(userOauth.oauthToken);
+                        //firebaseAuthWithGoogle(userOauth.oauthToken);
                     }
                 })
         );
