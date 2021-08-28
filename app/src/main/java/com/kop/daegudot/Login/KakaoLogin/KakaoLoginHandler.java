@@ -7,9 +7,13 @@ import android.widget.Toast;
 
 import com.kakao.sdk.auth.model.OAuthToken;
 import com.kakao.sdk.user.UserApiClient;
+import com.kakao.sdk.user.model.ScopeInfo;
 import com.kakao.sdk.user.model.User;
 import com.kop.daegudot.Login.LoginActivity;
 import com.kop.daegudot.Login.SignUpAddInfoActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
@@ -61,10 +65,44 @@ public class KakaoLoginHandler {
                 
                 mEmail = user.getKakaoAccount().getEmail();
                 mNickname = user.getKakaoAccount().getProfile().getNickname();
-                updateUI(true);
+        //        updateUI(true);
+                checkScopes();
             }
             return null;
         });
+    }
+    
+    private void checkScopes() {
+        List<String> scopes = new ArrayList<>();
+        scopes.add("account_email");
+        UserApiClient.getInstance().scopes(scopes, scopeCallback);
+    }
+    
+    Function2<ScopeInfo, Throwable, Unit> scopeCallback = (scopeInfo, throwable) -> {
+        if (scopeInfo != null) {
+            Log.d(TAG, "scope: " + scopeInfo.getScopes());
+            
+            if (scopeInfo.getScopes().get(0).getAgreed()) {
+                Log.d(TAG, "Scope agreed");
+                updateUI(true);
+            }
+            else {
+                Log.d(TAG, "Scope agreed false");
+                incrementAuthRequest();
+            }
+        }
+        if (throwable != null) {
+            // 로그인 실패
+            Log.d(TAG, "scope error: " + throwable.getLocalizedMessage());
+            Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+        }
+        return null;
+    };
+    
+    private void incrementAuthRequest() {
+        List<String> scopes = new ArrayList<>();
+        scopes.add("account_email");
+        UserApiClient.getInstance().loginWithNewScopes(mContext, scopes, kakaoCallback);
     }
     
     public void updateUI(boolean bool) {
