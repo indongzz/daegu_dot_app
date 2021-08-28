@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.kakao.sdk.auth.model.OAuthToken;
 import com.kakao.sdk.user.UserApiClient;
+import com.kakao.sdk.user.model.ScopeInfo;
 import com.kakao.sdk.user.model.User;
 import com.kop.daegudot.Login.LoginActivity;
 import com.kop.daegudot.Login.SignUpAddInfoActivity;
@@ -21,11 +22,15 @@ import com.kop.daegudot.Network.User.UserOauth;
 import com.kop.daegudot.Network.User.UserOauthResponse;
 import com.kop.daegudot.Network.User.UserResponseStatus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
 
@@ -83,10 +88,42 @@ public class KakaoLoginHandler {
                 mNickname = user.getKakaoAccount().getProfile().getNickname();*/
 
                 selectEmail(mEmail);
-                //updateUI(true);
             }
             return null;
         });
+    }
+    
+    private void checkScopes() {
+        List<String> scopes = new ArrayList<>();
+        scopes.add("account_email");
+        UserApiClient.getInstance().scopes(scopes, scopeCallback);
+    }
+    
+    Function2<ScopeInfo, Throwable, Unit> scopeCallback = (scopeInfo, throwable) -> {
+        if (scopeInfo != null) {
+            Log.d(TAG, "scope: " + scopeInfo.getScopes());
+            
+            if (scopeInfo.getScopes().get(0).getAgreed()) {
+                Log.d(TAG, "Scope agreed");
+                updateUI(true);
+            }
+            else {
+                Log.d(TAG, "Scope agreed false");
+                incrementAuthRequest();
+            }
+        }
+        if (throwable != null) {
+            // 로그인 실패
+            Log.d(TAG, "scope error: " + throwable.getLocalizedMessage());
+            Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+        }
+        return null;
+    };
+    
+    private void incrementAuthRequest() {
+        List<String> scopes = new ArrayList<>();
+        scopes.add("account_email");
+        UserApiClient.getInstance().loginWithNewScopes(mContext, scopes, kakaoCallback);
     }
     
     public void updateUI(boolean bool) {
