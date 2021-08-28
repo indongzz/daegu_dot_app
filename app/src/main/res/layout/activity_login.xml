@@ -52,11 +52,12 @@
         app:layout_constraintRight_toRightOf="parent"
         />
 
-    <com.kakao.usermgmt.LoginButton
+    <ImageButton
         android:id="@+id/signin_kakao"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-
+        android:src="@drawable/kakao_login_medium_wide"
+        android:background="@color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

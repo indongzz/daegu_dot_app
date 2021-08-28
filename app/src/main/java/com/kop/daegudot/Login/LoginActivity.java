@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -23,10 +24,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.kakao.auth.AuthType;
-import com.kakao.auth.Session;
-import com.kakao.usermgmt.LoginButton;
-import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
+//import com.kakao.auth.Session;
+import com.kakao.sdk.auth.model.OAuthToken;
+import com.kakao.sdk.user.UserApiClient;
+import com.kop.daegudot.Login.KakaoLogin.KakaoLoginHandler;
+//import com.kop.daegudot.Login.KakaoLogin.SessionCallback;
 import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
@@ -44,6 +46,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     // Google Login
@@ -53,8 +57,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     GoogleSignInClient mGoogleSignInClient;
 
     // Kakao Login
-    private SessionCallback sessionCallback;
-    Session mSession;
+//    private SessionCallback sessionCallback;
+//    Session mSession;
 
 //    SharedPreferences mPref;
 //    public static SharedPreferences.Editor editor;
@@ -88,13 +92,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mAuth = FirebaseAuth.getInstance();
 
         /* Kakao Sign In */
-
-        sessionCallback = new SessionCallback(this);
-
-        LoginButton kakaoLoginBtn = findViewById(R.id.signin_kakao);
-        mSession = Session.getCurrentSession();
-        mSession.addCallback(sessionCallback);
-
+        ImageButton kakaoLoginBtn = findViewById(R.id.signin_kakao);
         kakaoLoginBtn.setOnClickListener(this);
 
         /* Email Sign In */
@@ -102,17 +100,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         emailLoginBtn.setOnClickListener(this);
 
     }
-
-//    public void checkAlreadyLogin() {
-//        mPref = getSharedPreferences("data", MODE_PRIVATE);
-//        Log.d("checkAlreadyLogin", "...Check login...");
-//        if (mPref.getString("email", "") != "") {
-//            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//            startActivity(intent);
-//            finish();
-//            Log.d("checkAlreadyLogin", "Already Logged in");
-//        }
-//    }
 
     // SignIn Clicked
     private void googleSignIn() {
@@ -130,10 +117,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             handleSignInResult(task);
         }
 
-        // Kakao Login result
-        if(Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
-            return;
-        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -201,19 +184,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         startActivity(intent);
         finish();
     }
-
+    
     @Override
     public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.signin_google:
-                googleSignIn();
-                break;
-            case R.id.signin_kakao:
-                mSession.open(AuthType.KAKAO_LOGIN_ALL, LoginActivity.this);
-                break;
-            case R.id.signin_email:
-                convertToEmailLogin();
-                break;
+        if (v.getId() == R.id.signin_google) {
+            googleSignIn();
+        }
+        if (v.getId() == R.id.signin_kakao) {
+            KakaoLoginHandler kakaoLoginHandler = new KakaoLoginHandler(this);
+            kakaoLoginHandler.kakaoLogin();
+        }
+        if (v.getId() == R.id.signin_email) {
+            convertToEmailLogin();
         }
     }
 
@@ -248,7 +230,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Session.getCurrentSession().removeCallback(sessionCallback);
 
         if (!mCompositeDisposable.isDisposed()) {
             mCompositeDisposable.dispose();
