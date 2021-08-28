@@ -56,12 +56,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private FirebaseAuth mAuth;
     GoogleSignInClient mGoogleSignInClient;
 
-    // Kakao Login
-//    private SessionCallback sessionCallback;
-//    Session mSession;
-
-//    SharedPreferences mPref;
-//    public static SharedPreferences.Editor editor;
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     // Register 객체
@@ -160,7 +154,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            updateUI(false);
+                            //updateUI(false);
+                            Toast.makeText(getApplicationContext(), "구글 로그인에 실패하였습니다.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -179,7 +174,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public void convertToMainActivity() {
+    private void convertToMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
