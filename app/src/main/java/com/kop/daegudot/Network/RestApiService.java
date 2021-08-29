@@ -178,7 +178,4 @@ public interface RestApiService {
 
     @POST("/user/register/kakao")
     Observable<UserOauthResponse> oauthKakao(@Body UserOauth userOauth);
-
-    @POST("/user/register/kakao")
-    Observable<Long> oauthKakao(@Body UserOauth userOauth);
 }
