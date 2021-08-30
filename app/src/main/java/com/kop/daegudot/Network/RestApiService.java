@@ -18,6 +18,7 @@ import com.kop.daegudot.Network.More.MyInfo.NicknameUpdate;
 import com.kop.daegudot.Network.More.MyInfo.PasswordUpdate;
 import com.kop.daegudot.Network.Schedule.SubScheduleResponseList;
 import com.kop.daegudot.Network.User.UserOauth;
+import com.kop.daegudot.Network.User.UserOauthResponse;
 import com.kop.daegudot.Network.User.UserRegister;
 import com.kop.daegudot.Network.User.UserLogin;
 import com.kop.daegudot.Network.User.UserResponse;
@@ -173,8 +174,8 @@ public interface RestApiService {
     Observable<MyCommentList> selectMyComments();
 
     @POST("/user/register/google")
-    Observable<Long> oauthGoogle(@Body UserOauth userOauth);
+    Observable<UserOauthResponse> oauthGoogle(@Body UserOauth userOauth);
 
     @POST("/user/register/kakao")
-    Observable<Long> oauthKakao(@Body UserOauth userOauth);
+    Observable<UserOauthResponse> oauthKakao(@Body UserOauth userOauth);
 }

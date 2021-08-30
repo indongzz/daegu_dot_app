@@ -19,6 +19,7 @@ import com.kop.daegudot.MainActivity;
 import com.kop.daegudot.Network.RestApiService;
 import com.kop.daegudot.Network.RestfulAdapter;
 import com.kop.daegudot.Network.User.UserOauth;
+import com.kop.daegudot.Network.User.UserOauthResponse;
 import com.kop.daegudot.Network.User.UserResponseStatus;
 
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ public class KakaoLoginHandler {
     Function2<OAuthToken, Throwable, Unit> kakaoCallback = (oAuthToken, throwable) -> {
         if (oAuthToken != null) {
             Log.d(TAG, "로그인 성공 token: " + oAuthToken.toString());
+            checkScopes();
 
             UserOauth userOauth  = new UserOauth();
             userOauth.oauthToken = oAuthToken.getAccessToken();
@@ -67,7 +69,7 @@ public class KakaoLoginHandler {
         if (throwable != null) {
             // 로그인 실패
             Log.d("KakaoCallback", throwable.getLocalizedMessage());
-            Toast.makeText(mContext, "다시 시도해주세요", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "다시 시도해주세요.", Toast.LENGTH_SHORT).show();
         }
         return null;
     };
@@ -79,13 +81,6 @@ public class KakaoLoginHandler {
                 Toast.makeText(mContext, "카카오 로그인에 성공하였습니다.", Toast.LENGTH_SHORT).show();
             }
             else if (user != null) {
-                Log.d(TAG, "User id: " + user.getId() +
-                            "\nUser Email: " + user.getKakaoAccount().getEmail() +
-                            "\nUser Nickname: " + user.getKakaoAccount().getProfile().getNickname());
-                
-                mEmail = user.getKakaoAccount().getEmail();
-                mNickname = user.getKakaoAccount().getProfile().getNickname();
-
                 selectEmail(mEmail);
             }
             return null;
@@ -104,10 +99,11 @@ public class KakaoLoginHandler {
             
             if (scopeInfo.getScopes().get(0).getAgreed()) {
                 Log.d(TAG, "Scope agreed");
-                updateUI(true);
+                //updateUI(true);
             }
             else {
                 Log.d(TAG, "Scope agreed false");
+                Toast.makeText(mContext, "카카오 이메일 동의가 필요합니다.", Toast.LENGTH_SHORT).show();
                 incrementAuthRequest();
             }
         }
@@ -133,23 +129,28 @@ public class KakaoLoginHandler {
             Intent intent = new Intent(mContext, SignUpAddInfoActivity.class);
             intent.putExtra("email", mEmail);
             intent.putExtra("nickname", mNickname);
+            intent.putExtra("type", 'K');
             mContext.startActivity(intent);
             ((LoginActivity) mContext).finish();
         }
     }
-    //구글 인증 처리
+    //카카오 인증 처리
     private void oauthKakao(UserOauth userOauth) {
         RestfulAdapter restfulAdapter = RestfulAdapter.getInstance();
         RestApiService service =  restfulAdapter.getServiceApi(null);
-        Observable<Long> observable = service.oauthKakao(userOauth);
+        Observable<UserOauthResponse> observable = service.oauthKakao(userOauth);
 
         mCompositeDisposable.add(observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<Long>() {
+                .subscribeWith(new DisposableObserver<UserOauthResponse>() {
                     @Override
-                    public void onNext(Long response) {
-                        Log.d("USER_KAKAO", userOauth.oauthToken);
-                        if(response == 1L) Toast.makeText(mContext, "카카오 인증이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                    public void onNext(UserOauthResponse response) {
+                        Log.d("USER_KAKAO" + ":" +response.email, userOauth.oauthToken);
+                        if(response.status == 1L){
+                            Toast.makeText(mContext, "카카오 인증이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                            mEmail = response.email;
+                            mNickname = response.nickname;
+                        }
                         else Toast.makeText(mContext, "카카오 인증에 실패하였습니다.", Toast.LENGTH_SHORT).show();
                     }
 
@@ -161,7 +162,7 @@ public class KakaoLoginHandler {
 
                     @Override
                     public void onComplete() {
-                        Log.d("USER_GOOGLE", "COMPLETE");
+                        Log.d("USER_KAKAO", "COMPLETE");
                         requestMe();
                     }
                 })
@@ -185,7 +186,7 @@ public class KakaoLoginHandler {
                 .subscribeWith(new DisposableObserver<UserResponseStatus>() {
                     @Override
                     public void onNext(UserResponseStatus response) {
-                        if(response.status == 1L){
+                        if(response.status == 1L && response.userResponseDto.type == 'K'){
                             Toast.makeText(mContext, "로그인에 성공하였습니다.", Toast.LENGTH_SHORT).show();
                             Log.d("EMAIl_DUP", "DUPLICATE EMAIL" + " " + response.userResponseDto.email);
 
@@ -196,6 +197,9 @@ public class KakaoLoginHandler {
                             editor.apply();
 
                             convertToMainActivity();
+                        }
+                        else{
+                            Toast.makeText(mContext, "동일한 이메일이 존재합니다. 다른 로그인 방식을 시도해주세요.", Toast.LENGTH_SHORT).show();
                         }
                     }
 

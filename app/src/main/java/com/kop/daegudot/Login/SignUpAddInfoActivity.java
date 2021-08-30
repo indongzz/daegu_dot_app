@@ -39,6 +39,7 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
     SharedPreferences mTokenPref;
     String mNickname;
     String mEmail;
+    char mType;
 
     boolean NICK_CHECKED = false;
 
@@ -50,6 +51,7 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
         Intent intent = getIntent();
         mNickname = intent.getStringExtra("nickname");
         mEmail = intent.getStringExtra("email");
+        mType = intent.getCharExtra("type", 'N');
 
         editName = findViewById(R.id.edit_nickName);
         editName.setText(mNickname);
@@ -148,7 +150,7 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
                         userRegister.email = mEmail;
                         userRegister.nickname = mNickname;
                         userRegister.password = "";
-                        userRegister.type = 'D';
+                        userRegister.type = mType;
 
                         insertUser(userRegister);
 
