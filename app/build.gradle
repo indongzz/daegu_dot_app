@@ -9,7 +9,7 @@ android {
             keyPassword daegu_dot
         }
         debug {
-            storeFile file('C:\\Users\\kdi43\\Desktop\\snsaccount.jks')
+            storeFile file(snsaccount)
             storePassword daegu_dot
             keyAlias key0
             keyPassword daegu_dot

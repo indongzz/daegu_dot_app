@@ -72,6 +72,8 @@ public class SignUpAddInfoActivity extends AppCompatActivity implements View.OnC
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.backBtn:
+                Intent intent = new Intent(SignUpAddInfoActivity.this, LoginActivity.class);
+                startActivity(intent);
                 finish();
                 break;
             case R.id.btn_checkDup:
