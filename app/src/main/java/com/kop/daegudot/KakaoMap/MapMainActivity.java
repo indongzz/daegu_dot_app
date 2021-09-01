@@ -73,11 +73,6 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
         mBackBtn = findViewById(R.id.backBtn);
         mBackBtn.setOnClickListener(this);
         
-        mSearchView = findViewById(R.id.search_view);
-        mSearchView.setOnClickListener(this);
-        SearchViewHandler searchViewHandler = new SearchViewHandler(mContext);
-        searchViewHandler.setSearchView();
-        
         progressBar = findViewById(R.id.progress_bar);
         
         /* Map View */
@@ -174,9 +169,6 @@ public class MapMainActivity extends AppCompatActivity implements MapView.MapVie
     public void onClick(View v) {
         if (v.getId() == R.id.backBtn) {
             finish();
-        }
-        if (v.getId() == R.id.search_view) {
-            mSearchView.onActionViewExpanded();
         }
     }
     
